@@ -1,0 +1,7 @@
+[2024-03-14-SAMAPS2-500Artificial-resequenced-condition]
+git-tree-sha1 = "f5be8e0cd91a5116987be285154f2f2f27280144"
+lazy = true
+
+    [[2024-03-14-SAMAPS2-500Artificial-resequenced-condition.download]]
+    sha256 = "427e99122062636dc2b34f99943940cda34cdd525523e908716cfd1f72f797e8"
+    url = "https://gist.github.com/cossio/1d918ac4e72224a9113b8d32f316dbc1/raw/f5be8e0cd91a5116987be285154f2f2f27280144.tar.gz"
