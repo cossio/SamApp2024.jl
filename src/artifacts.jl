@@ -42,3 +42,25 @@ function pierre20221107post(name::Symbol)
         throw(ArgumentError("Argument should be `:natural` or `:synthetic`"))
     end
 end
+
+"""
+    probed_artificial_sequences_2022_df()
+
+Loads the Excel file joint_proposed_RF00162_annotated.xlsx as a DataFrame.
+"""
+function probed_artificial_sequences_2022_df()
+    xls = readxlsx(probed_artificial_sequences_2022_excel())["joint_proposed_RF00162 (2)"]
+    df = DataFrame([xls[:][1,n] => xls[:][2:end,n] for n in 1:size(xls[:], 2)]);
+    df.RBM_energy = parse.(Float64, df.RBM_energy)
+    df.INF_score = parse.(Float64, df.INF_score)
+    return df
+end
+
+"""
+    probed_artificial_sequences_2022_excel()
+
+Excel table joint_proposed_RF00162_annotated.xlsx of the sequences we designed for probing in 2022.
+RBM sequences were generated with `rbm2022()`. Infernal sequences with the model downloaded
+from Rfam (which has the entropic noise added).
+"""
+probed_artificial_sequences_2022_excel() = joinpath(artifact"Pierre20221107ShapeAnnotations", "joint_proposed_RF00162_annotated.xlsx")
