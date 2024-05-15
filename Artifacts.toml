@@ -13,3 +13,11 @@ lazy = true
     [[Designed_Sequences_20230317.download]]
     sha256 = "f94d0f0e7f417d4d909bafd9278310107eaf276a20e09af60320dc8d89415a96"
     url = "https://gist.github.com/cossio/dd697d8e9d442d08ab9ba43cf31cd75d/raw/72f2247b6ab9b0a24c4b4a03174b5a4a7c2e0b49.tar.gz"
+
+[yann_sequences_20230322]
+git-tree-sha1 = "5da88f70cfd377c6d284e0b05e35909aa89967de"
+lazy = true
+
+    [[yann_sequences_20230322.download]]
+    sha256 = "5e019f535f4ca1dd2f9a448d13febe0d26c5ccb13b52f647564f4156d9e68565"
+    url = "https://gist.github.com/cossio/82219ec390887ffe00c1e068824806ac/raw/c4d02f1b8080ab8be85f3872f88a1c10f9f82d9b/yann_sequences.tar.gz"

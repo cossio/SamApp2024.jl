@@ -90,8 +90,12 @@ function load_shapemapper_data_500v2_20240315()
     )
 end
 
-
 #= File containing our designed sequences for second run of experiments (with the 500 aptamers) =#
 function designed_sequences_20230317()
     CSV.read(joinpath(artifact"Designed_Sequences_20230317", "all_designed_sequences_v3.csv"), DataFrame)
+end
+
+function yann_sequences_20230322()
+    fasta = joinpath(artifact"yann_sequences_20230322", "yann_sequences", "rational-designs-aptamer.fa")
+    return collect(FASTX.FASTA.Reader(open(fasta)))
 end
