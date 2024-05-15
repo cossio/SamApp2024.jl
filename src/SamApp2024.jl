@@ -6,6 +6,7 @@ import LazyArtifacts
 using Base: Fix2
 using BioSequences: LongRNA
 using BioSequences: LongSequence
+using BioSequences: @rna_str
 using DataFrames: DataFrame
 using LazyArtifacts: @artifact_str
 using LinearAlgebra: Diagonal
