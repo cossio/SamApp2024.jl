@@ -18,5 +18,6 @@ include("effective_contacts.jl")
 include("shape_500.jl")
 include("hamming.jl")
 include("rfam.jl")
+include("onehot.jl")
 
 end
