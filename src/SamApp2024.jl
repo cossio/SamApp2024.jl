@@ -1,6 +1,9 @@
 module SamApp2024
 
+import CSV
+
 using Base: Fix2
+using BioSequences: LongRNA
 using LinearAlgebra: Diagonal
 using RestrictedBoltzmannMachines: batchmean
 using RestrictedBoltzmannMachines: flat_w

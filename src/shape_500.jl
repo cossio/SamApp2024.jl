@@ -3,8 +3,8 @@ function load_shapemapper_data_500v2_20240315()
     conditions = filter(startswith("SAMAPS2"), readdir(shape_dir))
     @assert issorted(conditions)
 
-    our_design_df = SamApp.designed_sequences_20230317()
-    yann_sequences = map(FASTX.sequence, SamApp.yann_sequences_20230322())
+    our_design_df = designed_sequences_20230317()
+    yann_sequences = map(FASTX.sequence, yann_sequences_20230322())
 
     shape_M = fill(NaN, 108, 500, length(conditions))
     shape_U = fill(NaN, 108, 500, length(conditions))
@@ -88,4 +88,10 @@ function load_shapemapper_data_500v2_20240315()
         conditions, aptamer_origin, aptamer_criteria,
         aligned_sequences = LongRNA{4}.(aligned_sequences)
     )
+end
+
+
+#= File containing our designed sequences for second run of experiments (with the 500 aptamers) =#
+function designed_sequences_20230317()
+    CSV.read(joinpath(artifact"Designed_Sequences_20230317", "all_designed_sequences_v3.csv"), DataFrame)
 end

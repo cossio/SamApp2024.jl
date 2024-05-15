@@ -5,3 +5,11 @@ lazy = true
     [[2024-03-14-SAMAPS2-500Artificial-resequenced-condition.download]]
     sha256 = "427e99122062636dc2b34f99943940cda34cdd525523e908716cfd1f72f797e8"
     url = "https://gist.github.com/cossio/1d918ac4e72224a9113b8d32f316dbc1/raw/f5be8e0cd91a5116987be285154f2f2f27280144.tar.gz"
+
+[Designed_Sequences_20230317]
+git-tree-sha1 = "72f2247b6ab9b0a24c4b4a03174b5a4a7c2e0b49"
+lazy = true
+
+    [[Designed_Sequences_20230317.download]]
+    sha256 = "f94d0f0e7f417d4d909bafd9278310107eaf276a20e09af60320dc8d89415a96"
+    url = "https://gist.github.com/cossio/dd697d8e9d442d08ab9ba43cf31cd75d/raw/72f2247b6ab9b0a24c4b4a03174b5a4a7c2e0b49.tar.gz"
