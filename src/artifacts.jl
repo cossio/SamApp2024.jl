@@ -19,3 +19,26 @@ function rbm2022()
     @assert size(rbm.w) == (5, 108, 100)
     return rbm
 end
+
+function probed_aptamers_table_20221027()
+    path = joinpath(artifact"probed_aptamers_table_20221027", "2022-10-27-tagged-aptamer-sequences-natural_artifical_pdb.tsv")
+    aptamers_df = CSV.read(path, DataFrame)
+    return aptamers_df
+end
+
+"""
+    pierre20221107post(:natural)
+    pierre20221107post(:synthetic)
+
+My post-processing of the Excel file 2022-11-07_APSAM-I_data_analysis sent by Pierre.
+There's one table for the `:natural` aptamers, and another for the `:synthetic` ones.
+"""
+function pierre20221107post(name::Symbol)
+    if name === :natural
+        return joinpath(artifact"pierre20221107post", "natural_aptamers.csv")
+    elseif name === :synthetic
+        return joinpath(artifact"pierre20221107post", "synthetic_aptamers.csv")
+    else
+        throw(ArgumentError("Argument should be `:natural` or `:synthetic`"))
+    end
+end

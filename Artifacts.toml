@@ -29,3 +29,27 @@ lazy = true
     [[RBM2022.download]]
     sha256 = "3fbc33fc0b471551e7200503bbde62b4310822071554a55f7706824e1a39ebdd"
     url = "https://gist.github.com/cossio/64376dac299a8e5d0450dda5c1a6395a/raw/3fa27e80fe3783e611f185fc2f986a6e01309d6b.tar.gz"
+
+["SAMAP-demux-repl0-and-repl4+5-2023-09"]
+git-tree-sha1 = "86aa3d1cba36f1b178479a0784bfd5b25c714ca5"
+lazy = true
+
+    [["SAMAP-demux-repl0-and-repl4+5-2023-09".download]]
+    sha256 = "7f13906e08baee66d27d518350a4a9ab64e272a171d355637193fdf323a064b4"
+    url = "https://gist.github.com/cossio/8327de3d9644286438b746abb9a2debd/raw/86aa3d1cba36f1b178479a0784bfd5b25c714ca5.tar.gz"
+
+[probed_aptamers_table_20221027]
+git-tree-sha1 = "43561b21d4cf2819626f0b0095e4e708dc6444a2"
+lazy = true
+
+    [[probed_aptamers_table_20221027.download]]
+    sha256 = "5ee6075a571a64f3190bb7dc3e585d8e77f0dc4cf5293ba5fb6a6c9534123c40"
+    url = "https://gist.github.com/cossio/ed2bb4e4c573957ba24870193d18650f/raw/43561b21d4cf2819626f0b0095e4e708dc6444a2.tar.gz"
+
+[pierre20221107post]
+git-tree-sha1 = "c68de43eef29914e04e85bf675f7afda9ebe6e76"
+lazy = true
+
+    [[pierre20221107post.download]]
+    sha256 = "e88a3e1508ae5929350c6c5af112b6d1636f4b366aa65f203516a31d2537a6a1"
+    url = "https://gist.github.com/cossio/882f9078e7632c244443fc23d06ac32b/raw/c68de43eef29914e04e85bf675f7afda9ebe6e76.tar.gz"

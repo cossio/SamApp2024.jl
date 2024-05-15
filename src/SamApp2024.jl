@@ -4,6 +4,8 @@ import CSV
 import FASTX
 import LazyArtifacts
 import HDF5
+import Infernal
+import Rfam
 using Base: Fix2
 using BioSequences: LongRNA
 using BioSequences: LongSequence
@@ -24,5 +26,7 @@ include("hamming.jl")
 include("rfam.jl")
 include("onehot.jl")
 include("artifacts.jl")
+include("shape.jl")
+include("shape_alignment.jl")
 
 end
