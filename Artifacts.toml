@@ -21,3 +21,11 @@ lazy = true
     [[yann_sequences_20230322.download]]
     sha256 = "5e019f535f4ca1dd2f9a448d13febe0d26c5ccb13b52f647564f4156d9e68565"
     url = "https://gist.github.com/cossio/82219ec390887ffe00c1e068824806ac/raw/c4d02f1b8080ab8be85f3872f88a1c10f9f82d9b/yann_sequences.tar.gz"
+
+[RBM2022]
+git-tree-sha1 = "3fa27e80fe3783e611f185fc2f986a6e01309d6b"
+lazy = true
+
+    [[RBM2022.download]]
+    sha256 = "3fbc33fc0b471551e7200503bbde62b4310822071554a55f7706824e1a39ebdd"
+    url = "https://gist.github.com/cossio/64376dac299a8e5d0450dda5c1a6395a/raw/3fa27e80fe3783e611f185fc2f986a6e01309d6b.tar.gz"

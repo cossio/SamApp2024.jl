@@ -3,6 +3,7 @@ module SamApp2024
 import CSV
 import FASTX
 import LazyArtifacts
+import HDF5
 using Base: Fix2
 using BioSequences: LongRNA
 using BioSequences: LongSequence
@@ -15,11 +16,13 @@ using RestrictedBoltzmannMachines: flat_w
 using RestrictedBoltzmannMachines: Potts
 using RestrictedBoltzmannMachines: RBM
 using RestrictedBoltzmannMachines: var_h_from_v
+using RestrictedBoltzmannMachines: dReLU
 
 include("effective_contacts.jl")
 include("shape_500.jl")
 include("hamming.jl")
 include("rfam.jl")
 include("onehot.jl")
+include("artifacts.jl")
 
 end
