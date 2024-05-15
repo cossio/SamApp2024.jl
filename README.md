@@ -4,5 +4,6 @@ This repository hosts the source code for the paper:
 > 
 > by Jorge Fernandez-de-Cossio-Diaz, Pierre Hardouin, Francois-Xavier Lyonnet du Moutier, Andrea Di Gioacchino, Bertrand Marchand, Yann Ponty, Bruno Sargueil, Rémi Monasson, Simona Cocco
 > 
-> bioRxiv 2023.05.10.540155; doi: https://doi.org/10.1101/2023.05.10.540155
-> https://www.biorxiv.org/content/10.1101/2023.05.10.540155v2.abstract
+> bioRxiv preprint: https://www.biorxiv.org/content/10.1101/2023.05.10.540155v2.abstract
+
+If you use this code, please cite this paper (or you can use the included [CITATION.bib](https://github.com/cossio/SamApp2024.jl/blob/main/CITATION.bib)).
