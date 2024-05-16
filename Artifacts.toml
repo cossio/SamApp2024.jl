@@ -53,3 +53,11 @@ lazy = true
     [[pierre20221107post.download]]
     sha256 = "e88a3e1508ae5929350c6c5af112b6d1636f4b366aa65f203516a31d2537a6a1"
     url = "https://gist.github.com/cossio/882f9078e7632c244443fc23d06ac32b/raw/c68de43eef29914e04e85bf675f7afda9ebe6e76.tar.gz"
+
+[Pierre20221107ShapeAnnotations]
+git-tree-sha1 = "04901fc58e794c59c47e42e43ea5d98d747b0fdf"
+lazy = true
+
+    [[Pierre20221107ShapeAnnotations.download]]
+    sha256 = "d4a4cb7168b092df80640d4cf7bc159e6de73c92fbede3c5e28b10b3f35997c5"
+    url = "https://gist.github.com/cossio/397612cbcd9dfe8565dbde0a0462c819/raw/04901fc58e794c59c47e42e43ea5d98d747b0fdf.tar.gz"

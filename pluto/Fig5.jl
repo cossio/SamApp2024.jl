@@ -103,6 +103,55 @@ shape_data_rep0 = SamApp2024.select_conditions_20231002(shape_data_045, filter(e
 # split rep0 from rep4+5
 shape_data_rep45 = SamApp2024.select_conditions_20231002(shape_data_045, filter(endswith("_rep45"), shape_data_045.conditions));
 
+# ╔═╡ c011571f-74e7-4bae-be5e-918ad678397c
+conds_sam_rep0 = identity.(indexin(["SAMAP_1M7_0-1SAM_5Mg_T30C_rep0", "SAMAP_1M7_0-5SAM_5Mg_T30C_rep0", "SAMAP_1M7_1SAM_5Mg_T30C_rep0"], shape_data_rep0.conditions));
+
+# ╔═╡ e39876f7-5399-4e4a-a1d5-101355741f28
+conds_mg_rep0 = identity.(indexin(["SAMAP_1M7_noSAM_5Mg_T30C_rep0"], shape_data_rep0.conditions));
+
+# ╔═╡ d527106f-7e5b-49a5-930a-fd847a782542
+conds_30C_rep0 = identity.(indexin(["SAMAP_1M7_noSAM_noMg_T30C_rep0"], shape_data_rep0.conditions));
+
+# ╔═╡ 3ac302e6-b7c6-474d-af2b-c12420ebd0be
+conds_sam_rep45 = identity.(indexin(["SAMAP_1M7_0-1SAM_5Mg_T30C_rep45", "SAMAP_1M7_1SAM_5Mg_T30C_rep45"], shape_data_rep45.conditions));
+
+# ╔═╡ 64cb3148-1d0a-4f7d-8859-ded1e2fc5283
+conds_mg_rep45 = identity.(indexin(["SAMAP_1M7_noSAM_5Mg_T30C_rep45"], shape_data_rep45.conditions));
+
+# ╔═╡ f9b70f45-5ce5-460a-b7bd-46a9cca2c8f3
+conds_30C_rep45 = identity.(indexin(["SAMAP_1M7_noSAM_noMg_T30C_rep45"], shape_data_rep45.conditions));
+
+# ╔═╡ 4e123003-aede-4e18-956f-7f87a85d5083
+@show conds_sam_rep0 conds_mg_rep0 conds_30C_rep0;
+
+# ╔═╡ 6bdf0eb7-511a-4900-bc51-66e960cd391c
+@show conds_sam_rep45 conds_mg_rep45 conds_30C_rep45;
+
+# ╔═╡ 6994d41d-0fdf-4dd6-bc8e-122d745ad34c
+(; bps, nps, pks) = SamApp2024.RF00162_sites_paired()
+
+# ╔═╡ 44042f22-0ae9-44a4-ad22-7d316e976b92
+rbm_seqs = findall(shape_data_045.aptamer_origin .== "RF00162_syn_rbm")
+
+# ╔═╡ 29896cb1-147d-4e15-a815-a2a55e7ce483
+inf_seqs = findall(shape_data_045.aptamer_origin .== "RF00162_syn_inf")
+
+# ╔═╡ 7a266977-5fea-4a23-84d0-e967650cc91e
+full_seqs = findall(shape_data_045.aptamer_origin .== "RF00162_full30")
+
+# ╔═╡ 4762b1ab-4dc9-4735-a9b3-6ab26a6c19d7
+seed_seqs = findall(shape_data_045.aptamer_origin .== "RF00162_seed70")
+
+# ╔═╡ 143dbfef-3376-4892-998a-a769acb78a05
+nat_seqs = full_seqs ∪ seed_seqs;
+
+# ╔═╡ 0fd1db6a-c51e-4e18-85aa-3064103b345f
+aptamer_rbm_energies = [
+    ismissing(seq) ? missing : 
+    free_energy(SamApp.rbm2022(), SamApp.onehot(LongRNA{4}(seq)))
+    for seq in shape_data_045.aligned_sequences
+];
+
 # ╔═╡ Cell order:
 # ╠═91f4edd8-290d-4270-83c1-f7c6281e9f68
 # ╠═dba2cd0a-5edb-4581-970b-c8d7d84cd331
@@ -136,3 +185,18 @@ shape_data_rep45 = SamApp2024.select_conditions_20231002(shape_data_045, filter(
 # ╠═dcf0701e-3fcc-4199-8285-803305ee38b2
 # ╠═d1387ef6-6497-4f0b-873c-4de5f8aa0715
 # ╠═0297ebf2-0822-4ae0-b4e1-73b8ca1c4452
+# ╠═c011571f-74e7-4bae-be5e-918ad678397c
+# ╠═e39876f7-5399-4e4a-a1d5-101355741f28
+# ╠═d527106f-7e5b-49a5-930a-fd847a782542
+# ╠═3ac302e6-b7c6-474d-af2b-c12420ebd0be
+# ╠═64cb3148-1d0a-4f7d-8859-ded1e2fc5283
+# ╠═f9b70f45-5ce5-460a-b7bd-46a9cca2c8f3
+# ╠═4e123003-aede-4e18-956f-7f87a85d5083
+# ╠═6bdf0eb7-511a-4900-bc51-66e960cd391c
+# ╠═6994d41d-0fdf-4dd6-bc8e-122d745ad34c
+# ╠═44042f22-0ae9-44a4-ad22-7d316e976b92
+# ╠═29896cb1-147d-4e15-a815-a2a55e7ce483
+# ╠═7a266977-5fea-4a23-84d0-e967650cc91e
+# ╠═4762b1ab-4dc9-4735-a9b3-6ab26a6c19d7
+# ╠═143dbfef-3376-4892-998a-a769acb78a05
+# ╠═0fd1db6a-c51e-4e18-85aa-3064103b345f

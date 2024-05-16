@@ -63,4 +63,6 @@ Excel table joint_proposed_RF00162_annotated.xlsx of the sequences we designed f
 RBM sequences were generated with `rbm2022()`. Infernal sequences with the model downloaded
 from Rfam (which has the entropic noise added).
 """
-probed_artificial_sequences_2022_excel() = joinpath(artifact"Pierre20221107ShapeAnnotations", "joint_proposed_RF00162_annotated.xlsx")
+function probed_artificial_sequences_2022_excel()
+    return joinpath(artifact"Pierre20221107ShapeAnnotations", "joint_proposed_RF00162_annotated.xlsx")
+end
