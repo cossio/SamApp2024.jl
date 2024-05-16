@@ -69,3 +69,11 @@ lazy = true
     [[rbm2022-samples.download]]
     sha256 = "33685e008518fe12436fea2b0475cd0f8cf38a13fad7f0fffe816f045de8af0b"
     url = "https://gist.github.com/cossio/0f71c46d09a74cdde9f41caef617d56f/raw/9b26accb101847e0854dac8c506b2dbf8d891d78.tar.gz"
+
+[rf00162_14_7_taxonomy]
+git-tree-sha1 = "176801a268fead07e24fe4a9e6f76a68be7de74c"
+lazy = true
+
+    [[rf00162_14_7_taxonomy.download]]
+    sha256 = "115cacc5143d7b6b4e680e49fe0da71b4f807701656879bb3ba4a6ce023c13b0"
+    url = "https://gist.github.com/cossio/d892a209c2cadffb16ba72d78437f9c6/raw/176801a268fead07e24fe4a9e6f76a68be7de74c.tar.gz"

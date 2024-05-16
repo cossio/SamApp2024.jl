@@ -255,7 +255,7 @@ _probed_origin = shape_data_rep0.aptamer_origin[_idx_not_missing_seqs];
 
 # ╔═╡ d89ee7c9-f646-4832-bf32-427a9aa8a640
 begin
-	hits_tax_df = SamApp.rf00162_hits_taxonomy();
+	hits_tax_df = SamApp2024.rf00162_hits_taxonomy();
 	hits_tax_df.taxonomy_split = [ismissing(tax) ? missing : split(tax, "; ") for tax in hits_tax_df.taxonomy]
 	hits_tax_df.taxa_1 = [ismissing(tax) ? missing : length(tax) ≥ 1 ? tax[1] : missing for tax in hits_tax_df.taxonomy_split];
 	hits_tax_df.taxa_2 = [ismissing(tax) ? missing : length(tax) ≥ 2 ? tax[2] : missing for tax in hits_tax_df.taxonomy_split];
@@ -271,17 +271,19 @@ let fig = Makie.Figure()
 	ax = Makie.Axis(fig[1,1][1,1], xlabel="rCM score", ylabel="RBM score", width=400, height=400, xticks=20:40:130, xgridvisible=false, ygridvisible=false)
 	Makie.hlines!(ax, 300, color=:orange, linestyle=:dash, linewidth=2)
 	#Makie.scatter!(ax, RF00162_hits_Refined_cm_scores, -RBMs.free_energy(SamApp.rbm2022(), SamApp.onehot(RF00162_hits_sequences)), label="Natural", color=(:gray, 0.5), markersize=10)
-	Makie.scatter!(ax, RF00162_hits_Rfam_cm_scores, -RBMs.free_energy(SamApp.rbm2022(), SamApp.onehot(RF00162_hits_sequences)), label="MSA", color=(:gray, 0.5), markersize=10)
+	Makie.scatter!(
+		ax, RF00162_hits_Rfam_cm_scores, -RBMs.free_energy(SamApp2024.rbm2022(), SamApp2024.onehot(RF00162_hits_sequences)), label="MSA", color=(:gray, 0.5), markersize=10
+	)
 	Makie.scatter!(ax, 
 	    #Refined_cm_emitted_sequences_infernal_scores[1:2000],
 	    Rfam_cm_emitted_sequences_infernal_scores[1:2000],
-	    -RBMs.free_energy(SamApp.rbm2022(), SamApp.onehot(Refined_cm_emitted_sequences))[1:2000],
+	    -RBMs.free_energy(SamApp2024.rbm2022(), SamApp2024.onehot(Refined_cm_emitted_sequences))[1:2000],
 	    label="rCM", color=:red, markersize=5
 	)
 	Makie.scatter!(ax, 
 	    #RBM_samples_Refined_CM_infernal_scores[1:2000],
 	    RBM_samples_Rfam_CM_infernal_scores[1:2000],
-	    -RBMs.free_energy(SamApp.rbm2022(), sampled_v)[1:2000],
+	    -RBMs.free_energy(SamApp2024.rbm2022(), sampled_v)[1:2000],
 	    label="RBM", color=:blue, markersize=5
 	)
 	Makie.xlims!(ax, -7, 101)

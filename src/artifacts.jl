@@ -74,3 +74,13 @@ function rbm2022samples()
     end
     return BitArray(sampled_v)
 end
+
+"""
+    rf00162_hits_taxonomy()
+
+Taxonomy annotations of RF00162 full hits aligment sequences (v14.7 of RFAM).
+"""
+function rf00162_hits_taxonomy()
+    path = joinpath(artifact"rf00162_14_7_taxonomy", "RF00162_hits_taxonomies.csv")
+    return CSV.read(path, DataFrame)
+end
