@@ -173,7 +173,7 @@ begin
 	# Infernal scores of RBM samples
 	_tmpfasta = tempname()
 	FASTX.FASTA.Writer(open(_tmpfasta, "w")) do writer
-	    for (n, seq) in enumerate(SamApp.rnaseq(sampled_v))
+	    for (n, seq) in enumerate(SamApp2024.rnaseq(sampled_v))
 	        @assert !ismissing(seq)
 	        write(writer, FASTX.FASTA.Record(string(n), filter(!=('-'), string(seq))))
 	    end
@@ -191,46 +191,75 @@ begin
 
 end
 
-# ╔═╡ b23beda8-7545-4828-93e4-fed06371892e
+# ╔═╡ 54d09468-5516-4568-9582-8172cc40c4f5
 # sites that have some non-zero fluctuations
 # We need to separate frozen sites below because otherwise cor and eigen give NaN, infinities, and fail
-_variable_sites_flag = vec(all(0 .< mean(SamApp.onehot(RF00162_hits_sequences); dims=3) .< 1; dims=1));
-_variable_sites = findall(_variable_sites_flag);
-RF00162_hits_var_sites_only = SamApp.onehot(RF00162_hits_sequences)[:, _variable_sites, :];
+_variable_sites_flag = vec(all(0 .< mean(SamApp2024.onehot(RF00162_hits_sequences); dims=3) .< 1; dims=1));
 
+# ╔═╡ 1b1989e8-36d2-474a-aa6e-be02bebb8e00
+_variable_sites = findall(_variable_sites_flag);
+
+# ╔═╡ 219bd907-7417-4718-aaf8-4555fb8f2e53
+RF00162_hits_var_sites_only = SamApp2024.onehot(RF00162_hits_sequences)[:, _variable_sites, :];
+
+# ╔═╡ cf5a9319-b99d-4c0a-a75c-f633fad52c63
 RF00162_hits_cor = cor(reshape(RF00162_hits_var_sites_only, :, size(RF00162_hits_var_sites_only, 3)); dims=2);
+
+# ╔═╡ 9f9e4969-bfbb-4f2e-971b-1265bf461a16
 RF00162_hits_eig = eigen(RF00162_hits_cor);
 
+
+
+# ╔═╡ 92fec252-d3a6-429e-ba3d-01139abc7bc7
 # remap the variable sites eigenvectors back to the original consensus sequence numbering
 begin
-RF00162_hits_eigvec = zeros(5, 108, size(RF00162_hits_eig.vectors, 1))
-for n in 1:size(RF00162_hits_eig.vectors, 1)
-    vec(view(RF00162_hits_eigvec, :, _variable_sites, n)) .= RF00162_hits_eig.vectors[:, n]
-end
+	RF00162_hits_eigvec = zeros(5, 108, size(RF00162_hits_eig.vectors, 1))
+	for n in 1:size(RF00162_hits_eig.vectors, 1)
+	    vec(view(RF00162_hits_eigvec, :, _variable_sites, n)) .= RF00162_hits_eig.vectors[:, n]
+	end
 end
 
-# ╔═╡ ae04d099-c58f-4285-8613-51985a203ba1
-__proj_hits = reshape(SamApp.onehot(RF00162_hits_sequences), 5*108, :)' * reshape(RF00162_hits_eigvec, 5*108, :);
+# ╔═╡ 68768649-9e5b-48e7-a33a-c50e20389a94
 __proj_rbm = reshape(sampled_v, 5*108, :)' * reshape(RF00162_hits_eigvec, 5*108, :);
+
+# ╔═╡ 51789884-f149-4562-9656-06b1e210fb43
 __proj_refined_cm = reshape(SamApp.onehot(Refined_cm_emitted_sequences), 5*108, :)' * reshape(RF00162_hits_eigvec, 5*108, :);
+
+# ╔═╡ b0df20e8-cd4d-4800-a348-d7bbd3e3cd65
 __proj_rfam_cm = reshape(SamApp.onehot(Rfam_cm_emitted_sequences), 5*108, :)' * reshape(RF00162_hits_eigvec, 5*108, :);
 
-# ╔═╡ 17dfa87c-1c77-42e2-bcde-a4e1bea9fb07
+# ╔═╡ 93a22e9b-5f2f-4d1f-b693-e4489c6befa1
 # load SHAPE data
-shape_data_045 = SamApp.load_shapemapper_data_pierre_demux_20230920(; demux=true);
+shape_data_045 = SamApp2024.load_shapemapper_data_pierre_demux_20230920(; demux=true);
 
 # split rep0 from rep4+5
-shape_data_rep0 = SamApp.select_conditions_20231002(shape_data_045, filter(endswith("_rep0"), shape_data_045.conditions));
-shape_data_rep45 = SamApp.select_conditions_20231002(shape_data_045, filter(endswith("_rep45"), shape_data_045.conditions));
 
-# ╔═╡ c9160620-d57c-4cf2-805a-4e526eb71f4f
+# ╔═╡ 703fde1e-33b2-4f66-b0b7-9e883f6470d4
+shape_data_rep0 = SamApp2024.select_conditions_20231002(shape_data_045, filter(endswith("_rep0"), shape_data_045.conditions));
+
+# ╔═╡ 4e1d8cc4-e169-484a-9c08-ed56db0350f5
+shape_data_rep45 = SamApp2024.select_conditions_20231002(shape_data_045, filter(endswith("_rep45"), shape_data_045.conditions));
+
+# ╔═╡ ac689699-10a5-4989-bd27-46a0fae25be2
 _idx_not_missing_seqs = findall(!ismissing, shape_data_rep0.aligned_sequences);
-shape_sequences_onehot = SamApp.onehot(LongRNA{4}.(shape_data_rep0.aligned_sequences[_idx_not_missing_seqs]));
 
+# ╔═╡ 373b6eb8-7e76-430a-8005-6eb688ba660e
+shape_sequences_onehot = SamApp2024.onehot(LongRNA{4}.(shape_data_rep0.aligned_sequences[_idx_not_missing_seqs]));
+
+# ╔═╡ d056e7a9-3cc6-4179-9ce8-f8c567b1a56f
 __proj_probed = reshape(shape_sequences_onehot, 5*108, :)' * reshape(RF00162_hits_eigvec, 5*108, :);
-__proj_hits = reshape(SamApp.onehot(RF00162_hits_sequences), 5*108, :)' * reshape(RF00162_hits_eigvec, 5*108, :);
 
+# ╔═╡ fd502d5b-c54d-4f02-88bb-bfacdd6e350c
 _probed_origin = shape_data_rep0.aptamer_origin[_idx_not_missing_seqs];
+
+# ╔═╡ 6d4adceb-d12b-45b1-b46c-e3c68131705f
+# ╠═╡ disabled = true
+#=╠═╡
+__proj_hits = reshape(SamApp.onehot(RF00162_hits_sequences), 5*108, :)' * reshape(RF00162_hits_eigvec, 5*108, :);
+  ╠═╡ =#
+
+# ╔═╡ 66d621fa-231f-415b-aa0b-ea6dc88cbaf1
+__proj_hits = reshape(SamApp.onehot(RF00162_hits_sequences), 5*108, :)' * reshape(RF00162_hits_eigvec, 5*108, :);
 
 # ╔═╡ Cell order:
 # ╠═5d5eb95f-6801-47c3-a82e-afab35559c0e
@@ -267,7 +296,21 @@ _probed_origin = shape_data_rep0.aptamer_origin[_idx_not_missing_seqs];
 # ╠═0bd3ffae-c009-4740-aa57-4dd5126eb848
 # ╠═7aba8c42-93a8-4528-90cd-b9a308960e80
 # ╠═16508ca2-1c56-4136-842d-397ab4760586
-# ╠═b23beda8-7545-4828-93e4-fed06371892e
-# ╠═ae04d099-c58f-4285-8613-51985a203ba1
-# ╠═17dfa87c-1c77-42e2-bcde-a4e1bea9fb07
-# ╠═c9160620-d57c-4cf2-805a-4e526eb71f4f
+# ╠═54d09468-5516-4568-9582-8172cc40c4f5
+# ╠═1b1989e8-36d2-474a-aa6e-be02bebb8e00
+# ╠═219bd907-7417-4718-aaf8-4555fb8f2e53
+# ╠═cf5a9319-b99d-4c0a-a75c-f633fad52c63
+# ╠═9f9e4969-bfbb-4f2e-971b-1265bf461a16
+# ╠═92fec252-d3a6-429e-ba3d-01139abc7bc7
+# ╠═66d621fa-231f-415b-aa0b-ea6dc88cbaf1
+# ╠═68768649-9e5b-48e7-a33a-c50e20389a94
+# ╠═51789884-f149-4562-9656-06b1e210fb43
+# ╠═b0df20e8-cd4d-4800-a348-d7bbd3e3cd65
+# ╠═93a22e9b-5f2f-4d1f-b693-e4489c6befa1
+# ╠═703fde1e-33b2-4f66-b0b7-9e883f6470d4
+# ╠═4e1d8cc4-e169-484a-9c08-ed56db0350f5
+# ╠═ac689699-10a5-4989-bd27-46a0fae25be2
+# ╠═373b6eb8-7e76-430a-8005-6eb688ba660e
+# ╠═d056e7a9-3cc6-4179-9ce8-f8c567b1a56f
+# ╠═6d4adceb-d12b-45b1-b46c-e3c68131705f
+# ╠═fd502d5b-c54d-4f02-88bb-bfacdd6e350c

@@ -148,9 +148,139 @@ nat_seqs = full_seqs ∪ seed_seqs;
 # ╔═╡ 0fd1db6a-c51e-4e18-85aa-3064103b345f
 aptamer_rbm_energies = [
     ismissing(seq) ? missing : 
-    free_energy(SamApp.rbm2022(), SamApp.onehot(LongRNA{4}(seq)))
+    free_energy(SamApp2024.rbm2022(), SamApp2024.onehot(LongRNA{4}(seq)))
     for seq in shape_data_045.aligned_sequences
 ];
+
+# ╔═╡ 880f1579-fae9-4cb4-9fd5-b533203fa0e0
+_rbmlo = rbm_seqs ∩ findall((!ismissing).(aptamer_rbm_energies) .&& (aptamer_rbm_energies .< -300));
+
+# ╔═╡ 14da7dad-da45-457f-ac4a-3a59dabf0898
+_rbmhi = rbm_seqs ∩ findall((!ismissing).(aptamer_rbm_energies) .&& (aptamer_rbm_energies .> -300));
+
+# ╔═╡ d71ccb35-7881-4571-8c5c-bac572630c37
+ΔR_sam = (
+    nanmean(shape_data_rep0.shape_reactivities[:, :, conds_sam_rep0]; dim=3) .- 
+    shape_data_rep0.shape_reactivities[:, :, only(conds_mg_rep0)]
+);
+
+# ╔═╡ c78f246c-f20d-4f6f-afa8-c12a316f488d
+ΔR_sam_avg_seed = nanmean(ΔR_sam[:, seed_seqs]; dim=2)
+
+# ╔═╡ 071338b6-2bb0-449d-b562-e23155436612
+ΔR_sam_std_seed = nanstd(ΔR_sam[:, seed_seqs]; dim=2);
+
+# ╔═╡ bd37015e-a662-4b7f-9694-8558306cd0d9
+ΔR_sam_avg_full = nanmean(ΔR_sam[:, full_seqs]; dim=2)
+
+# ╔═╡ 484ed85f-fe50-44e0-8e5d-b79c1b22317b
+ΔR_sam_std_full = nanstd(ΔR_sam[:, full_seqs]; dim=2);
+
+# ╔═╡ 301a213f-fd4b-4570-bfbb-d0b12d4f76e0
+ΔR_sam_avg_rbmlo = nanmean(ΔR_sam[:, _rbmlo]; dim=2)
+
+# ╔═╡ be52f566-e2b0-4cce-bfea-3b7e40bf077a
+ΔR_sam_std_rbmlo = nanstd(ΔR_sam[:, _rbmlo]; dim=2);
+
+# ╔═╡ 3dfad0ac-309b-49e7-9836-cd256fe59005
+ΔR_sam_avg_rbmhi = nanmean(ΔR_sam[:, _rbmhi]; dim=2)
+
+# ╔═╡ 91758ffb-1c13-4c8d-8ae5-fd66c0225fee
+ΔR_sam_std_rbmhi = nanstd(ΔR_sam[:, _rbmhi]; dim=2);
+
+# ╔═╡ 1d573ee1-eae1-4a96-b888-5b709101709e
+ΔR_sam_avg_inf = nanmean(ΔR_sam[:, inf_seqs]; dim=2)
+
+# ╔═╡ 91a97d59-c9fa-4141-a9e1-9cf9f0663405
+ΔR_sam_std_inf = nanstd(ΔR_sam[:, inf_seqs]; dim=2);
+
+# ╔═╡ 08a76f04-f5bd-4850-82e4-4c4fcea9dc9a
+bps_reactivities_rep0 = shape_data_rep0.shape_reactivities[bps, seed_seqs, conds_sam_rep0];
+
+# ╔═╡ b0c3959c-fb33-4caf-bd16-96885a0cd302
+nps_reactivities_rep0 = shape_data_rep0.shape_reactivities[nps, seed_seqs, conds_sam_rep0];
+
+# ╔═╡ fdb72e46-1410-488a-89b7-815c288277af
+all_reactivities_rep0 = shape_data_rep0.shape_reactivities[:, nat_seqs, conds_sam_rep0];
+
+# ╔═╡ 5ef6ad69-e574-4643-912b-db489114995e
+let fig = Makie.Figure()
+	ax = Makie.Axis(
+		fig[1,1], width=300, height=300, xlabel="SHAPE reactivity", ylabel="frequency", xgridvisible=false, ygridvisible=false, xticks=-2:2:6, yticks=0:2, xtrimspine=true, ytrimspine=true
+	)
+	Makie.hist!(ax, filter(x -> -2 < x < 6, vec(shape_data_rep0.shape_reactivities[bps, nat_seqs, conds_sam_rep0])), normalization=:pdf, bins=-2:0.05:6, color=(:teal, 0.5), gap=-0.01)
+	Makie.hist!(ax, filter(x -> -2 < x < 6, vec(shape_data_rep0.shape_reactivities[nps, nat_seqs, conds_sam_rep0])), normalization=:pdf, bins=-2:0.05:6, color=(:orange, 0.5), gap=-0.01)
+	Makie.stephist!(ax, filter(x -> -2 < x < 6, vec(shape_data_rep0.shape_reactivities[bps, nat_seqs, conds_sam_rep0])), label="base paired", normalization=:pdf, bins=-2:0.05:6, linewidth=3, color=:teal)
+	Makie.stephist!(ax, filter(x -> -2 < x < 6, vec(shape_data_rep0.shape_reactivities[nps, nat_seqs, conds_sam_rep0])), label="not paired", normalization=:pdf, bins=-2:0.05:6, linewidth=3, color=:orange)
+	Makie.xlims!(-2.2, 6)
+	Makie.ylims!(-0.07, 2)
+	#Makie.axislegend(ax, framevisible=false, patchlabelgap=3, position=(-0.02, 1))
+	Makie.axislegend(ax, position=(0.7, 0.2), framevisible=false)
+	Makie.hidespines!(ax, :t, :r)
+	
+	_dummy_ax = Makie.Axis(fig[1,2], width=20, xgridvisible=false, ygridvisible=false)
+	Makie.hidespines!(_dummy_ax, :t, :b, :r, :l)
+	Makie.hidexdecorations!(_dummy_ax)
+	Makie.hideydecorations!(_dummy_ax)
+	
+	ax = Makie.Axis(fig[1,3], width=300, height=300, xlabel="SHAPE reactivity", ylabel="frequency", xgridvisible=false, ygridvisible=false, xticks=-2:2:6, yticks=0:2, xtrimspine=true, ytrimspine=true)
+	Makie.hist!(ax, filter(x -> -2 < x < 6, vec(shape_data_rep0.shape_reactivities[bps, nat_seqs, conds_sam_rep0])), label="b.p.", normalization=:pdf, bins=-2:0.05:6, color=(:teal, 0.5), gap=-0.01)
+	Makie.hist!(ax, filter(x -> -2 < x < 6, vec(shape_data_rep0.shape_reactivities[nps, nat_seqs, conds_sam_rep0])), label="n.p.", normalization=:pdf, bins=-2:0.05:6, color=(:orange, 0.5), gap=-0.01)
+	Makie.stephist!(ax, filter(x -> -2 < x < 6, vec(shape_data_rep0.shape_reactivities[pks, nat_seqs, conds_mg_rep0])), label="p.k.", normalization=:pdf, bins=-2:0.1:6, linewidth=3, color=:black)
+	Makie.xlims!(-2.2, 6)
+	Makie.ylims!(-0.07, 2)
+	Makie.hidespines!(ax, :t, :r, :l)
+	Makie.hideydecorations!(ax)
+	
+	ax = Makie.Axis(fig[1,4], width=300, height=300, xlabel="SHAPE reactivity", xgridvisible=false, ygridvisible=false, xticks=-2:2:6, yticks=0:2, xtrimspine=true, ytrimspine=true)
+	Makie.hist!(ax, filter(x -> -2 < x < 6, vec(shape_data_rep0.shape_reactivities[bps, nat_seqs, conds_sam_rep0])), normalization=:pdf, bins=-2:0.05:6, color=(:teal, 0.5), gap=-0.01)
+	Makie.hist!(ax, filter(x -> -2 < x < 6, vec(shape_data_rep0.shape_reactivities[nps, nat_seqs, conds_sam_rep0])), normalization=:pdf, bins=-2:0.05:6, color=(:orange, 0.5), gap=-0.01)
+	Makie.stephist!(ax, filter(x -> -2 < x < 6, vec(shape_data_rep0.shape_reactivities[pks, nat_seqs, conds_sam_rep0])), label="pseudoknot", normalization=:pdf, bins=-2:0.1:6, linewidth=3, color=:black)
+	Makie.xlims!(-2.2, 6)
+	Makie.ylims!(-0.07, 2)
+	Makie.axislegend(ax, position=(0.7, 0.2), framevisible=false)
+	Makie.hidespines!(ax, :t, :r, :l)
+	Makie.hideydecorations!(ax)
+	
+	_xs = 3:107
+	
+	ax = Makie.Axis(fig[2,:], width=900, height=150, xticks=5:10:108, yticks=-2:1:1, xgridvisible=false, ygridvisible=false, ylabel="Δreactivity", xtrimspine=true, ytrimspine=true)
+	
+	Makie.band!(ax, _xs, (ΔR_sam_avg_seed - ΔR_sam_std_seed/2)[_xs], (ΔR_sam_avg_seed + ΔR_sam_std_seed/2)[_xs], markersize=5, color=(:gray, 0.25))
+	Makie.lines!(ax, _xs, ΔR_sam_avg_seed[_xs], linewidth=1, color=:gray)
+	Makie.scatter!(ax, _xs, ΔR_sam_avg_seed[_xs], markersize=5, color=:black, label="Natural")
+	
+	Makie.band!(ax, _xs, (ΔR_sam_avg_rbmlo - ΔR_sam_std_rbmlo/2)[_xs], (ΔR_sam_avg_rbmlo + ΔR_sam_std_rbmlo/2)[_xs], markersize=5, color=(:blue, 0.25))
+	Makie.lines!(ax, _xs, ΔR_sam_avg_rbmlo[_xs], linewidth=1, color=:blue)
+	Makie.scatter!(ax, _xs, ΔR_sam_avg_rbmlo[_xs], markersize=5, color=:blue, label="RBM (RBMscore>300)")
+	Makie.axislegend(ax, position=(0.5, 0), framevisible=false, patchlabelgap=-3)
+	Makie.xlims!(1, 108)
+	Makie.hidespines!(ax, :t, :r, :b)
+	Makie.hidexdecorations!(ax)
+	
+	ax = Makie.Axis(fig[3,:], width=900, height=150, xticks=5:10:108, yticks=-2:1:1, xgridvisible=false, ygridvisible=false, xlabel="site", ylabel="Δreactivity", xtrimspine=true, ytrimspine=true)
+	
+	Makie.band!(ax, _xs, (ΔR_sam_avg_seed - ΔR_sam_std_seed/2)[_xs], (ΔR_sam_avg_seed + ΔR_sam_std_seed/2)[_xs], markersize=5, color=(:gray, 0.25))
+	Makie.lines!(ax, _xs, ΔR_sam_avg_seed[_xs], linewidth=1, color=:gray)
+	Makie.scatter!(ax, _xs, ΔR_sam_avg_seed[_xs], markersize=5, color=:black, label="Natural")
+	
+	Makie.band!(ax, _xs, (ΔR_sam_avg_inf - ΔR_sam_std_inf/2)[_xs], (ΔR_sam_avg_inf + ΔR_sam_std_inf/2)[_xs], markersize=5, color=(:red, 0.25))
+	Makie.lines!(ax, _xs, ΔR_sam_avg_inf[_xs], linewidth=1, color=:red)
+	Makie.scatter!(ax, _xs, ΔR_sam_avg_inf[_xs], markersize=5, color=:red, label="rCM")
+	Makie.axislegend(ax, position=(0.5, 0), framevisible=false, patchlabelgap=-3)
+	Makie.hidespines!(ax, :t, :r)
+	Makie.xlims!(1, 108)
+	
+	# Makie.Label(fig[1,1][1,1,Makie.TopLeft()], "A)", font=:bold, padding=(0,0,10,10))
+	# Makie.Label(fig[1,2][1,1,Makie.TopLeft()], "B)", font=:bold, padding=(0,0,10,10))
+	# Makie.Label(fig[1,3][1,1,Makie.TopLeft()], "C)", font=:bold, padding=(0,0,10,10))
+	# Makie.Label(fig[2,:][1,1,Makie.TopLeft()], "D)", font=:bold, padding=(0,0,0,0))
+	# Makie.Label(fig[3,:][1,1,Makie.TopLeft()], "E)", font=:bold, padding=(0,0,0,0))
+	
+	Makie.resize_to_layout!(fig)
+	#Makie.save("/workspaces/SamApp.jl/notebooks/2024-03-14 New paper figures/Figures/SHAPE reactivities.pdf", fig)
+	fig
+end
 
 # ╔═╡ Cell order:
 # ╠═91f4edd8-290d-4270-83c1-f7c6281e9f68
@@ -200,3 +330,20 @@ aptamer_rbm_energies = [
 # ╠═4762b1ab-4dc9-4735-a9b3-6ab26a6c19d7
 # ╠═143dbfef-3376-4892-998a-a769acb78a05
 # ╠═0fd1db6a-c51e-4e18-85aa-3064103b345f
+# ╠═880f1579-fae9-4cb4-9fd5-b533203fa0e0
+# ╠═14da7dad-da45-457f-ac4a-3a59dabf0898
+# ╠═d71ccb35-7881-4571-8c5c-bac572630c37
+# ╠═c78f246c-f20d-4f6f-afa8-c12a316f488d
+# ╠═071338b6-2bb0-449d-b562-e23155436612
+# ╠═bd37015e-a662-4b7f-9694-8558306cd0d9
+# ╠═484ed85f-fe50-44e0-8e5d-b79c1b22317b
+# ╠═301a213f-fd4b-4570-bfbb-d0b12d4f76e0
+# ╠═be52f566-e2b0-4cce-bfea-3b7e40bf077a
+# ╠═3dfad0ac-309b-49e7-9836-cd256fe59005
+# ╠═91758ffb-1c13-4c8d-8ae5-fd66c0225fee
+# ╠═1d573ee1-eae1-4a96-b888-5b709101709e
+# ╠═91a97d59-c9fa-4141-a9e1-9cf9f0663405
+# ╠═08a76f04-f5bd-4850-82e4-4c4fcea9dc9a
+# ╠═b0c3959c-fb33-4caf-bd16-96885a0cd302
+# ╠═fdb72e46-1410-488a-89b7-815c288277af
+# ╠═5ef6ad69-e574-4643-912b-db489114995e

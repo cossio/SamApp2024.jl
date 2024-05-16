@@ -29,5 +29,6 @@ include("onehot.jl")
 include("artifacts.jl")
 include("shape.jl")
 include("shape_alignment.jl")
+include("secondary_structure.jl")
 
 end
