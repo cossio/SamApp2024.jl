@@ -66,3 +66,11 @@ from Rfam (which has the entropic noise added).
 function probed_artificial_sequences_2022_excel()
     return joinpath(artifact"Pierre20221107ShapeAnnotations", "joint_proposed_RF00162_annotated.xlsx")
 end
+
+#= Samples generated from the rbm2022 model (equilibrated). =#
+function rbm2022samples()
+    sampled_v = HDF5.h5open(joinpath(artifact"rbm2022-samples", "rbm_samples.hdf5"), "r") do hdf5
+        HDF5.read_dataset(hdf5, "samples")
+    end
+    return BitArray(sampled_v)
+end

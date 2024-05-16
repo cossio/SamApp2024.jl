@@ -61,3 +61,11 @@ lazy = true
     [[Pierre20221107ShapeAnnotations.download]]
     sha256 = "d4a4cb7168b092df80640d4cf7bc159e6de73c92fbede3c5e28b10b3f35997c5"
     url = "https://gist.github.com/cossio/397612cbcd9dfe8565dbde0a0462c819/raw/04901fc58e794c59c47e42e43ea5d98d747b0fdf.tar.gz"
+
+[rbm2022-samples]
+git-tree-sha1 = "9b26accb101847e0854dac8c506b2dbf8d891d78"
+lazy = true
+
+    [[rbm2022-samples.download]]
+    sha256 = "33685e008518fe12436fea2b0475cd0f8cf38a13fad7f0fffe816f045de8af0b"
+    url = "https://gist.github.com/cossio/0f71c46d09a74cdde9f41caef617d56f/raw/9b26accb101847e0854dac8c506b2dbf8d891d78.tar.gz"
