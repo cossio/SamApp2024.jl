@@ -219,20 +219,21 @@ begin
 	end
 end
 
+# ╔═╡ 66d621fa-231f-415b-aa0b-ea6dc88cbaf1
+__proj_hits = reshape(SamApp2024.onehot(RF00162_hits_sequences), 5*108, :)' * reshape(RF00162_hits_eigvec, 5*108, :);
+
 # ╔═╡ 68768649-9e5b-48e7-a33a-c50e20389a94
 __proj_rbm = reshape(sampled_v, 5*108, :)' * reshape(RF00162_hits_eigvec, 5*108, :);
 
 # ╔═╡ 51789884-f149-4562-9656-06b1e210fb43
-__proj_refined_cm = reshape(SamApp.onehot(Refined_cm_emitted_sequences), 5*108, :)' * reshape(RF00162_hits_eigvec, 5*108, :);
+__proj_refined_cm = reshape(SamApp2024.onehot(Refined_cm_emitted_sequences), 5*108, :)' * reshape(RF00162_hits_eigvec, 5*108, :);
 
 # ╔═╡ b0df20e8-cd4d-4800-a348-d7bbd3e3cd65
-__proj_rfam_cm = reshape(SamApp.onehot(Rfam_cm_emitted_sequences), 5*108, :)' * reshape(RF00162_hits_eigvec, 5*108, :);
+__proj_rfam_cm = reshape(SamApp2024.onehot(Rfam_cm_emitted_sequences), 5*108, :)' * reshape(RF00162_hits_eigvec, 5*108, :);
 
 # ╔═╡ 93a22e9b-5f2f-4d1f-b693-e4489c6befa1
 # load SHAPE data
 shape_data_045 = SamApp2024.load_shapemapper_data_pierre_demux_20230920(; demux=true);
-
-# split rep0 from rep4+5
 
 # ╔═╡ 703fde1e-33b2-4f66-b0b7-9e883f6470d4
 shape_data_rep0 = SamApp2024.select_conditions_20231002(shape_data_045, filter(endswith("_rep0"), shape_data_045.conditions));
@@ -252,14 +253,101 @@ __proj_probed = reshape(shape_sequences_onehot, 5*108, :)' * reshape(RF00162_hit
 # ╔═╡ fd502d5b-c54d-4f02-88bb-bfacdd6e350c
 _probed_origin = shape_data_rep0.aptamer_origin[_idx_not_missing_seqs];
 
-# ╔═╡ 6d4adceb-d12b-45b1-b46c-e3c68131705f
-# ╠═╡ disabled = true
-#=╠═╡
-__proj_hits = reshape(SamApp.onehot(RF00162_hits_sequences), 5*108, :)' * reshape(RF00162_hits_eigvec, 5*108, :);
-  ╠═╡ =#
+# ╔═╡ d89ee7c9-f646-4832-bf32-427a9aa8a640
+begin
+	hits_tax_df = SamApp.rf00162_hits_taxonomy();
+	hits_tax_df.taxonomy_split = [ismissing(tax) ? missing : split(tax, "; ") for tax in hits_tax_df.taxonomy]
+	hits_tax_df.taxa_1 = [ismissing(tax) ? missing : length(tax) ≥ 1 ? tax[1] : missing for tax in hits_tax_df.taxonomy_split];
+	hits_tax_df.taxa_2 = [ismissing(tax) ? missing : length(tax) ≥ 2 ? tax[2] : missing for tax in hits_tax_df.taxonomy_split];
+	hits_tax_df.taxa_3 = [ismissing(tax) ? missing : length(tax) ≥ 3 ? tax[3] : missing for tax in hits_tax_df.taxonomy_split];
+end
 
-# ╔═╡ 66d621fa-231f-415b-aa0b-ea6dc88cbaf1
-__proj_hits = reshape(SamApp.onehot(RF00162_hits_sequences), 5*108, :)' * reshape(RF00162_hits_eigvec, 5*108, :);
+# ╔═╡ 38c55494-e38a-4358-bc30-ba0f2880eb10
+hits_tax_cnt = countmap(split(join(filter(!ismissing, filter(!ismissing, hits_tax_df.taxonomy)), "; "), "; "));
+
+# ╔═╡ ea3ad48b-b0ac-4054-9548-fa9ed1842a16
+let fig = Makie.Figure()
+
+	ax = Makie.Axis(fig[1,1][1,1], xlabel="rCM score", ylabel="RBM score", width=400, height=400, xticks=20:40:130, xgridvisible=false, ygridvisible=false)
+	Makie.hlines!(ax, 300, color=:orange, linestyle=:dash, linewidth=2)
+	#Makie.scatter!(ax, RF00162_hits_Refined_cm_scores, -RBMs.free_energy(SamApp.rbm2022(), SamApp.onehot(RF00162_hits_sequences)), label="Natural", color=(:gray, 0.5), markersize=10)
+	Makie.scatter!(ax, RF00162_hits_Rfam_cm_scores, -RBMs.free_energy(SamApp.rbm2022(), SamApp.onehot(RF00162_hits_sequences)), label="MSA", color=(:gray, 0.5), markersize=10)
+	Makie.scatter!(ax, 
+	    #Refined_cm_emitted_sequences_infernal_scores[1:2000],
+	    Rfam_cm_emitted_sequences_infernal_scores[1:2000],
+	    -RBMs.free_energy(SamApp.rbm2022(), SamApp.onehot(Refined_cm_emitted_sequences))[1:2000],
+	    label="rCM", color=:red, markersize=5
+	)
+	Makie.scatter!(ax, 
+	    #RBM_samples_Refined_CM_infernal_scores[1:2000],
+	    RBM_samples_Rfam_CM_infernal_scores[1:2000],
+	    -RBMs.free_energy(SamApp.rbm2022(), sampled_v)[1:2000],
+	    label="RBM", color=:blue, markersize=5
+	)
+	Makie.xlims!(ax, -7, 101)
+	Makie.ylims!(ax, 220, 365)
+	Makie.axislegend(ax, position=:lt, framevisible=false)
+	
+	
+	_colors = [:purple, :cyan, :lime, :teal, :orange]
+	_c = 0
+	
+	# Natural
+	ax = Makie.Axis(fig[1,1][1,2], xlabel="PC1", ylabel="PC2", width=400, height=400, xgridvisible=false, ygridvisible=false) #title="Natural sequences")
+	Makie.scatter!(ax, __proj_hits[:, end], __proj_hits[:, end - 1], markersize=10, label="MSA", color=(:gray, 0.5))
+	for t = unique(hits_tax_df.taxa_2)
+	    ismissing(t) && continue
+	    hits_tax_cnt[t] > 100 || continue
+	    _c += 1
+	    Makie.scatter!(ax,
+	        __proj_hits[replace(hits_tax_df.taxa_2 .== t, missing => false), end],
+	        __proj_hits[replace(hits_tax_df.taxa_2 .== t, missing => false), end - 1],
+	        markersize=5, label=t, color=_colors[_c])
+	end
+	Makie.axislegend(ax, position=(-0.05, -0.03), framevisible=false)
+	
+	ax = Makie.Axis(fig[2,1][1,1], xlabel="PC1", ylabel="PC2", width=250, height=250, xgridvisible=false, ygridvisible=false, title="RBM generated sequences")
+	Makie.scatter!(ax, __proj_hits[:, end], __proj_hits[:, end - 1], markersize=10, label="MSA", color=color=(:gray, 0.5))
+	Makie.scatter!(ax, __proj_rbm[:, end], __proj_rbm[:, end - 1], markersize=4, label="RBM", color=:blue)
+	Makie.axislegend(ax, position=:lb, framevisible=false)
+	
+	ax = Makie.Axis(fig[2,1][1,2], xlabel="PC1", ylabel="PC2", width=250, height=250, xgridvisible=false, ygridvisible=false, title="CM generated sequences")
+	Makie.scatter!(ax, __proj_hits[:, end], __proj_hits[:, end - 1], markersize=10, label="MSA", color=color=(:gray, 0.5))
+	Makie.scatter!(ax, __proj_rfam_cm[:, end], __proj_rfam_cm[:, end - 1], markersize=4, label="rCM", color=:red)
+	Makie.axislegend(ax, position=:lb, framevisible=false)
+	
+	ax = Makie.Axis(fig[2,1][1,3], xlabel="PC1", ylabel="PC2", width=250, height=250, xgridvisible=false, ygridvisible=false, title="Probed sequences")
+	Makie.scatter!(ax, __proj_hits[:, end], __proj_hits[:, end - 1], markersize=10, color=(:gray, 0.5), label="MSA")
+	Makie.scatter!(ax, 
+	    __proj_probed[(_probed_origin .== "RF00162_seed70") .| (_probed_origin .== "RF00162_full30"), end],
+	    __proj_probed[(_probed_origin .== "RF00162_seed70") .| (_probed_origin .== "RF00162_full30"), end - 1],
+	    markersize=10, color=:black, label="Natural", marker=:cross
+	)
+	Makie.scatter!(ax, 
+	    __proj_probed[_probed_origin .== "RF00162_syn_inf", end],
+	    __proj_probed[_probed_origin .== "RF00162_syn_inf", end - 1],
+	    markersize=10, color=:red, label="rCM", marker=:cross
+	)
+	Makie.scatter!(ax, 
+	    __proj_probed[_probed_origin .== "RF00162_syn_rbm", end],
+	    __proj_probed[_probed_origin .== "RF00162_syn_rbm", end - 1],
+	    markersize=10, color=:blue, label="RBM", marker=:cross
+	)
+	Makie.axislegend(ax, position=:lb, framevisible=false, patchlabelgap=-3)
+	
+	Makie.Label(fig[1,1][1,1][1,1,Makie.TopLeft()], "A)", font=:bold)
+	Makie.Label(fig[1,1][1,2][1,1,Makie.TopLeft()], "B)", font=:bold)
+	Makie.Label(fig[2,1][1,1][1,1,Makie.TopLeft()], "C)", font=:bold)
+	Makie.Label(fig[2,1][1,2][1,1,Makie.TopLeft()], "D)", font=:bold)
+	Makie.Label(fig[2,1][1,3][1,1,Makie.TopLeft()], "E)", font=:bold)
+	
+	# fig[0,4] = Makie.Label(fig, "Natural sequences", font=:bold)
+	# fig[0,5] = Makie.Label(fig, "Generated sequences", font=:bold)
+	
+	Makie.resize_to_layout!(fig)
+	#Makie.save("/workspaces/SamApp.jl/notebooks/2024-03-14 New paper figures/Figures/PCA.pdf", fig)
+	fig
+end
 
 # ╔═╡ Cell order:
 # ╠═5d5eb95f-6801-47c3-a82e-afab35559c0e
@@ -312,5 +400,7 @@ __proj_hits = reshape(SamApp.onehot(RF00162_hits_sequences), 5*108, :)' * reshap
 # ╠═ac689699-10a5-4989-bd27-46a0fae25be2
 # ╠═373b6eb8-7e76-430a-8005-6eb688ba660e
 # ╠═d056e7a9-3cc6-4179-9ce8-f8c567b1a56f
-# ╠═6d4adceb-d12b-45b1-b46c-e3c68131705f
 # ╠═fd502d5b-c54d-4f02-88bb-bfacdd6e350c
+# ╠═d89ee7c9-f646-4832-bf32-427a9aa8a640
+# ╠═38c55494-e38a-4358-bc30-ba0f2880eb10
+# ╠═ea3ad48b-b0ac-4054-9548-fa9ed1842a16
