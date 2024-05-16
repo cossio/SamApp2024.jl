@@ -19,6 +19,7 @@ using RestrictedBoltzmannMachines: Potts
 using RestrictedBoltzmannMachines: RBM
 using RestrictedBoltzmannMachines: var_h_from_v
 using RestrictedBoltzmannMachines: dReLU
+using XLSX: readxlsx
 
 include("effective_contacts.jl")
 include("shape_500.jl")

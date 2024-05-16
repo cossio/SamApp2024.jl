@@ -120,6 +120,118 @@ end
 # use saved RBM samples
 sampled_v = SamApp2024.rbm2022samples(); # faster
 
+# ╔═╡ 7aba8c42-93a8-4528-90cd-b9a308960e80
+begin
+	# Infernal scores of hits, using Rfam CM model
+	RF00162_hits_Rfam_cm_scores = Infernal.cmalign_parse_sfile(
+		Infernal.cmalign(
+			Rfam_cm.out,
+			Infernal.esl_reformat("FASTA", RF00162_hits_afa.out; informat="AFA").out; 
+			glob=true, informat="FASTA"
+		).sfile
+	).bit_sc;
+	
+	# Infernal scores of hits, using Refined CM model
+	RF00162_hits_Refined_cm_scores = Infernal.cmalign_parse_sfile(
+		Infernal.cmalign(
+			Refined_cm.cmout,
+			Infernal.esl_reformat("FASTA", RF00162_hits_afa.out; informat="AFA").out;
+			glob=true, informat="FASTA"
+		).sfile
+	).bit_sc;
+end
+
+# ╔═╡ 16508ca2-1c56-4136-842d-397ab4760586
+begin
+	# Infernal scores of Refined CM samples
+	_tmpfasta = tempname()
+	FASTX.FASTA.Writer(open(_tmpfasta, "w")) do writer
+	    for (n, seq) in enumerate(Refined_cm_emitted_sequences)
+	        ismissing(seq) && continue
+	        write(writer, FASTX.FASTA.Record(string(n), filter(!=('-'), string(seq))))
+	    end
+	end
+	# Infernal scores
+	Refined_cm_emitted_sequences_infernal_scores = Infernal.cmalign_parse_sfile(
+		Infernal.cmalign(Refined_cm.cmout, _tmpfasta; glob=true, informat="FASTA").sfile
+	).bit_sc;
+
+	
+	# Infernal scores of Rfam CM samples
+	_tmpfasta = tempname()
+	FASTX.FASTA.Writer(open(_tmpfasta, "w")) do writer
+	    for (n, seq) in enumerate(Rfam_cm_emitted_sequences)
+	        ismissing(seq) && continue
+	        write(writer, FASTX.FASTA.Record(string(n), filter(!=('-'), string(seq))))
+	    end
+	end
+	# Infernal scores
+	Rfam_cm_emitted_sequences_infernal_scores = Infernal.cmalign_parse_sfile(
+		Infernal.cmalign(Rfam_cm.out, _tmpfasta; glob=true, informat="FASTA").sfile
+	).bit_sc;
+
+	# Infernal scores of RBM samples
+	_tmpfasta = tempname()
+	FASTX.FASTA.Writer(open(_tmpfasta, "w")) do writer
+	    for (n, seq) in enumerate(SamApp.rnaseq(sampled_v))
+	        @assert !ismissing(seq)
+	        write(writer, FASTX.FASTA.Record(string(n), filter(!=('-'), string(seq))))
+	    end
+	end
+	
+	# Rfam CM
+	RBM_samples_Rfam_CM_infernal_scores = Infernal.cmalign_parse_sfile(
+		Infernal.cmalign(Rfam_cm.out, _tmpfasta; glob=true, informat="FASTA").sfile
+	).bit_sc;
+	
+	# Refined CM
+	RBM_samples_Refined_CM_infernal_scores = Infernal.cmalign_parse_sfile(
+		Infernal.cmalign(Refined_cm.cmout, _tmpfasta; glob=true, informat="FASTA").sfile
+	).bit_sc;
+
+end
+
+# ╔═╡ b23beda8-7545-4828-93e4-fed06371892e
+# sites that have some non-zero fluctuations
+# We need to separate frozen sites below because otherwise cor and eigen give NaN, infinities, and fail
+_variable_sites_flag = vec(all(0 .< mean(SamApp.onehot(RF00162_hits_sequences); dims=3) .< 1; dims=1));
+_variable_sites = findall(_variable_sites_flag);
+RF00162_hits_var_sites_only = SamApp.onehot(RF00162_hits_sequences)[:, _variable_sites, :];
+
+RF00162_hits_cor = cor(reshape(RF00162_hits_var_sites_only, :, size(RF00162_hits_var_sites_only, 3)); dims=2);
+RF00162_hits_eig = eigen(RF00162_hits_cor);
+
+# remap the variable sites eigenvectors back to the original consensus sequence numbering
+begin
+RF00162_hits_eigvec = zeros(5, 108, size(RF00162_hits_eig.vectors, 1))
+for n in 1:size(RF00162_hits_eig.vectors, 1)
+    vec(view(RF00162_hits_eigvec, :, _variable_sites, n)) .= RF00162_hits_eig.vectors[:, n]
+end
+end
+
+# ╔═╡ ae04d099-c58f-4285-8613-51985a203ba1
+__proj_hits = reshape(SamApp.onehot(RF00162_hits_sequences), 5*108, :)' * reshape(RF00162_hits_eigvec, 5*108, :);
+__proj_rbm = reshape(sampled_v, 5*108, :)' * reshape(RF00162_hits_eigvec, 5*108, :);
+__proj_refined_cm = reshape(SamApp.onehot(Refined_cm_emitted_sequences), 5*108, :)' * reshape(RF00162_hits_eigvec, 5*108, :);
+__proj_rfam_cm = reshape(SamApp.onehot(Rfam_cm_emitted_sequences), 5*108, :)' * reshape(RF00162_hits_eigvec, 5*108, :);
+
+# ╔═╡ 17dfa87c-1c77-42e2-bcde-a4e1bea9fb07
+# load SHAPE data
+shape_data_045 = SamApp.load_shapemapper_data_pierre_demux_20230920(; demux=true);
+
+# split rep0 from rep4+5
+shape_data_rep0 = SamApp.select_conditions_20231002(shape_data_045, filter(endswith("_rep0"), shape_data_045.conditions));
+shape_data_rep45 = SamApp.select_conditions_20231002(shape_data_045, filter(endswith("_rep45"), shape_data_045.conditions));
+
+# ╔═╡ c9160620-d57c-4cf2-805a-4e526eb71f4f
+_idx_not_missing_seqs = findall(!ismissing, shape_data_rep0.aligned_sequences);
+shape_sequences_onehot = SamApp.onehot(LongRNA{4}.(shape_data_rep0.aligned_sequences[_idx_not_missing_seqs]));
+
+__proj_probed = reshape(shape_sequences_onehot, 5*108, :)' * reshape(RF00162_hits_eigvec, 5*108, :);
+__proj_hits = reshape(SamApp.onehot(RF00162_hits_sequences), 5*108, :)' * reshape(RF00162_hits_eigvec, 5*108, :);
+
+_probed_origin = shape_data_rep0.aptamer_origin[_idx_not_missing_seqs];
+
 # ╔═╡ Cell order:
 # ╠═5d5eb95f-6801-47c3-a82e-afab35559c0e
 # ╠═952a79aa-12fa-11ef-2326-d5fe00ff3dfe
@@ -153,3 +265,9 @@ sampled_v = SamApp2024.rbm2022samples(); # faster
 # ╠═0eeacfc3-2240-46e2-b851-9d574771d1d7
 # ╠═896d95be-2a0c-4c4b-9c73-d6e2d1452306
 # ╠═0bd3ffae-c009-4740-aa57-4dd5126eb848
+# ╠═7aba8c42-93a8-4528-90cd-b9a308960e80
+# ╠═16508ca2-1c56-4136-842d-397ab4760586
+# ╠═b23beda8-7545-4828-93e4-fed06371892e
+# ╠═ae04d099-c58f-4285-8613-51985a203ba1
+# ╠═17dfa87c-1c77-42e2-bcde-a4e1bea9fb07
+# ╠═c9160620-d57c-4cf2-805a-4e526eb71f4f
