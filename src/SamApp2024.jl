@@ -6,7 +6,6 @@ import CSV
 import DCAUtils
 import DelimitedFiles
 import Distributions
-import ElementarySymmetricPolynomials
 import FASTX
 import HDF5
 import Infernal

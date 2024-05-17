@@ -2,7 +2,7 @@
 
 julia_version = "1.10.3"
 manifest_format = "2.0"
-project_hash = "5f2392e6ce22c18695a75b0dba6a0549cd462ebe"
+project_hash = "29648182faf4887ff0dbc7958b5d66ce18e52815"
 
 [[deps.AbstractFFTs]]
 deps = ["LinearAlgebra"]
@@ -385,11 +385,6 @@ deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "e3290f2d49e661fbd94046d7e3726ffcb2d41053"
 uuid = "5ae413db-bbd1-5e63-b57d-d24a61df00f5"
 version = "2.2.4+0"
-
-[[deps.ElementarySymmetricPolynomials]]
-git-tree-sha1 = "cfeefe8feb4137dd6fc3baf4737cfe6046e8e8f8"
-uuid = "eedbd132-2e7d-4d7f-8b5e-3472db8bad43"
-version = "1.0.0"
 
 [[deps.EllipsisNotation]]
 deps = ["StaticArrayInterface"]
