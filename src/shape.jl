@@ -277,3 +277,111 @@ function load_shapemapper_data_pierre_demux_20230920(; demux = true)
         missing_files
     )
 end
+
+
+
+# Compute Protection scores (log-odd ratios)
+function shape_basepair_log_odds_v4(;
+    nsamples::Int=1000,
+    p_thresh::Real=1e-3,
+    shape_data, # aligned shape data
+
+    # Reactivities assumed to be compatible with base-paired and unpaired states. We use
+    # these to estimate the kernel density estimators for the probability of being
+    # base-paired vs. unpaired. These should be normalized before!
+    paired_reactivities::AbstractArray,
+    unpaired_reactivities::AbstractArray,
+    all_reactivities::AbstractArray,
+
+    # normalization of reactivities (by default = 1)
+    normalization::AbstractArray = one.(shape_data.shape_reactivities),
+
+    only_hq_profile::Bool=false
+)
+    # now we estimate probabilities of being base-paired vs. unpaired based on these reactivities
+    L, N, C = size(shape_data.shape_reactivities)
+
+    # parameters of the posterior Gamma distribution (Gamma is the conjugate to the Poisson likelihood)
+    # posterior Gamma distribution parameters (θ, α)
+    shape_gamma_theta_M = (shape_data.shape_M_stderr.^2) ./ shape_data.shape_M
+    shape_gamma_theta_U = (shape_data.shape_U_stderr.^2) ./ shape_data.shape_U
+    shape_gamma_theta_D = (shape_data.shape_D_stderr.^2) ./ shape_data.shape_D
+
+    shape_gamma_alpha_M = (shape_data.shape_M ./ shape_data.shape_M_stderr).^2
+    shape_gamma_alpha_U = (shape_data.shape_U ./ shape_data.shape_U_stderr).^2
+    shape_gamma_alpha_D = (shape_data.shape_D ./ shape_data.shape_D_stderr).^2
+
+    # Kernel density estimator of PDFs of base-paired and unpaired reactivities
+    bp_reactivities_kde = kde_lscv(filter(isfinite, vec(paired_reactivities))) # basepairs
+    np_reactivities_kde = kde_lscv(filter(isfinite, vec(unpaired_reactivities))) # unpaired
+    all_reactivities_kde = kde_lscv(filter(isfinite, vec(all_reactivities))) # ALL reactivities (base-paired + unpaired)
+
+    # optimization to allow faster interpolation evaluation
+    bp_reactivities_ikde = InterpKDE(bp_reactivities_kde)
+    np_reactivities_ikde = InterpKDE(np_reactivities_kde)
+    all_reactivities_ikde = InterpKDE(all_reactivities_kde)
+
+    # we will fill these arrays below. These are the log-likelihood ratios of reactivities
+    # conditioned on the site being base-paired (bp) or unpaired (np).
+    # '0' refers to the "null" distribution of all reactivities together (all_reactivities_kde above)
+    shape_log_odds_bp = fill(NaN, L, N, C) # log( P(R|bp) / P(R|0) )
+    shape_log_odds_np = fill(NaN, L, N, C) # log( P(R|np) / P(R|0) )
+
+    for c = 1:C, n = 1:N, i = 1:L
+        α_M = shape_gamma_alpha_M[i,n,c]
+        α_U = shape_gamma_alpha_U[i,n,c]
+        α_D = shape_gamma_alpha_D[i,n,c]
+
+        θ_M = shape_gamma_theta_M[i,n,c]
+        θ_U = shape_gamma_theta_U[i,n,c]
+        θ_D = shape_gamma_theta_D[i,n,c]
+
+        # if something is NaN, just skip this site
+        if isnan(α_M) || isnan(α_U) || isnan(α_D)
+            continue
+        elseif isnan(θ_M) || isnan(θ_U) || isnan(θ_D)
+            continue
+        end
+
+        # discard if ShapeMapper rules think this site has poor statistics
+        if only_hq_profile && isnan(shape_data.shape_reactivities[i,n,c])
+            continue
+        end
+
+        # resample mutation rates
+        M = rand(Gamma(α_M, θ_M), nsamples)
+        U = rand(Gamma(α_U, θ_U), nsamples)
+        D = rand(Gamma(α_D, θ_D), nsamples)
+
+        # resampled reactivities
+        R = (M - U) ./ D
+        # normalize
+        R = R / normalization[i,n,c]
+
+        P_bp = pdf.(Ref(bp_reactivities_ikde), R)
+        P_np = pdf.(Ref(np_reactivities_ikde), R)
+        #P_0 = (P_bp + P_np) / 2 # this is the difference with respect to v2
+        P_0 = pdf.(Ref(all_reactivities_ikde), R)
+
+        # Apply a probability threshold (p_thresh) to remove outliers
+        (mean(P_bp) > p_thresh) && (mean(P_np) > p_thresh) && (mean(P_0) > p_thresh) || continue
+        # (mean(P_0) < p_thresh || mean(P_bp) < p_thresh && mean(P_np) < p_thresh) && continue
+
+        _nz = findall(P_0 .> p_thresh) # retain only things that are not too far from the support of the histogram
+        #@show mean(P_bp[_nz] ./ P_0[_nz]) mean(P_np[_nz] ./ P_0[_nz])
+
+        shape_log_odds_bp[i,n,c] = log(mean(P_bp[_nz] ./ P_0[_nz]))
+        shape_log_odds_np[i,n,c] = log(mean(P_np[_nz] ./ P_0[_nz]))
+        @assert isfinite(shape_log_odds_bp[i,n,c])
+        @assert isfinite(shape_log_odds_np[i,n,c])
+    end
+
+    # log( P(R|bp) / P(R|np) )
+    shape_log_odds = shape_log_odds_bp - shape_log_odds_np
+
+    return (; shape_data..., shape_log_odds, shape_log_odds_bp, shape_log_odds_np,
+        shape_gamma_theta_M, shape_gamma_alpha_M,
+        shape_gamma_theta_U, shape_gamma_alpha_U,
+        shape_gamma_theta_D, shape_gamma_alpha_D
+    )
+end
