@@ -282,6 +282,152 @@ Vienna_energies_Pk_RBM_samples_RNAeval = [SamApp2024.vienna_pk_binding_energy_rn
 # All merged data, for the reactivity profiles plots
 shape_data_all_merged = SamApp2024.load_shapemapper_data_pierre_demux_20231027_repls_merged();
 
+# ╔═╡ e346e39a-185b-4fae-9e16-3745bd82a906
+conds_SAM_all_merged = map(identity, indexin(["SAMAP_1M7_0-1SAM_5Mg_T30C_allrep", "SAMAP_1M7_1SAM_5Mg_T30C_allrep"], shape_data_all_merged.conditions));
+
+# ╔═╡ ebede37d-ee91-4942-86bf-3924b0f8578f
+conds_Mg_all_merged = map(identity, indexin(["SAMAP_1M7_noSAM_5Mg_T30C_allrep"], shape_data_all_merged.conditions));
+
+# ╔═╡ ea6bb551-f3af-4647-9620-a3ecf90380b0
+conds_SAM_all_merged, conds_Mg_all_merged
+
+# ╔═╡ 743b9f9d-e141-4b2e-ac8e-2e3e70869599
+bps_reactivities_merged = shape_data_all_merged.shape_reactivities[bps, nat_seqs, conds_SAM_all_merged];
+nps_reactivities_merged = shape_data_all_merged.shape_reactivities[nps, nat_seqs, conds_SAM_all_merged];
+all_reactivities_merged = shape_data_all_merged.shape_reactivities[:, nat_seqs, conds_SAM_all_merged];
+
+shape_stats_merged = SamApp.shape_basepair_log_odds_v4(;
+    shape_data = shape_data_all_merged,
+    paired_reactivities = bps_reactivities_merged,
+    unpaired_reactivities = nps_reactivities_merged,
+    all_reactivities = all_reactivities_merged,
+    only_hq_profile = true, p_thresh = 1e-3, nsamples = 1000
+);
+
+# ╔═╡ 4c4144ca-9f36-44f0-b697-7411df2fac6a
+# structural motifs
+struct_bands = [
+    (; x0=0.5, xf=8.5, color="blue", alpha=0.1), # P1
+    (; x0=100.5, xf=108.5, color="blue", alpha=0.1), # P1
+    (; x0=11.5, xf=16.5, color="green", alpha=0.1), # P2
+    (; x0=20.5, xf=23.5, color="green", alpha=0.1), # P2
+    (; x0=28.5, xf=31.5, color="green", alpha=0.1), # P2
+    (; x0=37.5, xf=42.5, color="green", alpha=0.1), # P2
+    (; x0=42.5, xf=46.5, color="orange", alpha=0.1), # P3
+    (; x0=47.5, xf=53.5, color="orange", alpha=0.1), # P3
+    (; x0=60.5, xf=64.5, color="orange", alpha=0.1), # P3
+    (; x0=66.5, xf=72.5, color="orange", alpha=0.1), # P3
+    (; x0=80.5, xf=86.5, color="teal", alpha=0.1), # P4
+    (; x0=91.5, xf=97.5, color="teal", alpha=0.1), # P4
+    (; x0=24.5, xf=28.5, color="red", alpha=0.1), # Pk
+    (; x0=76.5, xf=80.5, color="red", alpha=0.1), # Pk
+];
+
+# ╔═╡ 9fcca185-180f-4478-8fa2-d0cf37e1937b
+let fig = Makie.Figure(; halign = :left)
+	ax = Makie.Axis(fig[1,1][1,1]; halign=:left, width=200, height=200, xlabel="Protect. score(hallmark sites)", ylabel="RBM score", title="no SAM", xgridvisible=false, ygridvisible=false)
+	#Makie.scatter!(ax, x_mg_rep0, -aptamer_rbm_energies, markersize=10, color=(:silver, 0.3), label="All probed")
+	Makie.scatter!(ax, x_mg_rep0[findall(_responds_sam_nop_rep0) ∩ nat_seqs], -aptamer_rbm_energies[findall(_responds_sam_nop_rep0) ∩ nat_seqs], markersize=15, color=:green, marker='O')
+	Makie.scatter!(ax, x_mg_rep0[findall(_responds_sam_yes_rep0) ∩ nat_seqs], -aptamer_rbm_energies[findall(_responds_sam_yes_rep0) ∩ nat_seqs], markersize=15, color=:green, marker='●')
+	Makie.scatter!(ax, x_mg_rep0[findall(_responds_sam_nop_rep0) ∩ inf_seqs], -aptamer_rbm_energies[findall(_responds_sam_nop_rep0) ∩ inf_seqs], markersize=15, color=:red, marker='O')
+	Makie.scatter!(ax, x_mg_rep0[findall(_responds_sam_yes_rep0) ∩ inf_seqs], -aptamer_rbm_energies[findall(_responds_sam_yes_rep0) ∩ inf_seqs], markersize=15, color=:red, marker='●')
+	Makie.scatter!(ax, x_mg_rep0[findall(_responds_sam_nop_rep0) ∩ rbm_seqs], -aptamer_rbm_energies[findall(_responds_sam_nop_rep0) ∩ rbm_seqs], markersize=15, color=:blue, marker='O')
+	Makie.scatter!(ax, x_mg_rep0[findall(_responds_sam_yes_rep0) ∩ rbm_seqs], -aptamer_rbm_energies[findall(_responds_sam_yes_rep0) ∩ rbm_seqs], markersize=15, color=:blue, marker='●')
+	Makie.vlines!(ax, [-_thresh, _thresh], linestyle=:dash, color=:orange)
+	
+	ax = Makie.Axis(fig[1,1][1,2]; halign=:left, width=200, height=200, xlabel="Protect. score(hallmark sites)", ylabel="RBM score", title="with SAM", xgridvisible=false, ygridvisible=false)
+	#Makie.scatter!(ax, x_sam_rep0, -aptamer_rbm_energies, markersize=10, color=(:gray, 0.5), label="All probed")
+	plt1 = Makie.scatter!(ax, x_sam_rep0[findall(_responds_sam_nop_rep0) ∩ nat_seqs], -aptamer_rbm_energies[findall(_responds_sam_nop_rep0) ∩ nat_seqs], markersize=15, color=:green, marker='O', label="Nat. (❌)")
+	plt2 = Makie.scatter!(ax, x_sam_rep0[findall(_responds_sam_yes_rep0) ∩ nat_seqs], -aptamer_rbm_energies[findall(_responds_sam_yes_rep0) ∩ nat_seqs], markersize=15, color=:green, marker='●', label="Nat. (✓)")
+	plt3 = Makie.scatter!(ax, x_sam_rep0[findall(_responds_sam_nop_rep0) ∩ inf_seqs], -aptamer_rbm_energies[findall(_responds_sam_nop_rep0) ∩ inf_seqs], markersize=15, color=:red, marker='O', label="CM (❌)")
+	plt4 = Makie.scatter!(ax, x_sam_rep0[findall(_responds_sam_yes_rep0) ∩ inf_seqs], -aptamer_rbm_energies[findall(_responds_sam_yes_rep0) ∩ inf_seqs], markersize=15, color=:red, marker='●', label="CM (✓)")
+	plt5 = Makie.scatter!(ax, x_sam_rep0[findall(_responds_sam_nop_rep0) ∩ rbm_seqs], -aptamer_rbm_energies[findall(_responds_sam_nop_rep0) ∩ rbm_seqs], markersize=15, color=:blue, marker='O', label="RBM (❌)")
+	plt6 = Makie.scatter!(ax, x_sam_rep0[findall(_responds_sam_yes_rep0) ∩ rbm_seqs], -aptamer_rbm_energies[findall(_responds_sam_yes_rep0) ∩ rbm_seqs], markersize=15, color=:blue, marker='●', label="RBM (✓)")
+	Makie.vlines!(ax, [-_thresh, _thresh], linestyle=:dash, color=:orange)
+	#Makie.xlims!(ax, -78, 35)
+	Makie.hideydecorations!(ax)
+	#Makie.axislegend(ax, position=:rt, framevisible=false)
+	Makie.Legend(fig[1,1][1,3],
+	    [plt1, plt2, plt3, plt4, plt5, plt6],
+	    ["Nat. (❌)", "Nat. (✓)", "rCM (❌)", "rCM (✓)", "RBM (❌)", "RBM (✓)"],
+	    framevisible=false
+	)
+	
+	# _dummy_ax = Makie.Axis(fig[1,2], width=400, height=300, xgridvisible=false, ygridvisible=false) # placeholder for the table
+	# Makie.hidexdecorations!(_dummy_ax)
+	# Makie.hideydecorations!(_dummy_ax)
+	# Makie.hidespines!(_dummy_ax, :t, :b, :l, :r)
+	
+	n_ex_rbm = 299 # rbm example, switcher
+	#n_ex_nat = 112 # natural example, responsive but not switcher
+	n_ex_nat = 101 # natural example, responsive but not switcher
+	
+	_width = 550
+	_height = 70
+	
+	_R_sam = shape_data_all_merged.shape_reactivities[:, n_ex_rbm, conds_SAM_all_merged[1]]
+	_R_mg = shape_data_all_merged.shape_reactivities[:, n_ex_rbm, only(conds_Mg_all_merged)]
+	
+	ax_react_1 = Makie.Axis(fig[2,1][1,1], width=_width, height=_height, xticks=5:10:108, ylabel="reactivity", xgridvisible=false, ygridvisible=false, yticks=0:2:5, ytrimspine=true)
+	for (x0, xf, color, alpha) = struct_bands
+	    Makie.vspan!(ax_react_1, x0, xf; color=(color, alpha))
+	end
+	Makie.stairs!(ax_react_1, 1:108, _R_mg, color=:gray, step=:center)
+	Makie.stairs!(ax_react_1, 1:108, _R_sam, color=:purple, step=:center)
+	Makie.xlims!(ax_react_1, 0.5, 108.5)
+	Makie.ylims!(ax_react_1, -1, 4)
+	Makie.hidespines!(ax_react_1, :t, :r, :b)
+	Makie.hidexdecorations!(ax_react_1)
+	
+	ax_diff_1 = Makie.Axis(fig[2,1][2,1]; width=_width, height=_height, xticks=5:10:108, xlabel="site", ylabel="Δreactivity", xgridvisible=false, ygridvisible=false, xtrimspine=true, ytrimspine=true, yticks=-2:2)
+	for (x0, xf, color, alpha) = struct_bands
+	    Makie.vspan!(ax_diff_1, x0, xf; color=(color, alpha))
+	end
+	Makie.barplot!(ax_diff_1, 1:108, _R_sam - _R_mg, color=ifelse.(_R_sam - _R_mg .< 0, :green, :gray))
+	Makie.xlims!(ax_diff_1, 0.5, 108.5)
+	Makie.ylims!(ax_diff_1, -1.5, 1.5)
+	Makie.hidespines!(ax_diff_1, :t, :b, :r)
+	Makie.hidexdecorations!(ax_diff_1)
+	
+	_R_sam = shape_data_all_merged.shape_reactivities[:, n_ex_nat, conds_SAM_all_merged[1]]
+	_R_mg = shape_data_all_merged.shape_reactivities[:, n_ex_nat, only(conds_Mg_all_merged)]
+	
+	ax_react_2 = Makie.Axis(fig[2,1][3,1], width=_width, height=_height, xticks=10:10:108, ylabel="reactivity", xgridvisible=false, ygridvisible=false, yticks=0:2:5, ytrimspine=true)
+	for (x0, xf, color, alpha) = struct_bands
+	    Makie.vspan!(ax_react_2, x0, xf; color=(color, alpha))
+	end
+	Makie.stairs!(ax_react_2, 1:108, _R_mg, color=:gray, step=:center)
+	Makie.stairs!(ax_react_2, 1:108, _R_sam, color=:purple, step=:center)
+	Makie.xlims!(ax_react_2, 0.5, 108.5)
+	Makie.ylims!(ax_react_2, -1, 6)
+	Makie.hidespines!(ax_react_2, :t, :r, :b)
+	Makie.hidexdecorations!(ax_react_2)
+	#Makie.hideydecorations!(ax_react_2)
+	
+	ax_diff_2 = Makie.Axis(fig[2,1][4,1]; width=_width, height=_height, xticks=5:10:108, xlabel="site", ylabel="Δreactivity", xgridvisible=false, ygridvisible=false, xtrimspine=true, ytrimspine=true, yticks=-2:2)
+	for (x0, xf, color, alpha) = struct_bands
+	    Makie.vspan!(ax_diff_2, x0, xf; color=(color, alpha))
+	end
+	Makie.barplot!(ax_diff_2, 1:108, _R_sam - _R_mg, color=ifelse.(_R_sam - _R_mg .< 0, :green, :gray))
+	Makie.scatter!(ax_diff_2, _sites, -1.4one.(_sites), markersize=7, color=:black, marker=:utriangle)
+	Makie.xlims!(ax_diff_2, 0, 109)
+	Makie.ylims!(ax_diff_2, -1.5, 1)
+	Makie.hidespines!(ax_diff_2, :t, :r)
+	#Makie.hideydecorations!(ax_diff_2)
+	
+	# Makie.scatter!(ax_diff_1, _sites, one.(_sites), color=:blue, markersize=5)
+	# Makie.scatter!(ax_diff_2, _sites, one.(_sites), color=:blue, markersize=5)
+	
+	Makie.linkxaxes!(ax_react_1, ax_diff_1)
+	Makie.linkxaxes!(ax_react_2, ax_diff_2)
+	Makie.linkyaxes!(ax_react_1, ax_react_2)
+	Makie.linkyaxes!(ax_diff_1, ax_diff_2)
+	
+	Makie.resize_to_layout!(fig)
+	#Makie.save("Figures/SAM response Repl0 v2.pdf", fig)
+	fig
+end
+
 # ╔═╡ Cell order:
 # ╠═77855f93-2b64-45bc-a307-df7f6e6187b3
 # ╠═45907f4d-29ec-4be7-97e8-bfcb4695416b
@@ -370,3 +516,9 @@ shape_data_all_merged = SamApp2024.load_shapemapper_data_pierre_demux_20231027_r
 # ╠═1f5d3f1b-5ac7-4cef-a746-eaadc19c94d0
 # ╠═56444e37-03d6-4829-9776-f79dc1a839a2
 # ╠═83534334-93f5-422b-8280-a2ca8ccaba4f
+# ╠═e346e39a-185b-4fae-9e16-3745bd82a906
+# ╠═ebede37d-ee91-4942-86bf-3924b0f8578f
+# ╠═ea6bb551-f3af-4647-9620-a3ecf90380b0
+# ╠═743b9f9d-e141-4b2e-ac8e-2e3e70869599
+# ╠═4c4144ca-9f36-44f0-b697-7411df2fac6a
+# ╠═9fcca185-180f-4478-8fa2-d0cf37e1937b

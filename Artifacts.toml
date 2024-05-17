@@ -77,3 +77,11 @@ lazy = true
     [[rf00162_14_7_taxonomy.download]]
     sha256 = "115cacc5143d7b6b4e680e49fe0da71b4f807701656879bb3ba4a6ce023c13b0"
     url = "https://gist.github.com/cossio/d892a209c2cadffb16ba72d78437f9c6/raw/176801a268fead07e24fe4a9e6f76a68be7de74c.tar.gz"
+
+[SAMAP_ALL-REP-MERGED-2023-10-27]
+git-tree-sha1 = "3fb28142091e8b33b12f3a2ba09bf54faf56b039"
+lazy = true
+
+    [[SAMAP_ALL-REP-MERGED-2023-10-27.download]]
+    sha256 = "23ab34615776fdacbe83ab7dcb7ead9ae9ea59aa90a1e0687886f4e6c392bddc"
+    url = "https://gist.github.com/cossio/661ce7c22cb66c5549635b0e6cb7971b/raw/3fb28142091e8b33b12f3a2ba09bf54faf56b039.tar.gz"
