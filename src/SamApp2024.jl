@@ -1,24 +1,40 @@
 module SamApp2024
 
+import Artifacts
+import CairoMakie
 import CSV
+import DCAUtils
+import DelimitedFiles
+import Distributions
+import ElementarySymmetricPolynomials
 import FASTX
-import LazyArtifacts
 import HDF5
 import Infernal
+import JLD2
+import KernelDensity
+import LazyArtifacts
+import LoggingExtras
+import Logomaker
+import Makie
+import NaNStatistics
 import Rfam
+import StatsBase
+import StringDistances
+import ViennaRNA
+import ViennaRNA_jll
 using Base: Fix2
+using BioSequences: @rna_str
 using BioSequences: LongRNA
 using BioSequences: LongSequence
-using BioSequences: @rna_str
 using DataFrames: DataFrame
 using LazyArtifacts: @artifact_str
 using LinearAlgebra: Diagonal
 using RestrictedBoltzmannMachines: batchmean
+using RestrictedBoltzmannMachines: dReLU
 using RestrictedBoltzmannMachines: flat_w
 using RestrictedBoltzmannMachines: Potts
 using RestrictedBoltzmannMachines: RBM
 using RestrictedBoltzmannMachines: var_h_from_v
-using RestrictedBoltzmannMachines: dReLU
 using XLSX: readxlsx
 
 include("effective_contacts.jl")

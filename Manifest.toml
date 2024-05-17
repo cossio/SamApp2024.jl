@@ -2,7 +2,7 @@
 
 julia_version = "1.10.3"
 manifest_format = "2.0"
-project_hash = "0150bf43ba1a54f075efca615b6404384ece8255"
+project_hash = "5f2392e6ce22c18695a75b0dba6a0549cd462ebe"
 
 [[deps.AbstractFFTs]]
 deps = ["LinearAlgebra"]
@@ -109,12 +109,6 @@ deps = ["BioSymbols", "PrecompileTools", "Random", "Twiddle"]
 git-tree-sha1 = "6fdba8b4279460fef5674e9aa2dac7ef5be361d5"
 uuid = "7e6ae17a-c86d-528c-b3b9-7f778a29fe59"
 version = "3.1.6"
-
-[[deps.BioSequencesOneHot]]
-deps = ["BioSequences"]
-git-tree-sha1 = "dbe3a1edc9c201d18057d36dffc641c39a4a44c6"
-uuid = "2814ae69-ac9a-473b-90f0-2183b26fd128"
-version = "2.0.1"
 
 [[deps.BioSymbols]]
 deps = ["PrecompileTools"]
@@ -1358,12 +1352,6 @@ deps = ["DataStructures", "LinearAlgebra"]
 git-tree-sha1 = "9b23c31e76e333e6fb4c1595ae6afa74966a729e"
 uuid = "1fd47b50-473d-5c70-9696-f719f8f3bcdc"
 version = "2.9.4"
-
-[[deps.RBMsEffectiveContacts]]
-deps = ["LinearAlgebra", "RestrictedBoltzmannMachines"]
-git-tree-sha1 = "f7f9acd1b681fadf52a41256a1db2ac6ccc49e33"
-uuid = "2f9af0fd-2043-4477-827d-59df7d24c0cf"
-version = "1.0.1"
 
 [[deps.REPL]]
 deps = ["InteractiveUtils", "Markdown", "Sockets", "Unicode"]
