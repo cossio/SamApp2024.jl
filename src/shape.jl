@@ -1,3 +1,14 @@
+const hallmark_sites_20230507 = [
+    25, 26, 27, 28, 77, 79, # Pseudoknot
+    34, 35, 36, 37, # Kink-turn
+    73, 74, 75, # A-minor
+    46, 47, # SAM contact (bulge)
+    76, 100, # Base-triple
+    101, 102, 103, 104, 105 # SAM contact (P1)
+];
+
+
+
 # a new version of the select_conditions function, adapted to the new namedtuple format
 function select_conditions_20231002(shape_data, conditions)
     c = indexin(conditions, shape_data.conditions)

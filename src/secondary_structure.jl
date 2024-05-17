@@ -26,3 +26,22 @@ function RF00162_wuss(; insertions=false)
         return filter(!=('.'), wuss_full)
     end
 end
+
+"""
+    RF00162_sites_annotated_secondary_structure()
+
+Returns the lists of sites in the consensus secondary structure of RF00162, in different
+structural elements (p1, p2, ..., base pairs, unpaired, pseudoknots, ...).
+"""
+function RF00162_sites_annotated_secondary_structure()
+    wuss = RF00162_wuss(; insertions=false)
+    bps = findall(∈("()<>"), wuss)
+    nps = findall(∉("()<>Aa"), wuss)
+    pk = findall(∈("Aa"), wuss)
+    #= Note that the pseudoknot sites are not included in bps nor nps. =#
+    p1 = union(1:8, 101:108)
+    p2 = union(13:17, 38:42, 21:23, 29:31)
+    p3 = union(43:46, 48:53, 61:64, 67:72)
+    p4 = union(81:86, 92:97)
+    return (; bps, nps, pk, p1, p2, p3, p4)
+end

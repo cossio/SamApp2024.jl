@@ -26,6 +26,10 @@ using BioSequences: @rna_str
 using BioSequences: LongRNA
 using BioSequences: LongSequence
 using DataFrames: DataFrame
+using Distributions: Gamma
+using Distributions: pdf
+using KernelDensity: InterpKDE
+using KernelDensity: kde_lscv
 using LazyArtifacts: @artifact_str
 using LinearAlgebra: Diagonal
 using RestrictedBoltzmannMachines: batchmean
@@ -34,6 +38,7 @@ using RestrictedBoltzmannMachines: flat_w
 using RestrictedBoltzmannMachines: Potts
 using RestrictedBoltzmannMachines: RBM
 using RestrictedBoltzmannMachines: var_h_from_v
+using Statistics: mean
 using XLSX: readxlsx
 
 include("effective_contacts.jl")

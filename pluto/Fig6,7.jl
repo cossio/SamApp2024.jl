@@ -107,8 +107,6 @@ import ViennaRNA_jll
 # load SHAPE data
 shape_data_045 = SamApp2024.load_shapemapper_data_pierre_demux_20230920(; demux=true);
 
-
-
 # ╔═╡ 3c96e229-e909-4de6-849e-753109b229d5
 # split rep0 from rep4+5
 shape_data_rep0 = SamApp2024.select_conditions_20231002(shape_data_045, filter(endswith("_rep0"), shape_data_045.conditions));
@@ -181,18 +179,25 @@ shape_stats_rep0 = SamApp2024.shape_basepair_log_odds_v4(;
 _thresh = log(5)
 
 # ╔═╡ 3922c5e8-6d40-4cf7-ae2a-3bcb5ae48d73
-_sites = SamApp.hallmark_sites_20230507;
+_sites = SamApp2024.hallmark_sites_20230507;
 
-# ╔═╡ 3bdc35bb-0b7d-48fe-87e4-3732fdb1feb8
+# ╔═╡ acf8bb76-bf87-4cf8-b280-e0e13c65fdff
 x_mg_rep0 = nansum(shape_stats_rep0.shape_log_odds[_sites, :,  conds_mg_rep0]; dim=(1,3))
+
+# ╔═╡ 1a364c8f-49e3-4c33-b892-8f35106c4afa
 x_sam_rep0 = nansum(shape_stats_rep0.shape_log_odds[_sites, :, conds_sam_rep0]; dim=(1,3))
 
+# ╔═╡ 4337d37f-15ba-4ead-b4d4-250c1c13f70c
 _responds_sam_yes_rep0 = (x_mg_rep0 .< -_thresh) .& (x_sam_rep0 .> +_thresh);
-_responds_sam_nop_rep0 = (x_mg_rep0 .> +_thresh) .| (x_sam_rep0 .< -_thresh);
-_inconclusive_rep0 = ((!).(_responds_sam_yes_rep0)) .& ((!).(_responds_sam_nop_rep0));
-_conclusive_rep0 = _responds_sam_yes_rep0 .| _responds_sam_nop_rep0;
 
-sum(_responds_sam_yes_rep0)
+# ╔═╡ 11b9e4bf-1531-459c-9d36-6d73526a96fb
+_responds_sam_nop_rep0 = (x_mg_rep0 .> +_thresh) .| (x_sam_rep0 .< -_thresh);
+
+# ╔═╡ 4825347b-2117-4b48-9f72-3bc24be76d07
+_inconclusive_rep0 = ((!).(_responds_sam_yes_rep0)) .& ((!).(_responds_sam_nop_rep0));
+
+# ╔═╡ 8f4dbcc1-3f77-43f0-b4bb-bb027bf20569
+_conclusive_rep0 = _responds_sam_yes_rep0 .| _responds_sam_nop_rep0;
 
 # ╔═╡ 41caae29-9181-4cf8-a814-64868a9b8e90
 aptamer_rbm_energies = [
@@ -201,21 +206,37 @@ aptamer_rbm_energies = [
     for seq in shape_data_045.aligned_sequences
 ];
 
-# ╔═╡ cc12dd0a-c217-436f-870c-601f16ce735b
-wuss = SamApp.rfam_ss("RF00162"; inserts=false)
-ss = SamApp.clean_wuss(wuss)
+# ╔═╡ 3d0cd846-07a7-4910-a2a2-2ef660355ad5
+wuss = SamApp2024.rfam_ss("RF00162"; inserts=false)
 
-# ╔═╡ 935b6930-8748-47c8-8db6-ee5557ef3423
+# ╔═╡ 74fbb354-2657-475e-8d1e-42d39e255396
+ss = SamApp2024.clean_wuss(wuss)
+
+# ╔═╡ 9f0baca9-46e2-4b20-9c0c-0dbbac36bbf0
 p1_pos = SamApp2024.RF00162_sites_annotated_secondary_structure().p1;
+
+# ╔═╡ ffcd720b-134f-4b83-adf7-ab39ab6dfba1
 p2_pos = SamApp2024.RF00162_sites_annotated_secondary_structure().p2;
+
+# ╔═╡ de174fc5-5bc0-4b5c-980d-88168f5355d1
 p3_pos = SamApp2024.RF00162_sites_annotated_secondary_structure().p3;
+
+# ╔═╡ bea93ba6-a1e5-444a-b419-f0ec290cb61f
 p4_pos = SamApp2024.RF00162_sites_annotated_secondary_structure().p4;
+
+# ╔═╡ 2639031c-df64-47c4-9d75-4f2ad73291dd
 pk_pos = SamApp2024.RF00162_sites_annotated_secondary_structure().pk;
 
-# ╔═╡ 387b740c-8475-4cdf-a08c-d8e5136bc7f2
+# ╔═╡ 15ff286a-a8e4-4c8b-9c73-04450ad6c500
 ss_without_P1 = join([i ∈ p1_pos ? '.' : c for (i,c) in enumerate(ss)]);
+
+# ╔═╡ b798af09-363d-4800-b37e-a8fe8ce36398
 ss_without_P2 = join([i ∈ p2_pos ? '.' : c for (i,c) in enumerate(ss)]);
+
+# ╔═╡ 1e382321-089d-407f-9d2b-e07dcdb00135
 ss_without_P3 = join([i ∈ p3_pos ? '.' : c for (i,c) in enumerate(ss)]);
+
+# ╔═╡ 445ab169-1024-4238-b3bb-35b9cbdc99e7
 ss_without_P4 = join([i ∈ p4_pos ? '.' : c for (i,c) in enumerate(ss)]);
 
 # ╔═╡ 6212efdb-8f9a-4fc8-824c-0623ac71d2ce
@@ -281,10 +302,23 @@ sampled_v = SamApp2024.rbm2022samples();
 # ╠═92975e4a-13a1-42b2-8219-a1266b7189a1
 # ╠═ac0f6b9c-abdc-4aa3-bf00-29f63330d219
 # ╠═3922c5e8-6d40-4cf7-ae2a-3bcb5ae48d73
-# ╠═3bdc35bb-0b7d-48fe-87e4-3732fdb1feb8
+# ╠═acf8bb76-bf87-4cf8-b280-e0e13c65fdff
+# ╠═1a364c8f-49e3-4c33-b892-8f35106c4afa
+# ╠═4337d37f-15ba-4ead-b4d4-250c1c13f70c
+# ╠═11b9e4bf-1531-459c-9d36-6d73526a96fb
+# ╠═4825347b-2117-4b48-9f72-3bc24be76d07
+# ╠═8f4dbcc1-3f77-43f0-b4bb-bb027bf20569
 # ╠═41caae29-9181-4cf8-a814-64868a9b8e90
-# ╠═cc12dd0a-c217-436f-870c-601f16ce735b
-# ╠═935b6930-8748-47c8-8db6-ee5557ef3423
-# ╠═387b740c-8475-4cdf-a08c-d8e5136bc7f2
+# ╠═3d0cd846-07a7-4910-a2a2-2ef660355ad5
+# ╠═74fbb354-2657-475e-8d1e-42d39e255396
+# ╠═9f0baca9-46e2-4b20-9c0c-0dbbac36bbf0
+# ╠═ffcd720b-134f-4b83-adf7-ab39ab6dfba1
+# ╠═de174fc5-5bc0-4b5c-980d-88168f5355d1
+# ╠═bea93ba6-a1e5-444a-b419-f0ec290cb61f
+# ╠═2639031c-df64-47c4-9d75-4f2ad73291dd
+# ╠═15ff286a-a8e4-4c8b-9c73-04450ad6c500
+# ╠═b798af09-363d-4800-b37e-a8fe8ce36398
+# ╠═1e382321-089d-407f-9d2b-e07dcdb00135
+# ╠═445ab169-1024-4238-b3bb-35b9cbdc99e7
 # ╠═6212efdb-8f9a-4fc8-824c-0623ac71d2ce
 # ╠═a03f024e-d55d-4ffc-aedd-d96f5b539fdd
