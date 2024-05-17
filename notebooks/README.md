@@ -1,0 +1,1 @@
+NOTE: These Jupyter notebooks have not been updated. Please use the [Pluto notebooks](https://github.com/cossio/SamApp2024.jl/tree/main/pluto) instead.
