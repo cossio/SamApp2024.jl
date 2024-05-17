@@ -65,7 +65,7 @@ function clean_wuss(wuss::AbstractString; keep_pseudoknots::Bool = false)
     end
 end
 
-# RNAeval for pseudoknot
+# RNAeval for the pseudoknot
 function vienna_pk_binding_energy_rnaeval(seq::String)
     # store here so that we don't have to fetch this every time
     wuss = "((((((((,,,,<<<<<---<<<_AAAA>>>------>>>>><<<<-<<<<<<_______>>>>-->>>>>>,,,<aaaa<<<<<<_____>>>>>>-->))))))))"
