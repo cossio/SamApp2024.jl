@@ -12,6 +12,6 @@ If you use this code, please cite this paper (or you can use the included [CITAT
 
 The code is organized as a [Julia](https://julialang.org) package. After having installed Julia, clone this repository locally and activate the included `Project.toml`.
 
-The included [Jupyter notebooks](https://github.com/cossio/SamApp2024.jl/tree/main/notebooks) and [Pluto notebooks](https://github.com/cossio/SamApp2024.jl/tree/main/pluto) contain the all the code for the analysis done in the paper (for more information about Pluto notebooks, see: https://plutojl.org).
+The included [Pluto notebooks](https://github.com/cossio/SamApp2024.jl/tree/main/pluto) contain the all the code for the analysis done in the paper. For more information about Pluto notebooks, see: https://plutojl.org.
 
-The code implementing Restricted Boltzmann machines (training, sampling, and other functions) is provided in a separate package: https://github.com/cossio/RestrictedBoltzmannMachines.jl. Note that this package will be installed automatically as a dependency.
+The code implementing Restricted Boltzmann machines (training, sampling, and other functions) is provided in a separate package: https://github.com/cossio/RestrictedBoltzmannMachines.jl. Note that this package will be installed automatically as a dependency of this repository by the Julia package manager.
