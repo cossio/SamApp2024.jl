@@ -245,6 +245,43 @@ ss_pk_only = replace(wuss, r"\(|\)|\[|\]|\{|\}|\<|\>|\-|\_|\," => '.', 'A' => '(
 # ╔═╡ a03f024e-d55d-4ffc-aedd-d96f5b539fdd
 sampled_v = SamApp2024.rbm2022samples();
 
+# ╔═╡ 0f849d0c-0a3c-4a70-b437-98b6340ceb58
+Vienna_energies_fold = [ismissing(seq) ? missing : ustrip(ViennaRNA.energy(string(seq), ss)) for seq = shape_data_rep0.aligned_sequences];
+
+# ╔═╡ 7cc5d85d-27c7-4f4d-b62a-30925a58a98a
+Vienna_energies_P1 = [ismissing(seq) ? missing : ustrip(ViennaRNA.energy(string(seq), ss)) - ustrip(ViennaRNA.energy(string(seq), ss_without_P1)) for seq = shape_data_rep0.aligned_sequences];
+
+# ╔═╡ 0d0bde49-85c7-4559-96c5-2602e59b505d
+Vienna_energies_P2 = [ismissing(seq) ? missing : ustrip(ViennaRNA.energy(string(seq), ss)) - ustrip(ViennaRNA.energy(string(seq), ss_without_P2)) for seq = shape_data_rep0.aligned_sequences];
+
+# ╔═╡ 9bcf2ca1-b26b-453c-824f-43de4e31c967
+Vienna_energies_P3 = [ismissing(seq) ? missing : ustrip(ViennaRNA.energy(string(seq), ss)) - ustrip(ViennaRNA.energy(string(seq), ss_without_P3)) for seq = shape_data_rep0.aligned_sequences];
+
+# ╔═╡ 94310e4e-644a-4b99-ad5f-d708a47ad7f8
+Vienna_energies_P4 = [ismissing(seq) ? missing : ustrip(ViennaRNA.energy(string(seq), ss)) - ustrip(ViennaRNA.energy(string(seq), ss_without_P4)) for seq = shape_data_rep0.aligned_sequences];
+
+# ╔═╡ 7dcca23e-dfb0-407c-9e91-47f7e8390990
+Vienna_energies_Pk = [ismissing(seq) ? missing : ustrip(ViennaRNA.energy(string(seq), ss_pk_only)) for seq = shape_data_rep0.aligned_sequences];
+
+# ╔═╡ 461c7485-2551-4417-9ffc-7cad3f65d2bb
+@time Vienna_energies_P1_RBM_samples = [
+    ustrip(ViennaRNA.energy(string(seq), ss)) - ustrip(ViennaRNA.energy(string(seq), ss_without_P1))
+    for seq = SamApp2024.rnaseq(sampled_v)
+];
+
+# ╔═╡ f547cf7b-943b-400e-aa4c-f1d60237c984
+Vienna_energies_Pk_RBM_samples = [ustrip(ViennaRNA.energy(string(seq), ss_pk_only)) for seq = SamApp2024.rnaseq(sampled_v)];
+
+# ╔═╡ 1f5d3f1b-5ac7-4cef-a746-eaadc19c94d0
+Vienna_energies_Pk_RNAeval = [ismissing(seq) ? NaN : SamApp2024.vienna_pk_binding_energy_rnaeval(seq) for seq = shape_data_rep0.aligned_sequences]
+
+# ╔═╡ 56444e37-03d6-4829-9776-f79dc1a839a2
+Vienna_energies_Pk_RBM_samples_RNAeval = [SamApp2024.vienna_pk_binding_energy_rnaeval(string(seq)) for seq = SamApp2024.rnaseq(sampled_v)];
+
+# ╔═╡ 83534334-93f5-422b-8280-a2ca8ccaba4f
+# All merged data, for the reactivity profiles plots
+shape_data_all_merged = SamApp2024.load_shapemapper_data_pierre_demux_20231027_repls_merged();
+
 # ╔═╡ Cell order:
 # ╠═77855f93-2b64-45bc-a307-df7f6e6187b3
 # ╠═45907f4d-29ec-4be7-97e8-bfcb4695416b
@@ -322,3 +359,14 @@ sampled_v = SamApp2024.rbm2022samples();
 # ╠═445ab169-1024-4238-b3bb-35b9cbdc99e7
 # ╠═6212efdb-8f9a-4fc8-824c-0623ac71d2ce
 # ╠═a03f024e-d55d-4ffc-aedd-d96f5b539fdd
+# ╠═0f849d0c-0a3c-4a70-b437-98b6340ceb58
+# ╠═7cc5d85d-27c7-4f4d-b62a-30925a58a98a
+# ╠═0d0bde49-85c7-4559-96c5-2602e59b505d
+# ╠═9bcf2ca1-b26b-453c-824f-43de4e31c967
+# ╠═94310e4e-644a-4b99-ad5f-d708a47ad7f8
+# ╠═7dcca23e-dfb0-407c-9e91-47f7e8390990
+# ╠═461c7485-2551-4417-9ffc-7cad3f65d2bb
+# ╠═f547cf7b-943b-400e-aa4c-f1d60237c984
+# ╠═1f5d3f1b-5ac7-4cef-a746-eaadc19c94d0
+# ╠═56444e37-03d6-4829-9776-f79dc1a839a2
+# ╠═83534334-93f5-422b-8280-a2ca8ccaba4f

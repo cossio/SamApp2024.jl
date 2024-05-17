@@ -45,3 +45,44 @@ function RF00162_sites_annotated_secondary_structure()
     p4 = union(81:86, 92:97)
     return (; bps, nps, pk, p1, p2, p3, p4)
 end
+
+"""
+    clean_wuss(wuss; keep_pseudoknots = false)
+
+Replaces all brackets by parentheses, and all unpaired sites by dots.
+"""
+function clean_wuss(wuss::AbstractString; keep_pseudoknots::Bool = false)
+    _wuss = replace(
+        wuss,
+        r"\(|\[|\{|\<" => '(',
+        r"\)|\]|\}|\>" => ')',
+        r"\-|\_|\," => '.'
+    )
+    if keep_pseudoknots
+        return _wuss
+    else
+        return replace(_wuss, r"[A-Z]|[a-z]" => '.')
+    end
+end
+
+# RNAeval for pseudoknot
+function vienna_pk_binding_energy_rnaeval(seq::String)
+    # store here so that we don't have to fetch this every time
+    wuss = "((((((((,,,,<<<<<---<<<_AAAA>>>------>>>>><<<<-<<<<<<_______>>>>-->>>>>>,,,<aaaa<<<<<<_____>>>>>>-->))))))))"
+
+    # only Pk is base-paired here
+    ss_pk_only = replace(wuss, r"\(|\)|\[|\]|\{|\}|\<|\>|\-|\_|\," => '.', 'A' => '(', 'a' => ')')
+
+    _rnaeval_input, io = mktemp()
+    write(io, seq * '\n')
+    write(io, ss_pk_only * '\n')
+    close(io)
+
+    _rnaeval_stdout = tempname()
+    run(pipeline(`$(ViennaRNA_jll.RNAeval()) -vi $_rnaeval_input`; stdout=_rnaeval_stdout))
+
+    _lines = readlines(_rnaeval_stdout)[1:5]
+    _vals = [parse(Int, split(l, [':', ' ']; keepempty=false)[end]) for l in _lines]
+
+    return sum(_vals[2:4]) / 100
+end
