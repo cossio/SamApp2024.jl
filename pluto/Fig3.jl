@@ -82,9 +82,6 @@ import SamApp2024
 # ╔═╡ f1e092ee-12ac-4680-9cb0-80a7fec907a6
 import StatsBase
 
-# ╔═╡ 64d76000-422b-4674-a7ca-91e4d96758a9
-import PythonPlot
-
 # ╔═╡ 1ae2d1fc-db46-4c34-a445-82c86953385c
 import Logomaker
 
@@ -147,7 +144,6 @@ end
 # ╠═eb8830a1-3ea2-4757-9a2b-5a19249baae0
 # ╠═d7c904eb-c1ab-4f72-a0b9-3c53e0b86a59
 # ╠═f1e092ee-12ac-4680-9cb0-80a7fec907a6
-# ╠═64d76000-422b-4674-a7ca-91e4d96758a9
 # ╠═1ae2d1fc-db46-4c34-a445-82c86953385c
 # ╠═5ed177a0-2ac4-41ac-a3c6-3610382b448f
 # ╠═acaf92ee-3f1c-42a7-a7ef-f350383efd22
