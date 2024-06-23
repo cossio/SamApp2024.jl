@@ -18,7 +18,7 @@ After having installed Julia, clone this repository locally using `git`, on a lo
 git clone https://github.com/cossio/SamApp2024.jl.git
 ```
 
-and activate the included `Project.toml`.
+Then, activate the included `Project.toml`.
 
 The included [Pluto notebooks](https://github.com/cossio/SamApp2024.jl/tree/main/pluto) contain the code for the downstream analysis done in the paper (which depend on the SamApp2024 package). For more information about Pluto notebooks, see: https://plutojl.org.
 
