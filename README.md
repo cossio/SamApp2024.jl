@@ -8,12 +8,24 @@ This repository hosts the source code for the paper:
 
 If you use this code, please cite this paper (or you can use the included [CITATION.bib](https://github.com/cossio/SamApp2024.jl/blob/main/CITATION.bib)).
 
-# Usage
+# Setup
 
-The code is organized as a [Julia](https://julialang.org) package. After having installed Julia, clone this repository locally and activate the included `Project.toml`.
+The code is organized as a [Julia](https://julialang.org) package. If you haven't setup Julia on your computer, you can install it following the simple instructions from the [official website](https://julialang.org/downloads/). We have tested our package on the latest Julia version at the time of writing: `v1.10.4`. It should work on future `v1.x.y` versions of Julia as well.
+
+After having installed Julia, clone this repository locally using `git`, on a local directory, by running the following command from the terminal:
+
+```bash
+git clone https://github.com/cossio/SamApp2024.jl.git
+```
+
+and activate the included `Project.toml`.
 
 The included [Pluto notebooks](https://github.com/cossio/SamApp2024.jl/tree/main/pluto) contain the code for the downstream analysis done in the paper (which depend on the SamApp2024 package). For more information about Pluto notebooks, see: https://plutojl.org.
 
 The code implementing Restricted Boltzmann machines (training, sampling, and other functions) is provided in a separate package: https://github.com/cossio/RestrictedBoltzmannMachines.jl. Note that this package will be installed automatically as a dependency of this repository by the Julia package manager.
+
+# Usage
+
+# Issues
 
 If you encounter any problems, please [open an issue](https://github.com/cossio/SamApp2024.jl/issues/new/choose) in this repository.
