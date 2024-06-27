@@ -291,12 +291,17 @@ conds_Mg_all_merged = map(identity, indexin(["SAMAP_1M7_noSAM_5Mg_T30C_allrep"],
 # ╔═╡ ea6bb551-f3af-4647-9620-a3ecf90380b0
 conds_SAM_all_merged, conds_Mg_all_merged
 
-# ╔═╡ 743b9f9d-e141-4b2e-ac8e-2e3e70869599
+# ╔═╡ 8c4a1b15-13e8-43a9-9be2-cb614a8c1869
 bps_reactivities_merged = shape_data_all_merged.shape_reactivities[bps, nat_seqs, conds_SAM_all_merged];
+
+# ╔═╡ 44321d83-09e4-4928-ac36-b32a12297320
 nps_reactivities_merged = shape_data_all_merged.shape_reactivities[nps, nat_seqs, conds_SAM_all_merged];
+
+# ╔═╡ d5b6b49a-9721-4c4c-a735-743f3cd852ab
 all_reactivities_merged = shape_data_all_merged.shape_reactivities[:, nat_seqs, conds_SAM_all_merged];
 
-shape_stats_merged = SamApp.shape_basepair_log_odds_v4(;
+# ╔═╡ 309bf006-c0e1-46a6-9bc8-0834450340d9
+shape_stats_merged = SamApp2024.shape_basepair_log_odds_v4(;
     shape_data = shape_data_all_merged,
     paired_reactivities = bps_reactivities_merged,
     unpaired_reactivities = nps_reactivities_merged,
@@ -519,6 +524,9 @@ end
 # ╠═e346e39a-185b-4fae-9e16-3745bd82a906
 # ╠═ebede37d-ee91-4942-86bf-3924b0f8578f
 # ╠═ea6bb551-f3af-4647-9620-a3ecf90380b0
-# ╠═743b9f9d-e141-4b2e-ac8e-2e3e70869599
+# ╠═8c4a1b15-13e8-43a9-9be2-cb614a8c1869
+# ╠═44321d83-09e4-4928-ac36-b32a12297320
+# ╠═d5b6b49a-9721-4c4c-a735-743f3cd852ab
+# ╠═309bf006-c0e1-46a6-9bc8-0834450340d9
 # ╠═4c4144ca-9f36-44f0-b697-7411df2fac6a
 # ╠═9fcca185-180f-4478-8fa2-d0cf37e1937b
