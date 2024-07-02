@@ -98,10 +98,7 @@ import ViennaRNA
 import ViennaRNA_jll
 
 # ╔═╡ 2a3fff7d-a1e5-474e-8981-ac9c05494d4d
-@show Rfam.get_rfam_directory();
-
-# ╔═╡ 1679e271-e03c-4db7-ad7d-4aaf3a2c183a
-@show Rfam.get_rfam_version();
+@show Rfam.get_rfam_directory() Rfam.get_rfam_version();
 
 # ╔═╡ c182ce25-a47f-4368-9ca7-9b5b93983dcb
 # load SHAPE data
@@ -466,7 +463,6 @@ end
 # ╠═4974c2e2-058d-41ca-924d-16709e4a58e6
 # ╠═94d99837-7415-4acb-b5d3-3b1dec5af05e
 # ╠═2a3fff7d-a1e5-474e-8981-ac9c05494d4d
-# ╠═1679e271-e03c-4db7-ad7d-4aaf3a2c183a
 # ╠═c182ce25-a47f-4368-9ca7-9b5b93983dcb
 # ╠═3c96e229-e909-4de6-849e-753109b229d5
 # ╠═775e36c0-7c9b-47e7-adef-ac686ce0dc88

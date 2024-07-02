@@ -32,6 +32,7 @@ using KernelDensity: InterpKDE
 using KernelDensity: kde_lscv
 using LazyArtifacts: @artifact_str
 using LinearAlgebra: Diagonal
+using LogExpFunctions: xlogx
 using RestrictedBoltzmannMachines: batchmean
 using RestrictedBoltzmannMachines: dReLU
 using RestrictedBoltzmannMachines: flat_w
@@ -50,5 +51,6 @@ include("artifacts.jl")
 include("shape.jl")
 include("shape_alignment.jl")
 include("secondary_structure.jl")
+include("util.jl")
 
 end

@@ -205,97 +205,20 @@ _inconclusive_rep0 = ((!).(_responds_sam_yes_rep0)) .& ((!).(_responds_sam_nop_r
 # ╔═╡ 4eae5eaa-37d8-43ff-be2a-c2d3ccf9a01d
 _conclusive_rep0 = _responds_sam_yes_rep0 .| _responds_sam_nop_rep0;
 
-# ╔═╡ 56511e5c-eb62-47bd-ab14-9dbc8a4cdf20
-aptamer_rbm_energies = [
-    ismissing(seq) ? missing : 
-    free_energy(SamApp2024.rbm2022(), SamApp2024.onehot(LongRNA{4}(seq)))
-    for seq in shape_data_045.aligned_sequences
-];
+# ╔═╡ f949a0c1-064d-4f61-9b3b-92a93a65f289
+_responds_sam_yes_rep0
 
-# ╔═╡ 845e0a9c-8c51-463d-a4ab-cf990d15fdbe
-wuss = SamApp2024.rfam_ss("RF00162"; inserts=false)
+# ╔═╡ 27fec5a4-13c6-461f-9f90-ec136fb25c3b
+_selection = ["APSAMN172", "APSAMN75", "APSAMN96", "APSAMS25", "APSAMS10"]
 
-# ╔═╡ 3836e1d6-50c0-4a12-ac3e-567d805e1d21
-ss = SamApp2024.clean_wuss(wuss)
+# ╔═╡ 47634614-5886-4de6-8608-da57354ce289
+[_responds_sam_yes_rep0[only(findall(==(_s), shape_stats_rep0.aptamer_names))] for _s = _selection]
 
-# ╔═╡ a636fa9d-4891-4601-bb27-aa36227bf813
-p1_pos = SamApp2024.RF00162_sites_annotated_secondary_structure().p1;
+# ╔═╡ 48d6dda0-9885-4653-85eb-ce42e6a1da4f
+[_responds_sam_nop_rep0[only(findall(==(_s), shape_stats_rep0.aptamer_names))] for _s = _selection]
 
-# ╔═╡ 97cd8f83-9411-429d-90d0-400f302931dc
-p2_pos = SamApp2024.RF00162_sites_annotated_secondary_structure().p2;
-
-# ╔═╡ b893669e-4359-4489-8137-9f4c35411a95
-p3_pos = SamApp2024.RF00162_sites_annotated_secondary_structure().p3;
-
-# ╔═╡ e4a8f81c-f63b-4c61-ae3d-0b7b134adc32
-p4_pos = SamApp2024.RF00162_sites_annotated_secondary_structure().p4;
-
-# ╔═╡ 8efc7ac0-d5d9-4db4-bb04-396d733cb8b5
-pk_pos = SamApp2024.RF00162_sites_annotated_secondary_structure().pk;
-
-# ╔═╡ 1b01c53e-ab7a-4dc1-a886-f98b9da3985e
-ss_without_P1 = join([i ∈ p1_pos ? '.' : c for (i,c) in enumerate(ss)]);
-
-# ╔═╡ 3e60f6e0-c132-4521-b6e3-1bbf69340040
-ss_without_P2 = join([i ∈ p2_pos ? '.' : c for (i,c) in enumerate(ss)]);
-
-# ╔═╡ 6c5d119d-c59f-4693-a98d-7d6afb3d36e9
-ss_without_P3 = join([i ∈ p3_pos ? '.' : c for (i,c) in enumerate(ss)]);
-
-# ╔═╡ a17204d5-c14a-4f12-af68-d6fc753e5fd3
-ss_without_P4 = join([i ∈ p4_pos ? '.' : c for (i,c) in enumerate(ss)]);
-
-# ╔═╡ 7c466c76-0d37-4a56-9192-4fd23f79d36b
-ss_pk_only = replace(wuss, r"\(|\)|\[|\]|\{|\}|\<|\>|\-|\_|\," => '.', 'A' => '(', 'a' => ')')
-
-# ╔═╡ c258469b-f96a-414a-b15f-cfb358a0b818
-sampled_v = SamApp2024.rbm2022samples();
-
-# ╔═╡ b1931f9a-2cd1-4093-834a-71e43364ace0
-Vienna_energies_fold = [ismissing(seq) ? missing : ustrip(ViennaRNA.energy(string(seq), ss)) for seq = shape_data_rep0.aligned_sequences];
-
-# ╔═╡ c4a50ef4-f22a-4246-8489-d4b86db9af90
-Vienna_energies_P1 = [ismissing(seq) ? missing : ustrip(ViennaRNA.energy(string(seq), ss)) - ustrip(ViennaRNA.energy(string(seq), ss_without_P1)) for seq = shape_data_rep0.aligned_sequences];
-
-# ╔═╡ d7ed834c-bcfe-4e19-b2ee-231aa749ba4c
-Vienna_energies_P2 = [ismissing(seq) ? missing : ustrip(ViennaRNA.energy(string(seq), ss)) - ustrip(ViennaRNA.energy(string(seq), ss_without_P2)) for seq = shape_data_rep0.aligned_sequences];
-
-# ╔═╡ 2ce39262-380f-4aa7-83e0-78ee97b86285
-Vienna_energies_P3 = [ismissing(seq) ? missing : ustrip(ViennaRNA.energy(string(seq), ss)) - ustrip(ViennaRNA.energy(string(seq), ss_without_P3)) for seq = shape_data_rep0.aligned_sequences];
-
-# ╔═╡ 572cda00-c0a7-4ec4-841c-1dc86661319a
-Vienna_energies_P4 = [ismissing(seq) ? missing : ustrip(ViennaRNA.energy(string(seq), ss)) - ustrip(ViennaRNA.energy(string(seq), ss_without_P4)) for seq = shape_data_rep0.aligned_sequences];
-
-# ╔═╡ 5e9fb4e7-1d89-44a4-ba20-84cfcd6fad39
-Vienna_energies_Pk = [ismissing(seq) ? missing : ustrip(ViennaRNA.energy(string(seq), ss_pk_only)) for seq = shape_data_rep0.aligned_sequences];
-
-# ╔═╡ 21bc04d0-1d4e-41ea-a8f1-186737ce9290
-@time Vienna_energies_P1_RBM_samples = [
-    ustrip(ViennaRNA.energy(string(seq), ss)) - ustrip(ViennaRNA.energy(string(seq), ss_without_P1))
-    for seq = SamApp2024.rnaseq(sampled_v)
-];
-
-# ╔═╡ eea6db3c-be7c-4448-b10f-2746091c4525
-Vienna_energies_Pk_RBM_samples = [ustrip(ViennaRNA.energy(string(seq), ss_pk_only)) for seq = SamApp2024.rnaseq(sampled_v)];
-
-# ╔═╡ bc4bac40-5594-4f25-adac-bf34b6f88d5c
-Vienna_energies_Pk_RNAeval = [ismissing(seq) ? NaN : SamApp2024.vienna_pk_binding_energy_rnaeval(seq) for seq = shape_data_rep0.aligned_sequences]
-
-# ╔═╡ d4636388-961d-45cf-87cd-f5899759b21e
-Vienna_energies_Pk_RBM_samples_RNAeval = [SamApp2024.vienna_pk_binding_energy_rnaeval(string(seq)) for seq = SamApp2024.rnaseq(sampled_v)];
-
-# ╔═╡ 0f90284c-d4d5-48db-9249-7a9faff3c71d
-# All merged data, for the reactivity profiles plots
-shape_data_all_merged = SamApp2024.load_shapemapper_data_pierre_demux_20231027_repls_merged();
-
-# ╔═╡ 40dba455-ca28-4e65-979b-a6faf89b3f43
-conds_SAM_all_merged = map(identity, indexin(["SAMAP_1M7_0-1SAM_5Mg_T30C_allrep", "SAMAP_1M7_1SAM_5Mg_T30C_allrep"], shape_data_all_merged.conditions));
-
-# ╔═╡ f6ec21fd-87b1-4758-9c9d-bc723141e452
-conds_Mg_all_merged = map(identity, indexin(["SAMAP_1M7_noSAM_5Mg_T30C_allrep"], shape_data_all_merged.conditions));
-
-# ╔═╡ 292b20e6-d327-4c13-a2f2-3c54fc4e5bef
-conds_SAM_all_merged, conds_Mg_all_merged
+# ╔═╡ 67d9cc7e-c984-4069-91be-e471500ca68d
+[_inconclusive_rep0[only(findall(==(_s), shape_stats_rep0.aptamer_names))] for _s = _selection]
 
 # ╔═╡ Cell order:
 # ╠═d008c260-2165-4217-97a7-d4d47e3372df
@@ -362,31 +285,8 @@ conds_SAM_all_merged, conds_Mg_all_merged
 # ╠═b82f538b-c4a7-4164-a583-8297de242b30
 # ╠═1119960b-b5db-4e64-b24c-93c46e331ea9
 # ╠═4eae5eaa-37d8-43ff-be2a-c2d3ccf9a01d
-# ╠═56511e5c-eb62-47bd-ab14-9dbc8a4cdf20
-# ╠═845e0a9c-8c51-463d-a4ab-cf990d15fdbe
-# ╠═3836e1d6-50c0-4a12-ac3e-567d805e1d21
-# ╠═a636fa9d-4891-4601-bb27-aa36227bf813
-# ╠═97cd8f83-9411-429d-90d0-400f302931dc
-# ╠═b893669e-4359-4489-8137-9f4c35411a95
-# ╠═e4a8f81c-f63b-4c61-ae3d-0b7b134adc32
-# ╠═8efc7ac0-d5d9-4db4-bb04-396d733cb8b5
-# ╠═1b01c53e-ab7a-4dc1-a886-f98b9da3985e
-# ╠═3e60f6e0-c132-4521-b6e3-1bbf69340040
-# ╠═6c5d119d-c59f-4693-a98d-7d6afb3d36e9
-# ╠═a17204d5-c14a-4f12-af68-d6fc753e5fd3
-# ╠═7c466c76-0d37-4a56-9192-4fd23f79d36b
-# ╠═c258469b-f96a-414a-b15f-cfb358a0b818
-# ╠═b1931f9a-2cd1-4093-834a-71e43364ace0
-# ╠═c4a50ef4-f22a-4246-8489-d4b86db9af90
-# ╠═d7ed834c-bcfe-4e19-b2ee-231aa749ba4c
-# ╠═2ce39262-380f-4aa7-83e0-78ee97b86285
-# ╠═572cda00-c0a7-4ec4-841c-1dc86661319a
-# ╠═5e9fb4e7-1d89-44a4-ba20-84cfcd6fad39
-# ╠═21bc04d0-1d4e-41ea-a8f1-186737ce9290
-# ╠═eea6db3c-be7c-4448-b10f-2746091c4525
-# ╠═bc4bac40-5594-4f25-adac-bf34b6f88d5c
-# ╠═d4636388-961d-45cf-87cd-f5899759b21e
-# ╠═0f90284c-d4d5-48db-9249-7a9faff3c71d
-# ╠═40dba455-ca28-4e65-979b-a6faf89b3f43
-# ╠═f6ec21fd-87b1-4758-9c9d-bc723141e452
-# ╠═292b20e6-d327-4c13-a2f2-3c54fc4e5bef
+# ╠═f949a0c1-064d-4f61-9b3b-92a93a65f289
+# ╠═27fec5a4-13c6-461f-9f90-ec136fb25c3b
+# ╠═47634614-5886-4de6-8608-da57354ce289
+# ╠═48d6dda0-9885-4653-85eb-ce42e6a1da4f
+# ╠═67d9cc7e-c984-4069-91be-e471500ca68d

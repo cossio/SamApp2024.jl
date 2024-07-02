@@ -37,6 +37,11 @@ using Statistics: cor
 # ╔═╡ d806c591-00b9-49ba-a755-e3923ae41670
 using Statistics: mean
 
+# ╔═╡ ca2287c5-2509-4870-a335-605c7ec1022d
+md"""
+# imports
+"""
+
 # ╔═╡ 60221493-44cb-41ff-b871-3352d42b0c21
 import CairoMakie
 
@@ -60,6 +65,11 @@ import Rfam
 
 # ╔═╡ ac311ee6-062d-4e88-9c58-8852126c0924
 import SamApp2024
+
+# ╔═╡ 85110743-90c3-40a1-ab08-abc481480223
+md"""
+# load data
+"""
 
 # ╔═╡ b214a89f-7a82-46ee-8b04-2a55cc257bc9
 shape_data = SamApp2024.load_shapemapper_data_500v2_20240315();
@@ -241,6 +251,11 @@ struct_bands = [
     (; x0=76.5, xf=80.5, color="red", alpha=0.1), # Pk
 ];
 
+# ╔═╡ 57fea3b4-eb6c-4064-87b5-314d83b1e117
+md"""
+# plots
+"""
+
 # ╔═╡ 36eb9427-db56-4265-9621-0a91efe99a93
 let fig = Makie.Figure()
 	ax = Makie.Axis(fig[1,1][1,1], xlabel="PC1", ylabel="PC2", width=300, height=300, xgridvisible=false, ygridvisible=false, title="Probed sequences")
@@ -361,6 +376,7 @@ let fig = Makie.Figure()
 end
 
 # ╔═╡ Cell order:
+# ╠═ca2287c5-2509-4870-a335-605c7ec1022d
 # ╠═b3c73892-1482-11ef-1248-f70b8e38afbd
 # ╠═60221493-44cb-41ff-b871-3352d42b0c21
 # ╠═415f361f-8ae0-40d7-93d6-2f0f1ef2ee4a
@@ -380,6 +396,7 @@ end
 # ╠═e162b72f-d324-4725-abc4-c8ab73770cf1
 # ╠═e908abe1-dd9e-4f5d-bb81-941d6edd08d9
 # ╠═d806c591-00b9-49ba-a755-e3923ae41670
+# ╠═85110743-90c3-40a1-ab08-abc481480223
 # ╠═b214a89f-7a82-46ee-8b04-2a55cc257bc9
 # ╠═07bdfaa2-587f-49b3-a50d-e92618399eb1
 # ╠═41636ccb-731a-453e-b4cc-f5643de8a63d
@@ -428,4 +445,5 @@ end
 # ╠═b588e294-6449-45c7-afbc-6535f1dfa6eb
 # ╠═e6028e8e-e58e-475e-994f-60bdecf164eb
 # ╠═91597c20-dace-4a3b-854a-8682173d9476
+# ╠═57fea3b4-eb6c-4064-87b5-314d83b1e117
 # ╠═36eb9427-db56-4265-9621-0a91efe99a93
