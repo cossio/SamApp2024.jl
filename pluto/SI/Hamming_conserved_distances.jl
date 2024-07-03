@@ -19,6 +19,9 @@ using RestrictedBoltzmannMachines: free_energy
 # ╔═╡ 0e9405c3-452c-4278-8b31-8aa89af09d06
 using Statistics: mean
 
+# ╔═╡ 8d4bc108-2cb6-416c-9a9d-e5cdf2120206
+using LogExpFunctions: xlogx
+
 # ╔═╡ b260395b-0f33-4289-83d8-8fdfa851c78c
 md"""
 # Imports
@@ -35,6 +38,14 @@ import SamApp2024
 
 # ╔═╡ 8798da86-73ba-4474-81dd-10296384e48e
 @show Rfam.get_rfam_directory() Rfam.get_rfam_version();
+
+# ╔═╡ 48a3772d-1f32-490c-9978-3099beb188dc
+md"""
+# Functions
+"""
+
+# ╔═╡ 9853b581-ca77-4b4d-ac8b-6ca3a960d244
+xlog2x(x) = xlogx(x) / log(oftype(x,2))
 
 # ╔═╡ 3cc2bb41-3213-42d4-995e-736eeaf01534
 md"""
@@ -166,6 +177,9 @@ _responds_sam_yes_500 = (x_mg_500 .< -_thresh) .& (x_sam_500 .> +_thresh);
 # ╔═╡ 7ce05caa-e694-4a61-8085-7ffc3a732667
 _responds_sam_nop_500 = (x_mg_500 .> +_thresh) .| (x_sam_500 .< -_thresh);
 
+# ╔═╡ 1f090e07-cd4e-4ded-8da9-0d3be10451c2
+_inconclusive_500 = ((!).(_responds_sam_yes_500)) .& ((!).(_responds_sam_nop_500));
+
 # ╔═╡ 8a60ae44-7aad-4265-93c1-1caba00afd13
 rbm_seqs_500 = findall(shape_data_500.aptamer_origin .== "rbm");
 
@@ -187,14 +201,22 @@ aptamer_natural_distances_rep0 = [ismissing(seq) ? missing : minimum(SamApp2024.
 p_site_hits = reshape(mean(SamApp2024.onehot(RF00162_hits); dims=3), 5, 108)
 
 # ╔═╡ 5abad490-b3d9-4fb2-a87c-89b160c32b0b
-poccupancy = p_site_hits / sum(p_site_hits; dims=1)
+poccupancy = p_site_hits ./ sum(p_site_hits; dims=1)
 
 # ╔═╡ 01af5f88-a0ed-4ee5-8c8a-b744463f4313
-
-conservation = vec((log2(5) .+ sum(SamApp2024.xlog2x.(poccupancy); dims=1)));
+conservation = vec((log2(5) .+ sum(xlog2x.(poccupancy); dims=1)));
 
 # ╔═╡ b17a6262-e87e-4344-aa41-35cf78770d86
-conserved_sites_500 = conservation_500 .> 0.5;
+conserved_sites = conservation .> 0.5
+
+# ╔═╡ fbac32fe-ecc7-443b-8f2a-6e0935531cba
+sum(conserved_sites)
+
+# ╔═╡ 09d81eb5-4759-486c-8e0a-71f7f56fb7cb
+aptamer_natural_distances_500_conserved = SamApp2024.hamming(SamApp2024.onehot(shape_data_500.aligned_sequences)[:, conserved_sites, :], SamApp2024.onehot(RF00162_hits)[:, conserved_sites, :]);
+
+# ╔═╡ f1700a78-538c-41d1-bb60-d644e0b27cec
+aptamer_natural_distances_rep0_conserved = [ismissing(seq) ? missing : minimum(SamApp2024.hamming(SamApp2024.onehot(LongRNA{4}(seq))[:, conserved_sites, :], SamApp2024.onehot(RF00162_hits)[:, conserved_sites, :])) for seq = shape_data_045.aligned_sequences];
 
 # ╔═╡ b9689ab6-a819-4f22-b8bc-1add6e7366c7
 md"""
@@ -205,29 +227,31 @@ md"""
 let fig = Makie.Figure()
 	ax = Makie.Axis(fig[1,1], width=300, height=300, xlabel="Divergence from closest natural", ylabel="RBM score", title="Total distance", xticks=0:0.1:0.6, yticks=200:25:350, xgridvisible=false, ygridvisible=false)
 	
-	#Makie.scatter!(ax, vec(minimum(aptamer_natural_distances_500; dims=2)) / 108, -aptamer_rbm_energies_500; markersize=15, color=(:teal, 0.2), marker='●', label="All probed")
+	Makie.scatter!(ax, vec(minimum(aptamer_natural_distances_500[rbm_seqs_500 ∩ findall(_inconclusive_500), :]; dims=2)) / 108, -aptamer_rbm_energies_500[rbm_seqs_500 ∩ findall(_inconclusive_500)]; markersize=15, color=(:gray, 0.5), label="RBM (inconcl.)")
 	Makie.scatter!(ax, vec(minimum(aptamer_natural_distances_500[rbm_seqs_500 ∩ findall(_responds_sam_yes_500), :]; dims=2)) / 108, -aptamer_rbm_energies_500[rbm_seqs_500 ∩ findall(_responds_sam_yes_500)]; markersize=10, color=:blue, marker='●', label="RBM (✓)")
 	Makie.scatter!(ax, vec(minimum(aptamer_natural_distances_500[rbm_seqs_500 ∩ findall(_responds_sam_nop_500), :]; dims=2)) / 108, -aptamer_rbm_energies_500[rbm_seqs_500 ∩ findall(_responds_sam_nop_500)]; markersize=10, color=:blue, marker='O', label="RBM (❌)")
 
+	Makie.scatter!(ax, aptamer_natural_distances_rep0[rbm_seqs_rep0 ∩ findall(_inconclusive_rep0)] / 108, -aptamer_rbm_energies_rep0[rbm_seqs_rep0 ∩ findall(_inconclusive_rep0)]; markersize=15, color=(:gray, 0.5))
 	Makie.scatter!(ax, aptamer_natural_distances_rep0[rbm_seqs_rep0 ∩ findall(_responds_sam_yes_rep0)] / 108, -aptamer_rbm_energies_rep0[rbm_seqs_rep0 ∩ findall(_responds_sam_yes_rep0)]; markersize=10, color=:blue, marker='●')
 	Makie.scatter!(ax, aptamer_natural_distances_rep0[rbm_seqs_rep0 ∩ findall(_responds_sam_nop_rep0)] / 108, -aptamer_rbm_energies_rep0[rbm_seqs_rep0 ∩ findall(_responds_sam_nop_rep0)]; markersize=10, color=:blue, marker='O')
 
 	Makie.ylims!(ax, 240, 360)
 	Makie.axislegend(ax, position=(-0.02, -0.01), framevisible=false, nbanks=1, colgap=1, rowgap=0.1, patchlabelgap=0)
 
-	ax = Makie.Axis(fig[1,2], width=300, height=300, xlabel="Divergence from closest natural", ylabel="RBM score", title="Conserved distance", xticks=0:0.1:0.6, yticks=200:25:350, xgridvisible=false, ygridvisible=false)
+	ax = Makie.Axis(fig[1,2], width=300, height=300, xlabel="Divergence from closest natural", ylabel="RBM score", title="Distance along conserved sites", xticks=0:0.1:0.6, yticks=200:25:350, xgridvisible=false, ygridvisible=false)
 	
-	Makie.scatter!(ax, vec(minimum(aptamer_natural_distances_500[rbm_seqs_500 ∩ findall(_responds_sam_yes_500), :]; dims=2)) / 108, -aptamer_rbm_energies_500[rbm_seqs_500 ∩ findall(_responds_sam_yes_500)]; markersize=10, color=:blue, marker='●', label="RBM (✓)")
-	Makie.scatter!(ax, vec(minimum(aptamer_natural_distances_500[rbm_seqs_500 ∩ findall(_responds_sam_nop_500), :]; dims=2)) / 108, -aptamer_rbm_energies_500[rbm_seqs_500 ∩ findall(_responds_sam_nop_500)]; markersize=10, color=:blue, marker='O', label="RBM (❌)")
+	Makie.scatter!(ax, vec(minimum(aptamer_natural_distances_500_conserved[rbm_seqs_500 ∩ findall(_inconclusive_500), :]; dims=2)) / 108, -aptamer_rbm_energies_500[rbm_seqs_500 ∩ findall(_inconclusive_500)]; markersize=15, color=(:gray, 0.5))
+	Makie.scatter!(ax, vec(minimum(aptamer_natural_distances_500_conserved[rbm_seqs_500 ∩ findall(_responds_sam_yes_500), :]; dims=2)) / 108, -aptamer_rbm_energies_500[rbm_seqs_500 ∩ findall(_responds_sam_yes_500)]; markersize=10, color=:blue, marker='●')
+	Makie.scatter!(ax, vec(minimum(aptamer_natural_distances_500_conserved[rbm_seqs_500 ∩ findall(_responds_sam_nop_500), :]; dims=2)) / 108, -aptamer_rbm_energies_500[rbm_seqs_500 ∩ findall(_responds_sam_nop_500)]; markersize=10, color=:blue, marker='O')
 
-	Makie.scatter!(ax, aptamer_natural_distances_rep0[rbm_seqs_rep0 ∩ findall(_responds_sam_yes_rep0)] / 108, -aptamer_rbm_energies_rep0[rbm_seqs_rep0 ∩ findall(_responds_sam_yes_rep0)]; markersize=10, color=:blue, marker='●')
-	Makie.scatter!(ax, aptamer_natural_distances_rep0[rbm_seqs_rep0 ∩ findall(_responds_sam_nop_rep0)] / 108, -aptamer_rbm_energies_rep0[rbm_seqs_rep0 ∩ findall(_responds_sam_nop_rep0)]; markersize=10, color=:blue, marker='O')
+	Makie.scatter!(ax, aptamer_natural_distances_rep0_conserved[rbm_seqs_rep0 ∩ findall(_inconclusive_500)] / 108, -aptamer_rbm_energies_rep0[rbm_seqs_rep0 ∩ findall(_inconclusive_500)]; markersize=15, color=(:gray, 0.5))
+	Makie.scatter!(ax, aptamer_natural_distances_rep0_conserved[rbm_seqs_rep0 ∩ findall(_responds_sam_yes_rep0)] / 108, -aptamer_rbm_energies_rep0[rbm_seqs_rep0 ∩ findall(_responds_sam_yes_rep0)]; markersize=10, color=:blue, marker='●')
+	Makie.scatter!(ax, aptamer_natural_distances_rep0_conserved[rbm_seqs_rep0 ∩ findall(_responds_sam_nop_rep0)] / 108, -aptamer_rbm_energies_rep0[rbm_seqs_rep0 ∩ findall(_responds_sam_nop_rep0)]; markersize=10, color=:blue, marker='O')
 
 	Makie.ylims!(ax, 240, 360)
-	Makie.axislegend(ax, position=(-0.02, -0.01), framevisible=false, nbanks=1, colgap=1, rowgap=0.1, patchlabelgap=0)
 
 	Makie.resize_to_layout!(fig)
-	#Makie.save("Figures/500 aptamers.pdf", fig)
+	Makie.save("/DATA/cossio/SAM/2024/SamApp2024.jl/pluto/SI/Figures/Hamming distances conserved.pdf", fig)
 	fig
 end
 
@@ -241,7 +265,10 @@ end
 # ╠═e9a45fb3-7b6f-4957-8f8b-240c964e3fb6
 # ╠═072312ba-58f2-4bea-898c-5164c976ea16
 # ╠═0e9405c3-452c-4278-8b31-8aa89af09d06
+# ╠═8d4bc108-2cb6-416c-9a9d-e5cdf2120206
 # ╠═8798da86-73ba-4474-81dd-10296384e48e
+# ╠═48a3772d-1f32-490c-9978-3099beb188dc
+# ╠═9853b581-ca77-4b4d-ac8b-6ca3a960d244
 # ╠═3cc2bb41-3213-42d4-995e-736eeaf01534
 # ╠═26683581-756c-47c3-98bf-91a5035875d0
 # ╠═4d577148-6793-493c-be1e-50d447224f47
@@ -278,6 +305,7 @@ end
 # ╠═88a27614-0463-44ee-8508-76b65e0936b9
 # ╠═60ae1097-6576-40d6-a813-a2ff4f7975ec
 # ╠═7ce05caa-e694-4a61-8085-7ffc3a732667
+# ╠═1f090e07-cd4e-4ded-8da9-0d3be10451c2
 # ╠═8a60ae44-7aad-4265-93c1-1caba00afd13
 # ╠═7dcb4fff-c8ab-4f3a-b36c-19b9db528142
 # ╠═8ec5db2f-da12-48f0-8e1e-7a8c97901742
@@ -287,5 +315,8 @@ end
 # ╠═5abad490-b3d9-4fb2-a87c-89b160c32b0b
 # ╠═01af5f88-a0ed-4ee5-8c8a-b744463f4313
 # ╠═b17a6262-e87e-4344-aa41-35cf78770d86
+# ╠═fbac32fe-ecc7-443b-8f2a-6e0935531cba
+# ╠═09d81eb5-4759-486c-8e0a-71f7f56fb7cb
+# ╠═f1700a78-538c-41d1-bb60-d644e0b27cec
 # ╠═b9689ab6-a819-4f22-b8bc-1add6e7366c7
 # ╠═7aa22d92-c726-401f-ad37-e4efd683df6e
