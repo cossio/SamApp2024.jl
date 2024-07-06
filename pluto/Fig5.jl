@@ -313,7 +313,8 @@ end
 md"""
 # Significance of correlation difference by bootstrapping
 
-Following https://stats.stackexchange.com/questions/278751/how-do-i-determine-whether-two-correlations-are-significantly-different.
+We resample the reactivities to estimate the variability of the correlation coefficients and the statistical significance of their difference.
+Following https://stats.stackexchange.com/a/278797. 
 """
 
 # ╔═╡ 1eced2e8-6c9c-4482-8c5d-6f0212ca1bde
