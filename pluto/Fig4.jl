@@ -208,8 +208,6 @@ RF00162_hits_cor = cor(reshape(RF00162_hits_var_sites_only, :, size(RF00162_hits
 # ╔═╡ 9f9e4969-bfbb-4f2e-971b-1265bf461a16
 RF00162_hits_eig = eigen(RF00162_hits_cor);
 
-
-
 # ╔═╡ 92fec252-d3a6-429e-ba3d-01139abc7bc7
 # remap the variable sites eigenvectors back to the original consensus sequence numbering
 begin
