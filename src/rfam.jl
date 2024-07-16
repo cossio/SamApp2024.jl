@@ -99,14 +99,9 @@ function rfam_RF00162_hits()
     fasta = Rfam.fasta_file("RF00162")
     cm = Infernal.cmfetch(Rfam.cm(), "RF00162").out
 
-    # trimmed (no inserts) aligned fasta
-    RF00162_hits_afa = Infernal.cmalign(cm, fasta; matchonly=true, outformat="AFA")
-
-    # these are already aligned and without inserts
-    RF00162_hits_sequences = FASTX.sequence.(FASTX.FASTA.Reader(open(RF00162_hits_afa.out)))
-    @assert only(unique(length.(RF00162_hits_sequences))) == 108
-
-    return LongRNA{4}.(RF00162_hits_sequences)
+    sequences = align_fasta_to_cm(fasta, cm)
+    @assert only(unique(map(length, sequences))) == 108
+    return sequences
 end
 
 function rfam_RF00162_seed()
