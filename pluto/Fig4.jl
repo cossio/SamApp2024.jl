@@ -61,14 +61,8 @@ import StatsBase, KernelDensity
 # ╔═╡ aa8a002e-693a-402b-aaf1-576bf59e3a4e
 md"# Plot"
 
-# ╔═╡ bcd9840c-c209-470a-bf4f-3ae5c38c38f4
-Rfam.fasta_file("RF00162")
-
-# ╔═╡ c2c6abc9-5cc7-445a-a899-671b45f94794
-Infernal.cmfetch(Rfam.cm(), "RF00162").out |> readlines
-
-# ╔═╡ 23712f17-3947-4ed3-85bd-00dceb854167
-Rfam_cm = Infernal.cmfetch(Rfam.cm(), "RF00162");
+# ╔═╡ 3a00d0fd-17e1-4518-8fca-ac1ccd0f7d28
+Rfam_cm = Infernal.cmfetch(Rfam.cm(), "RF00162")
 
 # ╔═╡ 660fa41b-c6c2-4b41-a698-82530c8dc4ef
 RF00162_seed_stk = Infernal.esl_afetch(Rfam.seed(), "RF00162")
@@ -375,9 +369,7 @@ end
 # ╠═bf22e1b2-f8bd-4990-938d-4db503660c3d
 # ╠═ac2f96ec-b31f-4f63-8fd3-4390d687755b
 # ╠═aa8a002e-693a-402b-aaf1-576bf59e3a4e
-# ╠═bcd9840c-c209-470a-bf4f-3ae5c38c38f4
-# ╠═c2c6abc9-5cc7-445a-a899-671b45f94794
-# ╠═23712f17-3947-4ed3-85bd-00dceb854167
+# ╠═3a00d0fd-17e1-4518-8fca-ac1ccd0f7d28
 # ╠═660fa41b-c6c2-4b41-a698-82530c8dc4ef
 # ╠═8399bdac-bd99-4a20-be2c-2055db32a5a6
 # ╠═fd9539ff-e725-4b18-94fd-e6a75fc2ec73
