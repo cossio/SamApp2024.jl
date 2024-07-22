@@ -185,7 +185,7 @@ md"""
 # ╔═╡ 5ef6ad69-e574-4643-912b-db489114995e
 let fig = Makie.Figure()
 	ax = Makie.Axis(
-		fig[1,1], width=300, height=300, xlabel="SHAPE reactivity", ylabel="frequency", xgridvisible=false, ygridvisible=false, xticks=-2:2:6, yticks=0:2, xtrimspine=true, ytrimspine=true
+		fig[1,1], width=300, height=300, xlabel="SHAPE reactivity", ylabel="density", xgridvisible=false, ygridvisible=false, xticks=-2:2:6, yticks=0:2, xtrimspine=true, ytrimspine=true
 	)
 	Makie.hist!(ax, filter(x -> -2 < x < 6, vec(shape_data_rep0.shape_reactivities[bps, nat_seqs, conds_sam_rep0])), normalization=:pdf, bins=-2:0.05:6, color=(:teal, 0.5), gap=-0.01)
 	Makie.hist!(ax, filter(x -> -2 < x < 6, vec(shape_data_rep0.shape_reactivities[nps, nat_seqs, conds_sam_rep0])), normalization=:pdf, bins=-2:0.05:6, color=(:orange, 0.5), gap=-0.01)
@@ -202,7 +202,7 @@ let fig = Makie.Figure()
 	Makie.hidexdecorations!(_dummy_ax)
 	Makie.hideydecorations!(_dummy_ax)
 	
-	ax = Makie.Axis(fig[1,3], width=300, height=300, xlabel="SHAPE reactivity", ylabel="frequency", xgridvisible=false, ygridvisible=false, xticks=-2:2:6, yticks=0:2, xtrimspine=true, ytrimspine=true)
+	ax = Makie.Axis(fig[1,3], width=300, height=300, xlabel="SHAPE reactivity", ylabel="density", xgridvisible=false, ygridvisible=false, xticks=-2:2:6, yticks=0:2, xtrimspine=true, ytrimspine=true)
 	Makie.hist!(ax, filter(x -> -2 < x < 6, vec(shape_data_rep0.shape_reactivities[bps, nat_seqs, conds_sam_rep0])), label="b.p.", normalization=:pdf, bins=-2:0.05:6, color=(:teal, 0.5), gap=-0.01)
 	Makie.hist!(ax, filter(x -> -2 < x < 6, vec(shape_data_rep0.shape_reactivities[nps, nat_seqs, conds_sam_rep0])), label="n.p.", normalization=:pdf, bins=-2:0.05:6, color=(:orange, 0.5), gap=-0.01)
 	Makie.stephist!(ax, filter(x -> -2 < x < 6, vec(shape_data_rep0.shape_reactivities[pks, nat_seqs, conds_mg_rep0])), label="p.k.", normalization=:pdf, bins=-2:0.1:6, linewidth=3, color=:black)
@@ -258,6 +258,7 @@ let fig = Makie.Figure()
 	
 	Makie.resize_to_layout!(fig)
 	#Makie.save("/workspaces/SamApp.jl/notebooks/2024-03-14 New paper figures/Figures/SHAPE reactivities.pdf", fig)
+	Makie.save("Figures/Fig5.pdf", fig)
 	fig
 end
 
@@ -336,6 +337,7 @@ let fig = Makie.Figure()
 	Makie.Label(fig[3,2][1,1,Makie.TopLeft()], "D)", font=:bold, padding=(0,0,10,10))
 
 	Makie.resize_to_layout!(fig)
+	Makie.save("/DATA/cossio/SAM/2024/SamApp2024.jl/pluto/SI/Figures/Bootstrap_Reactivity_Profiles.pdf", fig)
 	fig
 end
 
