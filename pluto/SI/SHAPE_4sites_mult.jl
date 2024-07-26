@@ -229,47 +229,67 @@ md"""
 
 # ╔═╡ 3fc412a9-0395-4375-8a15-d1add4333a8d
 let fig = Makie.Figure()
-	for (col, i) = enumerate((1,8))
+	for (col, num_sites) = enumerate([1, 8])
 
-		data_bp = dropdims(mean(rand(shape_log_odds_bp_sam, i, 10000); dims=1); dims=1)
-		data_np = dropdims(mean(rand(shape_log_odds_np_sam, i, 10000); dims=1); dims=1)
+		data_bp = dropdims(sum(rand(shape_log_odds_bp_sam, num_sites, 10000); dims=1); dims=1)
+		data_np = dropdims(sum(rand(shape_log_odds_np_sam, num_sites, 10000); dims=1); dims=1)
+
+		bins = sqrt(num_sites) * (-20:0.05:10)
 		
-		ax = Makie.Axis(fig[1, col], width=250, height=250, xlabel="Total protection score", ylabel="Frequency", xgridvisible=false, ygridvisible=false, title="$i sites")
-		Makie.hist!(ax, data_bp, normalization=:pdf, bins=-5:0.01:10, color=(:blue, 0.3))
-		Makie.hist!(ax, data_np, normalization=:pdf, bins=-5:0.01:10, color=(:red, 0.3))
-		Makie.stephist!(ax, data_bp, normalization=:pdf, bins=-5:0.05:10, color=:blue, linewidth=2, label="paired")
-		Makie.stephist!(ax, data_np, normalization=:pdf, bins=-5:0.05:10, color=:red, linewidth=2, label="unpaired")
+		ax = Makie.Axis(
+			fig[1, col], width=250, height=250, 
+			xlabel = num_sites == 1 ? "Protection score" : "Total protection score",
+			ylabel="Frequency", xgridvisible=false, ygridvisible=false,
+			title= num_sites == 1 ? "1 site" : "$num_sites sites"
+		)
+		Makie.hist!(ax, data_bp; normalization=:pdf, bins, color=(:blue, 0.3))
+		Makie.hist!(ax, data_np; normalization=:pdf, bins, color=(:red, 0.3))
+		Makie.stephist!(ax, data_bp; normalization=:pdf, bins, color=:blue, linewidth=2, label="paired")
+		Makie.stephist!(ax, data_np; normalization=:pdf, bins, color=:red, linewidth=2, label="unpaired")
 		# Makie.stephist!(ax,
 		# 	[dropdims(sum(rand(shape_log_odds_bp_sam, 8, 10000); dims=1); dims=1); dropdims(sum(rand(shape_log_odds_np_sam, 8, 10000); dims=1); dims=1)],
 		# 	normalization=:pdf, bins=-11:0.05:5, color=:black, gap=-0.01
 		# )
-		if i == 1
+		if col == 1
 			Makie.xlims!(ax, -3, 0.8)
+			Makie.ylims!(ax, 0, 2.7)
+			Makie.axislegend(ax; position=:lt, framevisible=false)
 		else
-			Makie.xlims!(ax, -1.7, 0.7)
+			Makie.xlims!(ax, -10, 5)
+			Makie.ylims!(ax, 0, 0.35)
 		end
-		Makie.ylims!(ax, 0, 2.7)
-		(col == 1) && Makie.axislegend(ax; position=:lt, framevisible=false)
 		
 		####
 		# Second row
 		####
 		
-		data_bp = dropdims(mean(rand(bps_reactivities_rep0_flat, i, 10000); dims=1); dims=1)
-		data_np = dropdims(mean(rand(nps_reactivities_rep0_flat, i, 10000); dims=1); dims=1)
-		
-		ax = Makie.Axis(fig[2, col], width=250, height=250, xlabel="Average reactivity", ylabel="Frequency", xgridvisible=false, ygridvisible=false, title="$i sites")
-		Makie.hist!(ax, data_bp, normalization=:pdf, bins=-5:0.01:10, color=(:blue, 0.3))
-		Makie.hist!(ax, data_np, normalization=:pdf, bins=-5:0.01:10, color=(:red, 0.3))
-		Makie.stephist!(ax, data_bp, normalization=:pdf, bins=-5:0.05:10, color=:blue, linewidth=2, label="paired")
-		Makie.stephist!(ax, data_np, normalization=:pdf, bins=-5:0.05:10, color=:red, linewidth=2, label="unpaired")
+		data_bp = dropdims(sum(rand(bps_reactivities_rep0_flat, num_sites, 10000); dims=1); dims=1)
+		data_np = dropdims(sum(rand(nps_reactivities_rep0_flat, num_sites, 10000); dims=1); dims=1)
+
+		bins = sqrt(num_sites) * (-5:0.05:20)
+
+		ax = Makie.Axis(
+			fig[2, col], width=250, height=250, 
+			xlabel = num_sites == 1 ? "Reactivity" : "Total Reactivity",
+			ylabel="Frequency", xgridvisible=false, ygridvisible=false, 
+			title= num_sites == 1 ? "1 site" : "$num_sites sites"
+		)
+
+		Makie.hist!(ax, data_bp; normalization=:pdf, bins, color=(:blue, 0.3))
+		Makie.hist!(ax, data_np; normalization=:pdf, bins, color=(:red, 0.3))
+		Makie.stephist!(ax, data_bp; normalization=:pdf, bins, color=:blue, linewidth=2, label="paired")
+		Makie.stephist!(ax, data_np; normalization=:pdf, bins, color=:red, linewidth=2, label="unpaired")
 		# Makie.stephist!(ax,
 		# 	[dropdims(sum(rand(shape_log_odds_bp_sam, 8, 10000); dims=1); dims=1); dropdims(sum(rand(shape_log_odds_np_sam, 8, 10000); dims=1); dims=1)],
 		# 	normalization=:pdf, bins=-11:0.05:5, color=:black, gap=-0.01
 		# )
-		Makie.xlims!(ax, -0.5, 3)
-		Makie.ylims!(ax, 0, 3.2)
-		(col == 1) && Makie.axislegend(ax; position=:rt, framevisible=false)
+		if num_sites == 1
+			Makie.xlims!(ax, -1, 3)
+			Makie.ylims!(ax, 0, 2.2)
+		else
+			Makie.xlims!(ax, -2, 15)
+			Makie.ylims!(ax, 0, 0.45)
+		end
 	end
 
 	Makie.Label(fig[1,1][1, 1, Makie.TopLeft()], "A)", fontsize = 18, font = :bold, padding = (0, 5, 5, 0), halign = :right)
@@ -279,6 +299,82 @@ let fig = Makie.Figure()
 
 	Makie.resize_to_layout!(fig)
 	Makie.save("/DATA/cossio/SAM/2024/SamApp2024.jl/pluto/SI/Figures/SI_prot_score_additivity_separation.pdf", fig)
+	fig
+end
+
+# ╔═╡ 5649d967-70f1-4883-9205-1b5421e9c484
+let fig = Makie.Figure()
+	_sz = 150
+	for (col, num_sites) = enumerate([1, 8])
+
+		data_bp = dropdims(sum(rand(shape_log_odds_bp_sam, num_sites, 10000); dims=1); dims=1)
+		data_np = dropdims(sum(rand(shape_log_odds_np_sam, num_sites, 10000); dims=1); dims=1)
+
+		bins = sqrt(num_sites) * (-20:0.05:10)
+		
+		ax = Makie.Axis(
+			fig[1, col], width=_sz, height=_sz, 
+			xlabel = num_sites == 1 ? "Protection score" : "Total protection score",
+			ylabel="Frequency", xgridvisible=false, ygridvisible=false,
+			title= num_sites == 1 ? "1 site" : "$num_sites sites"
+		)
+		Makie.hist!(ax, data_bp; normalization=:pdf, bins, color=(:blue, 0.3))
+		Makie.hist!(ax, data_np; normalization=:pdf, bins, color=(:red, 0.3))
+		Makie.stephist!(ax, data_bp; normalization=:pdf, bins, color=:blue, linewidth=2, label="paired")
+		Makie.stephist!(ax, data_np; normalization=:pdf, bins, color=:red, linewidth=2, label="unpaired")
+		# Makie.stephist!(ax,
+		# 	[dropdims(sum(rand(shape_log_odds_bp_sam, 8, 10000); dims=1); dims=1); dropdims(sum(rand(shape_log_odds_np_sam, 8, 10000); dims=1); dims=1)],
+		# 	normalization=:pdf, bins=-11:0.05:5, color=:black, gap=-0.01
+		# )
+		if col == 1
+			Makie.xlims!(ax, -3, 0.8)
+			Makie.ylims!(ax, 0, 2.7)
+			Makie.axislegend(ax; position=:lt, framevisible=false)
+		else
+			Makie.xlims!(ax, -10, 5)
+			Makie.ylims!(ax, 0, 0.35)
+		end
+		
+		####
+		# Second row
+		####
+		
+		data_bp = dropdims(sum(rand(bps_reactivities_rep0_flat, num_sites, 10000); dims=1); dims=1)
+		data_np = dropdims(sum(rand(nps_reactivities_rep0_flat, num_sites, 10000); dims=1); dims=1)
+
+		bins = sqrt(num_sites) * (-5:0.05:20)
+
+		ax = Makie.Axis(
+			fig[2, col], width=_sz, height=_sz, 
+			xlabel = num_sites == 1 ? "Reactivity" : "Total Reactivity",
+			ylabel="Frequency", xgridvisible=false, ygridvisible=false, 
+			title= num_sites == 1 ? "1 site" : "$num_sites sites"
+		)
+
+		Makie.hist!(ax, data_bp; normalization=:pdf, bins, color=(:blue, 0.3))
+		Makie.hist!(ax, data_np; normalization=:pdf, bins, color=(:red, 0.3))
+		Makie.stephist!(ax, data_bp; normalization=:pdf, bins, color=:blue, linewidth=2, label="paired")
+		Makie.stephist!(ax, data_np; normalization=:pdf, bins, color=:red, linewidth=2, label="unpaired")
+		# Makie.stephist!(ax,
+		# 	[dropdims(sum(rand(shape_log_odds_bp_sam, 8, 10000); dims=1); dims=1); dropdims(sum(rand(shape_log_odds_np_sam, 8, 10000); dims=1); dims=1)],
+		# 	normalization=:pdf, bins=-11:0.05:5, color=:black, gap=-0.01
+		# )
+		if num_sites == 1
+			Makie.xlims!(ax, -1, 3)
+			Makie.ylims!(ax, 0, 2.2)
+		else
+			Makie.xlims!(ax, -2, 15)
+			Makie.ylims!(ax, 0, 0.45)
+		end
+	end
+
+	Makie.Label(fig[1,1][1, 1, Makie.TopLeft()], "A)", fontsize = 18, font = :bold, padding = (0, 5, 5, 0), halign = :right)
+	Makie.Label(fig[1,2][1, 1, Makie.TopLeft()], "B)", fontsize = 18, font = :bold, padding = (0, 5, 5, 0), halign = :right)
+	Makie.Label(fig[2,1][1, 1, Makie.TopLeft()], "C)", fontsize = 18, font = :bold, padding = (0, 5, 5, 0), halign = :right)
+	Makie.Label(fig[2,2][1, 1, Makie.TopLeft()], "D)", fontsize = 18, font = :bold, padding = (0, 5, 5, 0), halign = :right)
+
+	Makie.resize_to_layout!(fig)
+	#Makie.save("/DATA/cossio/SAM/2024/SamApp2024.jl/pluto/SI/Figures/SI_prot_score_additivity_separation_small.pdf", fig)
 	fig
 end
 
@@ -336,3 +432,4 @@ end
 # ╠═95ada45b-9cd3-4a3d-bea5-edb36697f048
 # ╠═57e48547-f1fe-454f-bf9c-7ace090c238e
 # ╠═3fc412a9-0395-4375-8a15-d1add4333a8d
+# ╠═5649d967-70f1-4883-9205-1b5421e9c484

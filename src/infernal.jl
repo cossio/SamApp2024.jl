@@ -9,7 +9,7 @@ function infernal_align_fasta_to_cm(fasta_path::AbstractString, cm_path::Abstrac
     return LongRNA{4}.(sequences)
 end
 
-function infernal_score_sequences(cm_path::AbstractString, sequences::AbstractVector)
+function infernal_score_sequences(cm_path::AbstractString, sequences::AbstractVector; informat=nothing, notrunc=true, glob=true)
     mktemp() do fasta_path, io
         FASTX.FASTA.Writer(io) do writer
             for (i, sequence) = enumerate(sequences)
@@ -17,7 +17,7 @@ function infernal_score_sequences(cm_path::AbstractString, sequences::AbstractVe
                 write(writer, record)
             end
         end
-        result = Infernal.cmalign(cm_path, fasta_path; notrunc=true, glob=true)
+        result = Infernal.cmalign(cm_path, fasta_path; glob, informat, notrunc)
         return Infernal.cmalign_parse_sfile(result.sfile)
     end
 end
