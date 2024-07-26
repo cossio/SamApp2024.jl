@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.42
+# v0.19.45
 
 using Markdown
 using InteractiveUtils
@@ -55,8 +55,14 @@ import RestrictedBoltzmannMachines as RBMs
 # ╔═╡ 8bed6401-4c1a-453d-ac16-ff4c81346936
 import Rfam
 
+# ╔═╡ 3f26156e-edf7-4bf4-ac2d-baf9e9d660fa
+import PlutoUI
+
 # ╔═╡ 98c97d8b-9849-48dc-ae6c-c0924d14e560
 import StatsBase, KernelDensity
+
+# ╔═╡ aa4f2963-ec25-4469-adea-f7f16c69db26
+PlutoUI.TableOfContents()
 
 # ╔═╡ aa8a002e-693a-402b-aaf1-576bf59e3a4e
 md"# Plot"
@@ -349,6 +355,94 @@ let fig = Makie.Figure()
 	fig
 end
 
+# ╔═╡ cb3dbcf4-d56b-44cc-9ac0-3dd5f3a59baa
+md"# CM variants"
+
+# ╔═╡ 369e1792-2853-46f1-a9f8-b6d46752c110
+let fig = Makie.Figure()
+
+	ax = Makie.Axis(fig[1,1][1,1], xlabel="dCM score", ylabel="RBM score", width=400, height=400, xticks=20:40:130, xgridvisible=false, ygridvisible=false)
+	Makie.hlines!(ax, 300, color=:orange, linestyle=:dash, linewidth=2)
+	#Makie.scatter!(ax, RF00162_hits_Refined_cm_scores, -RBMs.free_energy(SamApp.rbm2022(), SamApp.onehot(RF00162_hits_sequences)), label="Natural", color=(:gray, 0.5), markersize=10)
+	Makie.scatter!(
+		ax, RF00162_hits_Refined_cm_scores, -RBMs.free_energy(SamApp2024.rbm2022(), SamApp2024.onehot(RF00162_hits_sequences)), label="MSA", color=(:gray, 0.5), markersize=10
+	)
+	Makie.scatter!(ax, 
+	    #Refined_cm_emitted_sequences_infernal_scores[1:2000],
+	    Refined_cm_emitted_sequences_infernal_scores[1:2000],
+	    -RBMs.free_energy(SamApp2024.rbm2022(), SamApp2024.onehot(Refined_cm_emitted_sequences))[1:2000],
+	    label="dCM", color=:red, markersize=5
+	)
+	Makie.scatter!(ax, 
+	    #RBM_samples_Refined_CM_infernal_scores[1:2000],
+	    RBM_samples_Refined_CM_infernal_scores[1:2000],
+	    -RBMs.free_energy(SamApp2024.rbm2022(), sampled_v)[1:2000],
+	    label="RBM", color=:blue, markersize=5
+	)
+	Makie.xlims!(ax, 20, 130)
+	Makie.ylims!(ax, 220, 365)
+	Makie.axislegend(ax, position=:lt, framevisible=false)
+	
+	_colors = [:purple, :cyan, :lime, :teal, :orange]
+	_c = 0
+	
+	# Natural
+	ax = Makie.Axis(fig[1,1][1,2], xlabel="PC1", ylabel="PC2", width=400, height=400, xgridvisible=false, ygridvisible=false) #title="Natural sequences")
+	Makie.scatter!(ax, __proj_hits[:, end], __proj_hits[:, end - 1], markersize=10, label="MSA", color=(:gray, 0.5))
+	for t = unique(hits_tax_df.taxa_2)
+	    ismissing(t) && continue
+	    hits_tax_cnt[t] > 100 || continue
+	    _c += 1
+	    Makie.scatter!(ax,
+	        __proj_hits[replace(hits_tax_df.taxa_2 .== t, missing => false), end],
+	        __proj_hits[replace(hits_tax_df.taxa_2 .== t, missing => false), end - 1],
+	        markersize=5, label=t, color=_colors[_c])
+	end
+	Makie.axislegend(ax, position=(-0.05, -0.03), framevisible=false)
+	
+	ax = Makie.Axis(fig[2,1][1,1], xlabel="PC1", ylabel="PC2", width=250, height=250, xgridvisible=false, ygridvisible=false, title="RBM generated sequences")
+	Makie.scatter!(ax, __proj_hits[:, end], __proj_hits[:, end - 1], markersize=10, label="MSA", color=color=(:gray, 0.5))
+	Makie.scatter!(ax, __proj_rbm[:, end], __proj_rbm[:, end - 1], markersize=4, label="RBM", color=:blue)
+	Makie.axislegend(ax, position=:lb, framevisible=false)
+	
+	ax = Makie.Axis(fig[2,1][1,2], xlabel="PC1", ylabel="PC2", width=250, height=250, xgridvisible=false, ygridvisible=false, title="CM generated sequences")
+	Makie.scatter!(ax, __proj_hits[:, end], __proj_hits[:, end - 1], markersize=10, label="MSA", color=color=(:gray, 0.5))
+	Makie.scatter!(ax, __proj_refined_cm[:, end], __proj_refined_cm[:, end - 1], markersize=4, label="dCM", color=:red)
+	Makie.axislegend(ax, position=:lb, framevisible=false)
+	
+	ax = Makie.Axis(fig[2,1][1,3], xlabel="PC1", ylabel="PC2", width=250, height=250, xgridvisible=false, ygridvisible=false, title="Probed sequences")
+	Makie.scatter!(ax, __proj_hits[:, end], __proj_hits[:, end - 1], markersize=10, color=(:gray, 0.5), label="MSA")
+	Makie.scatter!(ax, 
+	    __proj_probed[(_probed_origin .== "RF00162_seed70") .| (_probed_origin .== "RF00162_full30"), end],
+	    __proj_probed[(_probed_origin .== "RF00162_seed70") .| (_probed_origin .== "RF00162_full30"), end - 1],
+	    markersize=10, color=:black, label="Natural", marker=:cross
+	)
+	Makie.scatter!(ax, 
+	    __proj_probed[_probed_origin .== "RF00162_syn_inf", end],
+	    __proj_probed[_probed_origin .== "RF00162_syn_inf", end - 1],
+	    markersize=10, color=:red, label="rCM", marker=:cross
+	)
+	Makie.scatter!(ax, 
+	    __proj_probed[_probed_origin .== "RF00162_syn_rbm", end],
+	    __proj_probed[_probed_origin .== "RF00162_syn_rbm", end - 1],
+	    markersize=10, color=:blue, label="RBM", marker=:cross
+	)
+	Makie.axislegend(ax, position=:lb, framevisible=false, patchlabelgap=-3)
+	
+	Makie.Label(fig[1,1][1,1][1,1,Makie.TopLeft()], "A)", font=:bold)
+	Makie.Label(fig[1,1][1,2][1,1,Makie.TopLeft()], "B)", font=:bold)
+	Makie.Label(fig[2,1][1,1][1,1,Makie.TopLeft()], "C)", font=:bold)
+	Makie.Label(fig[2,1][1,2][1,1,Makie.TopLeft()], "D)", font=:bold)
+	Makie.Label(fig[2,1][1,3][1,1,Makie.TopLeft()], "E)", font=:bold)
+	
+	# fig[0,4] = Makie.Label(fig, "Natural sequences", font=:bold)
+	# fig[0,5] = Makie.Label(fig, "Generated sequences", font=:bold)
+	
+	Makie.resize_to_layout!(fig)
+	#Makie.save("/workspaces/SamApp.jl/notebooks/2024-03-14 New paper figures/Figures/PCA.pdf", fig)
+	fig
+end
+
 # ╔═╡ Cell order:
 # ╠═5d5eb95f-6801-47c3-a82e-afab35559c0e
 # ╠═952a79aa-12fa-11ef-2326-d5fe00ff3dfe
@@ -358,6 +452,7 @@ end
 # ╠═4a2a79bc-6fb1-45d3-ad4a-abfc889f2737
 # ╠═5ca1d179-8dda-4e4b-9bab-b1cf4f6bafbe
 # ╠═8bed6401-4c1a-453d-ac16-ff4c81346936
+# ╠═3f26156e-edf7-4bf4-ac2d-baf9e9d660fa
 # ╠═98c97d8b-9849-48dc-ae6c-c0924d14e560
 # ╠═adbed31f-5777-4b6f-acf9-f37a472ef5d8
 # ╠═de469256-6471-4fa9-854b-7b7783295aef
@@ -368,6 +463,7 @@ end
 # ╠═a72c9391-c8f5-4bf5-94bd-3e9bbc326fa2
 # ╠═bf22e1b2-f8bd-4990-938d-4db503660c3d
 # ╠═ac2f96ec-b31f-4f63-8fd3-4390d687755b
+# ╠═aa4f2963-ec25-4469-adea-f7f16c69db26
 # ╠═aa8a002e-693a-402b-aaf1-576bf59e3a4e
 # ╠═3a00d0fd-17e1-4518-8fca-ac1ccd0f7d28
 # ╠═660fa41b-c6c2-4b41-a698-82530c8dc4ef
@@ -404,3 +500,5 @@ end
 # ╠═d89ee7c9-f646-4832-bf32-427a9aa8a640
 # ╠═38c55494-e38a-4358-bc30-ba0f2880eb10
 # ╠═ea3ad48b-b0ac-4054-9548-fa9ed1842a16
+# ╠═cb3dbcf4-d56b-44cc-9ac0-3dd5f3a59baa
+# ╠═369e1792-2853-46f1-a9f8-b6d46752c110

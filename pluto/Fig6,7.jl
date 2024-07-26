@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.42
+# v0.19.45
 
 using Markdown
 using InteractiveUtils
@@ -195,6 +195,9 @@ _inconclusive_rep0 = ((!).(_responds_sam_yes_rep0)) .& ((!).(_responds_sam_nop_r
 
 # ╔═╡ 8f4dbcc1-3f77-43f0-b4bb-bb027bf20569
 _conclusive_rep0 = _responds_sam_yes_rep0 .| _responds_sam_nop_rep0;
+
+# ╔═╡ db615f71-8858-47da-be2f-8196f7070e6d
+sum(_responds_sam_yes_rep0), sum(_responds_sam_nop_rep0), sum(_inconclusive_rep0)
 
 # ╔═╡ 41caae29-9181-4cf8-a814-64868a9b8e90
 aptamer_rbm_energies = [
@@ -492,6 +495,7 @@ end
 # ╠═11b9e4bf-1531-459c-9d36-6d73526a96fb
 # ╠═4825347b-2117-4b48-9f72-3bc24be76d07
 # ╠═8f4dbcc1-3f77-43f0-b4bb-bb027bf20569
+# ╠═db615f71-8858-47da-be2f-8196f7070e6d
 # ╠═41caae29-9181-4cf8-a814-64868a9b8e90
 # ╠═3d0cd846-07a7-4910-a2a2-2ef660355ad5
 # ╠═74fbb354-2657-475e-8d1e-42d39e255396
