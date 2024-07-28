@@ -32,4 +32,4 @@ If you encounter any problems, please [open an issue](https://github.com/cossio/
 
 # Other resources
 
-The code for simulations of other riboswitch families can be found at the following repository: https://github.com/cossio/RiboswitchesSimulations20240620.jl.
+The code for simulations of other riboswitch families (reported in Supplementary Materials of the paper cited above) can be found at the following repository: https://github.com/cossio/RiboswitchesSimulations20240620.jl.
