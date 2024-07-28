@@ -207,80 +207,102 @@ md"""
 # Infernal scores
 """
 
-# ╔═╡ be47ff53-67bc-4065-a675-7260f6bd2805
-# Infernal scores of hits, using Rfam CM model
-_tmp_rfam_fasta = Infernal.esl_reformat("FASTA", RF00162_hits_afa.out; informat="AFA")
-
-# ╔═╡ 624388c1-f99c-4a57-a07b-9914875c300a
-_tmp_rfam_cmalign = Infernal.cmalign(Rfam_cm.out, _tmp_rfam_fasta.out; glob=true, informat="FASTA");
-
-# ╔═╡ 04954f12-aa09-4aea-8c19-889a4a14b2d1
-_tmp_rfam_cmalign_df = Infernal.cmalign_parse_sfile(_tmp_rfam_cmalign.sfile);
-
-# ╔═╡ 6abe643c-555f-43e1-b5ef-298e863b422c
-RF00162_hits_Rfam_cm_scores = _tmp_rfam_cmalign_df.bit_sc;
-
 # ╔═╡ 699d33dc-474b-4d15-b78c-5ab778c30a34
-RF00162_hits_Rfam_cm_scores_2 = SamApp2024.infernal_score_sequences(Rfam_cm.out, [replace(string(seq), '-' => "") for seq = RF00162_hits_sequences]).bit_sc
+# Infernal scores of hits, using Rfam CM model
+RF00162_hits_Rfam_cm_scores = SamApp2024.infernal_score_sequences(Rfam_cm.out, [replace(string(seq), '-' => "") for seq = RF00162_hits_sequences]; informat="FASTA", notrunc=false).bit_sc
 
-# ╔═╡ b430b5b5-8a04-422c-970a-3e7715b8e2a0
-Makie.scatter(RF00162_hits_Rfam_cm_scores, RF00162_hits_Rfam_cm_scores_2)
-
-# ╔═╡ ce1e1bc1-cfbf-426e-9e03-4ef651fb030f
-RF00162_hits_sequences
-
-# ╔═╡ 64f26067-e3c6-4a0b-8fe1-e2b9f090d217
+# ╔═╡ 1c94e498-2a12-4151-b252-8682026d7c22
 # Infernal scores of hits, using Denoised CM model
-_tmp_denoised_fasta = Infernal.esl_reformat("FASTA", RF00162_hits_afa.out; informat="AFA")
+RF00162_hits_Denoised_cm_scores = SamApp2024.infernal_score_sequences(Denoised_cm.cmout, [replace(string(seq), '-' => "") for seq = RF00162_hits_sequences]; informat="FASTA", notrunc=false).bit_sc
 
-# ╔═╡ a0ae0102-383d-4a16-89ff-294fc0e4cd1b
-_tmp_denoised_cmalign = Infernal.cmalign(Denoised_cm.cmout, _tmp_denoised_fasta.out; glob=true, informat="FASTA");
-
-# ╔═╡ 54ed110a-6600-4b28-85ec-ac45f588057d
-_tmp_denoised_cmalign_df = Infernal.cmalign_parse_sfile(_tmp_denoised_cmalign.sfile);
-
-# ╔═╡ 3f1c368a-d7e8-4eb7-aeae-0b3057e47386
-RF00162_hits_Denoised_cm_scores = _tmp_denoised_cmalign_df.bit_sc;
-
-# ╔═╡ 7f5553a2-1c9a-4907-96e1-bfc903b6ee7c
+# ╔═╡ 2584436c-018b-4769-9449-888868227e2b
 # Infernal scores of hits, using Untangled CM model
-# first, must permute MSA columns
-_tmpafa_perm = tempname()
+RF00162_hits_Untangled_cm_scores = SamApp2024.infernal_score_sequences(Untangled_cm_permuted.cmout, [replace(string(seq)[perm], '-' => "") for seq = RF00162_hits_sequences]; informat="FASTA", notrunc=false).bit_sc
 
-# ╔═╡ 0319f490-0d0b-4811-9b27-988b723c9257
-open(_tmpafa_perm, "w") do io
-    for record in FASTX.FASTA.Reader(open(RF00162_hits_afa.out))
-        write(io, ">" * FASTX.description(record) * '\n')
-        write(io, FASTX.sequence(record)[perm] * '\n')
-    end
-end
+# ╔═╡ 66e0d54d-3c6c-4dd0-ac22-1c92d1357874
+Rfam_cm_emitted_sequences_infernal_scores = SamApp2024.infernal_score_sequences(Rfam_cm.out, [replace(string(seq), '-' => "") for seq = Rfam_cm_emitted_sequences]; informat="FASTA", notrunc=false).bit_sc
 
-# ╔═╡ c8ea00fb-c0ba-400d-a7e7-66c12aa02b33
-_tmp_untangled_fasta = Infernal.esl_reformat("FASTA", _tmpafa_perm; informat="AFA")
+# ╔═╡ 077a471a-e69f-4ef9-af6b-61d76ca8f7f2
+Denoised_cm_emitted_sequences_infernal_scores = SamApp2024.infernal_score_sequences(Denoised_cm.cmout, [replace(string(seq), '-' => "") for seq = Denoised_cm_emitted_sequences]; informat="FASTA", notrunc=false).bit_sc
 
-# ╔═╡ d69de357-3d0e-439c-876c-11a6f6e99abf
-_tmp_untangled_cmalign = Infernal.cmalign(Untangled_cm_permuted.cmout, _tmp_untangled_fasta.out; glob=true, informat="FASTA");
+# ╔═╡ 788d547d-fc20-404f-940d-2fc977087ac9
+Untangled_cm_emitted_sequences_infernal_scores = SamApp2024.infernal_score_sequences(Untangled_cm_permuted.cmout, [replace(string(seq), '-' => "") for seq = Untangled_cm_permuted_emitted_sequences]; informat="FASTA", notrunc=false).bit_sc
 
-# ╔═╡ cb81f733-7c28-416a-86e2-95afe6c137af
-_tmp_untangled_cmalign_df = Infernal.cmalign_parse_sfile(_tmp_untangled_cmalign.sfile);
+# ╔═╡ f2ac783c-22ac-460a-a680-5be2455fa35c
+RBM_samples_Rfam_CM_infernal_scores = SamApp2024.infernal_score_sequences(Rfam_cm.out, [replace(string(seq), '-' => "") for seq = SamApp2024.rnaseq(sampled_v)]; informat="FASTA", notrunc=false).bit_sc
 
-# ╔═╡ d3a61998-e3fd-45d7-95f3-658d6eb7c554
-RF00162_hits_Untangled_cm_scores = _tmp_untangled_cmalign_df.bit_sc;
+# ╔═╡ c902284d-814d-42a9-aa51-f715a50a8934
+RBM_samples_Denoised_CM_infernal_scores = SamApp2024.infernal_score_sequences(Denoised_cm.cmout, [replace(string(seq), '-' => "") for seq = SamApp2024.rnaseq(sampled_v)]; informat="FASTA", notrunc=false).bit_sc
+
+# ╔═╡ 3e35e9d4-efab-4c57-bc84-7888c92852d1
+RBM_samples_Untangled_CM_infernal_scores = SamApp2024.infernal_score_sequences(Untangled_cm_permuted.cmout, [replace(string(seq)[perm], '-' => "") for seq = SamApp2024.rnaseq(sampled_v)]; informat="FASTA", notrunc=false).bit_sc
+
+# ╔═╡ e4a649b4-19ed-4573-9c2a-c122fd61e81f
+md"""
+# Figure
+"""
 
 # ╔═╡ 64c22582-6695-4057-bb93-ea331a24c8af
-# Infernal scores of Rfam CM samples
-_tmp_rfam_fasta = tempname()
-FASTX.FASTA.Writer(open(_tmpfasta, "w")) do writer
-    for (n, seq) in enumerate(Rfam_cm_emitted_sequences)
-        ismissing(seq) && continue
-        write(writer, FASTX.FASTA.Record(string(n), filter(!=('-'), string(seq))))
-    end
+let fig = Makie.Figure()
+	_sz = 350
+	
+	ax = Makie.Axis(fig[1,1], xlabel="Rfam CM score", ylabel="RBM score", width=_sz, height=_sz, xticks=-20:20:110, xgridvisible=false, ygridvisible=false)
+	Makie.scatter!(ax, RF00162_hits_Rfam_cm_scores, -RBMs.free_energy(SamApp2024.rbm2022(), SamApp2024.onehot(RF00162_hits_sequences)), label="Natural", color=(:gray, 0.5), markersize=10)
+	Makie.scatter!(ax, 
+	    Rfam_cm_emitted_sequences_infernal_scores[1:2000],
+	    -RBMs.free_energy(SamApp2024.rbm2022(), SamApp2024.onehot(Rfam_cm_emitted_sequences))[1:2000],
+	    label="Rfam CM", color=:red, markersize=5)
+	Makie.scatter!(ax, 
+	    RBM_samples_Rfam_CM_infernal_scores[1:2000],
+	    -RBMs.free_energy(SamApp2024.rbm2022(), sampled_v)[1:2000],
+	    label="RBM", color=:blue, markersize=5)
+	Makie.xlims!(ax, -10, 110)
+	Makie.axislegend(ax, position=:rb)
+	
+	ax = Makie.Axis(fig[1,2], xlabel="Denoised CM score", ylabel="RBM score", width=_sz, height=_sz, xticks=20:20:140, xgridvisible=false, ygridvisible=false)
+	Makie.scatter!(ax, RF00162_hits_Denoised_cm_scores, -RBMs.free_energy(SamApp2024.rbm2022(), SamApp2024.onehot(RF00162_hits_sequences)), label="Natural", color=(:gray, 0.5), markersize=10)
+	Makie.scatter!(ax, 
+	    Denoised_cm_emitted_sequences_infernal_scores[1:2000],
+	    -RBMs.free_energy(SamApp2024.rbm2022(), SamApp2024.onehot(Denoised_cm_emitted_sequences))[1:2000],
+	    label="Denoised CM", color=:red, markersize=5)
+	Makie.scatter!(ax, 
+	    RBM_samples_Denoised_CM_infernal_scores[1:2000],
+	    -RBMs.free_energy(SamApp2024.rbm2022(), sampled_v)[1:2000],
+	    label="RBM", color=:blue, markersize=5)
+	Makie.xlims!(ax, 20, 140)
+	Makie.axislegend(ax, position=:rb)
+	
+	ax = Makie.Axis(fig[1,3], xlabel="Unknotted CM score", ylabel="RBM score", width=_sz, height=_sz, xticks=20:20:140, xgridvisible=false, ygridvisible=false)
+	Makie.scatter!(ax, RF00162_hits_Untangled_cm_scores, -RBMs.free_energy(SamApp2024.rbm2022(), SamApp2024.onehot(RF00162_hits_sequences)), label="Natural", color=(:gray, 0.5), markersize=10)
+	Makie.scatter!(ax, 
+	    Untangled_cm_emitted_sequences_infernal_scores[1:2000],
+	    -RBMs.free_energy(SamApp2024.rbm2022(), SamApp2024.onehot(Untangled_cm_emitted_sequences))[1:2000],
+	    label="Unknotted CM", color=:red, markersize=5)
+	Makie.scatter!(ax, 
+	    RBM_samples_Untangled_CM_infernal_scores[1:2000],
+	    -RBMs.free_energy(SamApp2024.rbm2022(), sampled_v)[1:2000],
+	    label="RBM", color=:blue, markersize=5)
+	Makie.xlims!(ax, 20, 140)
+	Makie.axislegend(ax, position=:rb)
+	
+	ax = Makie.Axis(fig[2,1], xlabel="Rfam CM score", ylabel="Denoised CM score", width=_sz, height=_sz, xticks=-20:20:110, xgridvisible=false, ygridvisible=false)
+	Makie.scatter!(ax, RF00162_hits_Rfam_cm_scores, RF00162_hits_Denoised_cm_scores, color=:black, markersize=5)
+	ax = Makie.Axis(fig[2,2], xlabel="Rfam CM score", ylabel="Unknotted CM score", width=_sz, height=_sz, xticks=20:20:140, xgridvisible=false, ygridvisible=false)
+	Makie.scatter!(ax, RF00162_hits_Rfam_cm_scores, RF00162_hits_Untangled_cm_scores, color=:black, markersize=5)
+	ax = Makie.Axis(fig[2,3], xlabel="Denoised CM score", ylabel="Unknotted CM score", width=_sz, height=_sz, xticks=20:20:140, xgridvisible=false, ygridvisible=false)
+	Makie.scatter!(ax, RF00162_hits_Denoised_cm_scores, RF00162_hits_Untangled_cm_scores, color=:black, markersize=5)
+
+	Makie.Label(fig[1,1][1, 1, Makie.TopLeft()], "A)", fontsize = 18, font = :bold, padding = (0, 5, 5, 0), halign = :right)
+	Makie.Label(fig[1,2][1, 1, Makie.TopLeft()], "B)", fontsize = 18, font = :bold, padding = (0, 5, 5, 0), halign = :right)
+	Makie.Label(fig[1,3][1, 1, Makie.TopLeft()], "C)", fontsize = 18, font = :bold, padding = (0, 5, 5, 0), halign = :right)
+	Makie.Label(fig[2,1][1, 1, Makie.TopLeft()], "D)", fontsize = 18, font = :bold, padding = (0, 5, 5, 0), halign = :right)
+	Makie.Label(fig[2,2][1, 1, Makie.TopLeft()], "E)", fontsize = 18, font = :bold, padding = (0, 5, 5, 0), halign = :right)
+	Makie.Label(fig[2,3][1, 1, Makie.TopLeft()], "F)", fontsize = 18, font = :bold, padding = (0, 5, 5, 0), halign = :right)
+
+	Makie.resize_to_layout!(fig)
+	Makie.save("/DATA/cossio/SAM/2024/SamApp2024.jl/pluto/SI/Figures/2024-04-15 RBMs vs. CMs.pdf", fig)
+	fig
 end
-# unaligned fasta without inserts
-_tmp_cmalign = Infernal.cmalign(Rfam_cm.out, _tmpfasta; glob=true, informat="FASTA");
-# Infernal scores
-_tmp_cmalign_df = Infernal.cmalign_parse_sfile(_tmp_cmalign.sfile);
-Rfam_cm_emitted_sequences_infernal_scores = _tmp_cmalign_df.bit_sc;
 
 # ╔═╡ Cell order:
 # ╠═a9e38c8d-19ed-44a4-8374-a6bf8e857fb2
@@ -333,21 +355,14 @@ Rfam_cm_emitted_sequences_infernal_scores = _tmp_cmalign_df.bit_sc;
 # ╠═5ac9b927-fcbb-4ab7-903f-2d78ad6e6e3f
 # ╠═3f5b9040-6cb8-4445-a010-9215d8128456
 # ╠═9e2d19b1-581a-4529-8b25-6d537263224b
-# ╠═be47ff53-67bc-4065-a675-7260f6bd2805
-# ╠═624388c1-f99c-4a57-a07b-9914875c300a
-# ╠═04954f12-aa09-4aea-8c19-889a4a14b2d1
-# ╠═6abe643c-555f-43e1-b5ef-298e863b422c
 # ╠═699d33dc-474b-4d15-b78c-5ab778c30a34
-# ╠═b430b5b5-8a04-422c-970a-3e7715b8e2a0
-# ╠═ce1e1bc1-cfbf-426e-9e03-4ef651fb030f
-# ╠═64f26067-e3c6-4a0b-8fe1-e2b9f090d217
-# ╠═a0ae0102-383d-4a16-89ff-294fc0e4cd1b
-# ╠═54ed110a-6600-4b28-85ec-ac45f588057d
-# ╠═3f1c368a-d7e8-4eb7-aeae-0b3057e47386
-# ╠═7f5553a2-1c9a-4907-96e1-bfc903b6ee7c
-# ╠═0319f490-0d0b-4811-9b27-988b723c9257
-# ╠═c8ea00fb-c0ba-400d-a7e7-66c12aa02b33
-# ╠═d69de357-3d0e-439c-876c-11a6f6e99abf
-# ╠═cb81f733-7c28-416a-86e2-95afe6c137af
-# ╠═d3a61998-e3fd-45d7-95f3-658d6eb7c554
+# ╠═1c94e498-2a12-4151-b252-8682026d7c22
+# ╠═2584436c-018b-4769-9449-888868227e2b
+# ╠═66e0d54d-3c6c-4dd0-ac22-1c92d1357874
+# ╠═077a471a-e69f-4ef9-af6b-61d76ca8f7f2
+# ╠═788d547d-fc20-404f-940d-2fc977087ac9
+# ╠═f2ac783c-22ac-460a-a680-5be2455fa35c
+# ╠═c902284d-814d-42a9-aa51-f715a50a8934
+# ╠═3e35e9d4-efab-4c57-bc84-7888c92852d1
+# ╠═e4a649b4-19ed-4573-9c2a-c122fd61e81f
 # ╠═64c22582-6695-4057-bb93-ea331a24c8af
