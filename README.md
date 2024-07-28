@@ -29,3 +29,7 @@ The code implementing Restricted Boltzmann machines (training, sampling, and oth
 # Issues
 
 If you encounter any problems, please [open an issue](https://github.com/cossio/SamApp2024.jl/issues/new/choose) in this repository.
+
+# Other resources
+
+The code for simulations of other riboswitch families can be found at the following repository: https://github.com/cossio/RiboswitchesSimulations20240620.jl.
