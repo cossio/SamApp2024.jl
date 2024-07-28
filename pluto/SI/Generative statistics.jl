@@ -58,6 +58,12 @@ import Rfam
 # ╔═╡ 0eede979-3e59-432d-9d02-7dd31d862c46
 import PlutoUI
 
+# ╔═╡ 6fbf87af-dc10-42cc-b302-aabc586b6706
+import Unitful
+
+# ╔═╡ 443414d3-9f39-4178-b0c1-0aa0ffea4726
+import ViennaRNA
+
 # ╔═╡ a6b2a41f-c516-4d47-b2e2-8454095d96e8
 import StatsBase, KernelDensity
 
@@ -122,11 +128,32 @@ sampled_distances = hamming_nodiag(sampled_v);
 # ╔═╡ e68d577d-ae21-422c-a71e-8af1793ffe47
 RF00162_to_sampled_distances = SamApp2024.hamming(SamApp2024.onehot(RF00162_hits_sequences), sampled_v);
 
+# ╔═╡ 4bcfdf66-a21a-4190-8151-285afd4783d8
+p_site_hits = reshape(mean(SamApp2024.onehot(RF00162_hits_sequences); dims=3), 5, 108)
+
+# ╔═╡ 474ac89b-ad01-45b5-a297-600545506622
+poccupancy = p_site_hits ./ sum(p_site_hits; dims=1)
+
+# ╔═╡ 6004c3ca-eba1-4947-a5e3-53f5563d2718
+conservation = vec((log2(5) .+ sum(SamApp2024.xlog2x.(poccupancy); dims=1)));
+
+# ╔═╡ 7d488c07-1b6b-4202-ac07-53571e9c30de
+conserved_sites = conservation .> 0.5
+
+# ╔═╡ fac62361-cd9e-4c00-ab6a-821aa951d7a0
+sum(conserved_sites)
+
+# ╔═╡ 6d36634c-21c4-4bc8-b062-05a9db0f4b9d
+RF00162_to_sampled_distances_conserved = SamApp2024.hamming(SamApp2024.onehot(RF00162_hits_sequences)[:, conserved_sites, :], sampled_v[:, conserved_sites, :]);
+
+# ╔═╡ be56319a-c697-47ed-acab-a0b0d6e3985b
+Makie.lines(sort(conservation))
+
 # ╔═╡ 7648ec2f-5e08-4ffe-853e-8483d6fd1f35
 md"# Site statistics"
 
 # ╔═╡ 6f2074ff-be72-402f-9b76-7b5559c73675
-RF00162_joint = reshape(SamApp2024.onehot(RF00162_hits_sequences), 5*108, :) * reshape(SamApp2024.onehot(RF00162_hits_sequences), 5*108, :)' / length(RF00162_hits_sequences)
+RF00162_joint = reshape(SamApp2024.onehot(RF00162_hits_sequences), 5*108, :) * reshape(SamApp2024.onehot(RF00162_hits_sequences), 5*108, :)' / length(RF00162_hits_sequences);
 
 # ╔═╡ 84cc7005-0aea-424a-8e89-2567add27e34
 sampled_joint = reshape(sampled_v, 5*108, :) * reshape(sampled_v, 5*108, :)' / size(sampled_v, 3);
@@ -164,12 +191,32 @@ cor(RF00162_joint_flat, sampled_joint_flat)
 # ╔═╡ ab28ea64-9538-44d6-a428-b4eca24169d4
 cor(RF00162_joint_cov_flat, sampled_joint_cov_flat)
 
+# ╔═╡ 2a39b63f-091d-44bd-bfbc-0ba905cdb3ba
+md"# ViennaRNA energies"
+
+# ╔═╡ c47b8a16-b5df-4221-a332-58a0d323e00a
+wuss = SamApp2024.rfam_ss("RF00162"; inserts=false)
+
+# ╔═╡ 5b0ffc82-d963-4d10-b843-609500878143
+ss = SamApp2024.clean_wuss(wuss)
+
+# ╔═╡ 9318840e-4294-4135-bbb0-f575cd4c2ea8
+Vienna_energies_fold_msa = [ViennaRNA.energy(string(seq), ss) for seq = RF00162_hits_sequences]
+
+# ╔═╡ efb10860-34d7-4acd-93da-c36085a93e42
+Vienna_energies_fold_samples = [ViennaRNA.energy(string(seq), ss) for seq = SamApp2024.rnaseq(sampled_v)]
+
+# ╔═╡ ed12b554-304d-4d29-854f-8edb1709b6e7
+Unitful.ustrip
+
 # ╔═╡ 7f4324b3-54d2-4242-bc55-4826520edd3f
 md"# Figure"
 
 # ╔═╡ 4c9acaa4-1b33-438a-9034-3cf4edc3e4df
 let fig = Makie.Figure()
-	ax = Makie.Axis(fig[1,1], width=200, height=200, xlabel="MSA", ylabel="RBM", xticks=0:0.5:1, yticks=0:0.5:1, 
+	_sz = 200
+	
+	ax = Makie.Axis(fig[1,1], width=_sz, height=_sz, xlabel="MSA", ylabel="RBM", xticks=0:0.5:1, yticks=0:0.5:1, 
 	    #xtrimspine=true, ytrimspine=true,
 	    xgridvisible=false, ygridvisible=false, topspinevisible=false, rightspinevisible=false,
 		title="conservation (cor. $(round(cor(vec(mean(SamApp2024.onehot(RF00162_hits_sequences); dims=3)), vec(mean(sampled_v; dims=3))); digits=2)))"
@@ -180,7 +227,7 @@ let fig = Makie.Figure()
 	
 	_jnt_idx = rand(1:length(RF00162_joint_cov_flat), 10000)
 	
-	ax = Makie.Axis(fig[1,2], width=200, height=200, xlabel="sequence length", ylabel="frequency", xticks=60:20:108, yticks=0:0.1:0.15,
+	ax = Makie.Axis(fig[1,2], width=_sz, height=_sz, xlabel="Aligned sequence length", ylabel="frequency", xticks=60:20:108, yticks=0:0.1:0.15,
 	    #xtrimspine=true, ytrimspine=true,
 	    xgridvisible=false, ygridvisible=false, topspinevisible=false, rightspinevisible=false)
 	Makie.hist!(ax, vec(108 .- sum(SamApp2024.onehot(RF00162_hits_sequences)[5,:,:]; dims=1)), color=:gray, normalization=:pdf, label="MSA", bins=60:1:108,
@@ -190,14 +237,7 @@ let fig = Makie.Figure()
 	Makie.ylims!(0, 0.17)
 	Makie.axislegend(ax, position=:lt)
 	
-	ax = Makie.Axis(fig[2,1], width=200, height=200, xlabel="RBM score", ylabel="frequency", xticks=250:50:350, yticks=0:0.02:0.04,
-	    xgridvisible=false, ygridvisible=false, topspinevisible=false, rightspinevisible=false)
-	Makie.hist!(ax, -RBMs.free_energy(SamApp2024.rbm2022(), SamApp2024.onehot(RF00162_hits_sequences)), color=:gray, normalization=:pdf, label="MSA", bins=250:5:370)
-	Makie.stephist!(ax, -RBMs.free_energy(SamApp2024.rbm2022(), sampled_v), color=:red, normalization=:pdf, linewidth=3, label="RBM", bins=250:5:370)
-	Makie.xlims!(ax, 250, 370)
-	Makie.ylims!(0, 0.04)
-	
-	ax = Makie.Axis(fig[1,3], width=200, height=200, xlabel="MSA", ylabel="RBM", xticks=-0.1:0.1:0.1, yticks=-0.1:0.1:0.1,
+	ax = Makie.Axis(fig[1,4], width=_sz, height=_sz, xlabel="MSA", ylabel="RBM", xticks=-0.1:0.1:0.1, yticks=-0.1:0.1:0.1,
 	    xgridvisible=false, ygridvisible=false, topspinevisible=false, rightspinevisible=false,
 		title="covariation (cor. $(round(cor(RF00162_joint_cov_flat, sampled_joint_cov_flat); digits=2)))"
 	)
@@ -221,30 +261,53 @@ let fig = Makie.Figure()
 	# #Makie.hexbin!(ax, RF00162_joint, sampled_joint)
 	Makie.xlims!(ax, -0.2, 0.2)
 	Makie.ylims!(ax, -0.2, 0.2)
-	Makie.Colorbar(fig[1,4], _plt)
-	
-	ax = Makie.Axis(fig[2,2], width=200, height=200, xlabel="distance", ylabel="frequency", xticks=0:50:100, yticks=0:0.02:0.04,
+	Makie.Colorbar(fig[1,5], _plt)
+
+	ax = Makie.Axis(fig[1,3], width=_sz, height=_sz, xlabel="RBM score", ylabel="frequency", xticks=250:50:350, yticks=0:0.02:0.04,
+	    xgridvisible=false, ygridvisible=false, topspinevisible=false, rightspinevisible=false)
+	Makie.hist!(ax, -RBMs.free_energy(SamApp2024.rbm2022(), SamApp2024.onehot(RF00162_hits_sequences)), color=:gray, normalization=:pdf, label="MSA", bins=250:5:370)
+	Makie.stephist!(ax, -RBMs.free_energy(SamApp2024.rbm2022(), sampled_v), color=:red, normalization=:pdf, linewidth=3, label="RBM", bins=250:5:370)
+	Makie.xlims!(ax, 250, 370)
+	Makie.ylims!(0, 0.04)
+
+	ax = Makie.Axis(fig[2,1], width=_sz, height=_sz, xlabel="pairwise distances", ylabel="frequency", xticks=0:50:100, yticks=0:0.02:0.04,
 	    xgridvisible=false, ygridvisible=false, topspinevisible=false, rightspinevisible=false)
 	Makie.hist!(ax, RF00162_distances, color=:gray, normalization=:pdf, label="MSA", bins=0:5:100, strokewidth=0, strokecolor=:gray)
 	Makie.stephist!(ax, sampled_distances, color=:red, normalization=:pdf, linewidth=3, label="RBM", bins=0:5:108)
 	Makie.xlims!(0, 108)
 	Makie.ylims!(0, 0.06)
 	
-	ax = Makie.Axis(fig[2,3], width=200, height=200, xlabel="distance to closest natural", ylabel="frequency", xticks=0:30:60, yticks=0:0.02:0.04,
+	ax = Makie.Axis(fig[2,2], width=_sz, height=_sz, xlabel="distance to closest natural", ylabel="frequency", xticks=0:30:60, yticks=0:0.02:0.04,
 	    xgridvisible=false, ygridvisible=false, topspinevisible=false, rightspinevisible=false)
 	Makie.stephist!(ax, vec(minimum(RF00162_to_sampled_distances, dims=1)), color=:red, normalization=:pdf, linewidth=3, bins=0:5:60)
 	Makie.xlims!(0, 60)
 	Makie.ylims!(0, 0.06)
+
+	ax = Makie.Axis(fig[2,3], width=_sz, height=_sz, xlabel="distance to closest natural (cons. > 0.5)", ylabel="frequency", xticks=0:10:30, yticks=0:0.1:0.2,
+	    xgridvisible=false, ygridvisible=false, topspinevisible=false, rightspinevisible=false)
+	Makie.stephist!(ax, vec(minimum(RF00162_to_sampled_distances_conserved, dims=1)), color=:red, normalization=:pdf, linewidth=3, bins=0:2:60)
+	Makie.xlims!(0, 30)
+	Makie.ylims!(0, 0.15)
+
+	ax = Makie.Axis(fig[2,4], width=_sz, height=_sz, xlabel="ViennaRNA folding energy (kcal/mol)", ylabel="frequency",
+	    xgridvisible=false, ygridvisible=false, topspinevisible=false, rightspinevisible=false
+	)
+	Makie.hist!(ax, map(Unitful.ustrip, Vienna_energies_fold_msa), color=:gray, normalization=:pdf, label="MSA", strokewidth=0, strokecolor=:gray)
+	Makie.stephist!(ax, map(Unitful.ustrip, Vienna_energies_fold_samples), color=:red, normalization=:pdf, label="RBM", linewidth=3)
+	#Makie.xlims!(0, 60)
+	#Makie.ylims!(0, 0.06)
 	
 	Makie.Label(fig[1,1][1, 1, Makie.TopLeft()], "A)", fontsize = 16, font = :bold, padding = (0, 5, 5, 0), halign = :right)
 	Makie.Label(fig[1,2][1, 1, Makie.TopLeft()], "B)", fontsize = 16, font = :bold, padding = (0, 5, 5, 0), halign = :right)
 	Makie.Label(fig[1,3][1, 1, Makie.TopLeft()], "C)", fontsize = 16, font = :bold, padding = (0, 5, 5, 0), halign = :right)
-	Makie.Label(fig[2,1][1, 1, Makie.TopLeft()], "D)", fontsize = 16, font = :bold, padding = (0, 5, 5, 0), halign = :right)
-	Makie.Label(fig[2,2][1, 1, Makie.TopLeft()], "E)", fontsize = 16, font = :bold, padding = (0, 5, 5, 0), halign = :right)
-	Makie.Label(fig[2,3][1, 1, Makie.TopLeft()], "F)", fontsize = 16, font = :bold, padding = (0, 5, 5, 0), halign = :right)
+	Makie.Label(fig[1,4][1, 1, Makie.TopLeft()], "D)", fontsize = 16, font = :bold, padding = (0, 5, 5, 0), halign = :right)
+	Makie.Label(fig[2,1][1, 1, Makie.TopLeft()], "E)", fontsize = 16, font = :bold, padding = (0, 5, 5, 0), halign = :right)
+	Makie.Label(fig[2,2][1, 1, Makie.TopLeft()], "F)", fontsize = 16, font = :bold, padding = (0, 5, 5, 0), halign = :right)
+	Makie.Label(fig[2,3][1, 1, Makie.TopLeft()], "G)", fontsize = 16, font = :bold, padding = (0, 5, 5, 0), halign = :right)
+	Makie.Label(fig[2,4][1, 1, Makie.TopLeft()], "H)", fontsize = 16, font = :bold, padding = (0, 5, 5, 0), halign = :right)
 
 	Makie.resize_to_layout!(fig)
-	#Makie.save(joinpath(paper_figs_dir, "rbm_generative_stats.pdf"), fig)
+	Makie.save("/DATA/cossio/SAM/2024/SamApp2024.jl/pluto/SI/Figures/fig-rbm_generation.pdf", fig)
 	fig
 end
 
@@ -258,6 +321,8 @@ end
 # ╠═bc474b44-5591-4893-8c69-fe66d55d2d9d
 # ╠═83974feb-e04a-4fe3-a4ce-e480578ba4ce
 # ╠═0eede979-3e59-432d-9d02-7dd31d862c46
+# ╠═6fbf87af-dc10-42cc-b302-aabc586b6706
+# ╠═443414d3-9f39-4178-b0c1-0aa0ffea4726
 # ╠═a6b2a41f-c516-4d47-b2e2-8454095d96e8
 # ╠═24f9e3a2-ae85-4d3d-a4cd-4281c07492c7
 # ╠═7ec13690-0410-4828-be59-49d698fc3448
@@ -287,6 +352,13 @@ end
 # ╠═fe3431c3-a6b6-4040-955d-9f255c51caab
 # ╠═261d7630-deec-4c57-9033-46509090c14f
 # ╠═e68d577d-ae21-422c-a71e-8af1793ffe47
+# ╠═4bcfdf66-a21a-4190-8151-285afd4783d8
+# ╠═474ac89b-ad01-45b5-a297-600545506622
+# ╠═6004c3ca-eba1-4947-a5e3-53f5563d2718
+# ╠═7d488c07-1b6b-4202-ac07-53571e9c30de
+# ╠═fac62361-cd9e-4c00-ab6a-821aa951d7a0
+# ╠═6d36634c-21c4-4bc8-b062-05a9db0f4b9d
+# ╠═be56319a-c697-47ed-acab-a0b0d6e3985b
 # ╠═7648ec2f-5e08-4ffe-853e-8483d6fd1f35
 # ╠═6f2074ff-be72-402f-9b76-7b5559c73675
 # ╠═84cc7005-0aea-424a-8e89-2567add27e34
@@ -301,5 +373,11 @@ end
 # ╠═46a638e9-8aac-44f1-92f4-6df63b48d1f0
 # ╠═a92f025a-dc7a-45ae-84c2-84b3958806b1
 # ╠═ab28ea64-9538-44d6-a428-b4eca24169d4
+# ╠═2a39b63f-091d-44bd-bfbc-0ba905cdb3ba
+# ╠═c47b8a16-b5df-4221-a332-58a0d323e00a
+# ╠═5b0ffc82-d963-4d10-b843-609500878143
+# ╠═9318840e-4294-4135-bbb0-f575cd4c2ea8
+# ╠═efb10860-34d7-4acd-93da-c36085a93e42
+# ╠═ed12b554-304d-4d29-854f-8edb1709b6e7
 # ╠═7f4324b3-54d2-4242-bc55-4826520edd3f
 # ╠═4c9acaa4-1b33-438a-9034-3cf4edc3e4df

@@ -99,7 +99,7 @@ function rfam_RF00162_hits()
     fasta = Rfam.fasta_file("RF00162")
     cm = Infernal.cmfetch(Rfam.cm(), "RF00162").out
 
-    sequences = align_fasta_to_cm(fasta, cm)
+    sequences = infernal_align_fasta_to_cm(fasta, cm)
     @assert only(unique(map(length, sequences))) == 108
     return sequences
 end
