@@ -41,7 +41,7 @@ hamming(seq::BitMatrix, seqs::BitArray{3}) = hamming(seqs, seq)'
 
 function hamming(s1::LongRNA, s2::LongRNA)
     @assert length(s1) == length(s2)
-    return Hamming()(string(s1), string(s2))
+    return StringDistances.Hamming()(string(s1), string(s2))
 end
 
 hamming(seqs1::AbstractVector{<:LongSequence}, s2::LongRNA) = [hamming(s1, s2) for s1 in seqs1]
