@@ -94,9 +94,6 @@ RF00162_hits_stk = Infernal.cmalign(Rfam_cm.out, Rfam.fasta_file("RF00162"); mat
 # fit new CM model using full alignment (without inserts), and without entropic noise
 Denoised_cm = SamApp2024.rfam_RF00162_denoised_cm()
 
-# ╔═╡ 3ed4e68b-1d42-42a2-bcef-a1acd3da10c9
-
-
 # ╔═╡ a89f2164-0baa-4613-bae9-941d04ef7a31
 Rfam_cm_emitted_sequences = SamApp2024.infernal_cm_emit_sequences(Rfam_cm.out; N=5000, inserts=false)
 
@@ -155,19 +152,8 @@ open(RF00162_hits_stk_permuted, "w") do file
     end
 end
 
-# ╔═╡ 0f3a48b5-863c-4afe-8c5f-912e2b5e7c89
-# emit sequences from CM model
-Untangled_cm_permuted_emitted_sequences_afa = Infernal.cmemit(Untangled_cm_permuted.cmout; N=5000, aligned=true, outformat="AFA");
-
-# ╔═╡ e8663b57-c9ea-421f-851b-e05e3d7c67e8
-Untangled_cm_permuted_emitted_sequences_with_inserts = FASTX.sequence.(FASTX.FASTA.Reader(open(Untangled_cm_permuted_emitted_sequences_afa.out)));
-
-# ╔═╡ 5ac9b927-fcbb-4ab7-903f-2d78ad6e6e3f
-# remove inserts
-#Untangled_cm_permuted_emitted_sequences = LongRNA{4}.([filter(!=('.'), filter(!islowercase, seq)) for seq in Untangled_cm_permuted_emitted_sequences_with_inserts]);
-
-# ╔═╡ 4557272d-7bb3-4449-807a-bd15b1a0f285
-Untangled_cm_permuted_emitted_sequences = SamApp2024.infernal_cm_emit_sequences(Untangled_cm_permuted.cmout; N=5000, inserts=false)
+# ╔═╡ 8a5fe11d-6857-47ca-921b-c6dd30d71dc3
+Untangled_cm_permuted_emitted_sequences = SamApp2024.infernal_cm_emit_sequences(Uknotted_cm_permutted.cmout; N=5000, inserts=false)
 
 # ╔═╡ 3f5b9040-6cb8-4445-a010-9215d8128456
 # Permute back to correct column locations
@@ -188,7 +174,7 @@ RF00162_hits_Denoised_cm_scores = SamApp2024.infernal_score_sequences(Denoised_c
 
 # ╔═╡ 2584436c-018b-4769-9449-888868227e2b
 # Infernal scores of hits, using Untangled CM model
-RF00162_hits_Untangled_cm_scores = SamApp2024.infernal_score_sequences(Untangled_cm_permuted.cmout, [replace(string(seq)[perm], '-' => "") for seq = RF00162_hits_sequences]; informat="FASTA", notrunc=false).bit_sc
+RF00162_hits_Untangled_cm_scores = SamApp2024.infernal_score_sequences(Uknotted_cm_permutted.cmout, [replace(string(seq)[perm], '-' => "") for seq = RF00162_hits_sequences]; informat="FASTA", notrunc=false).bit_sc
 
 # ╔═╡ 66e0d54d-3c6c-4dd0-ac22-1c92d1357874
 Rfam_cm_emitted_sequences_infernal_scores = SamApp2024.infernal_score_sequences(Rfam_cm.out, [replace(string(seq), '-' => "") for seq = Rfam_cm_emitted_sequences]; informat="FASTA", notrunc=false).bit_sc
@@ -197,7 +183,7 @@ Rfam_cm_emitted_sequences_infernal_scores = SamApp2024.infernal_score_sequences(
 Denoised_cm_emitted_sequences_infernal_scores = SamApp2024.infernal_score_sequences(Denoised_cm.cmout, [replace(string(seq), '-' => "") for seq = Denoised_cm_emitted_sequences]; informat="FASTA", notrunc=false).bit_sc
 
 # ╔═╡ 788d547d-fc20-404f-940d-2fc977087ac9
-Untangled_cm_emitted_sequences_infernal_scores = SamApp2024.infernal_score_sequences(Untangled_cm_permuted.cmout, [replace(string(seq), '-' => "") for seq = Untangled_cm_permuted_emitted_sequences]; informat="FASTA", notrunc=false).bit_sc
+Untangled_cm_emitted_sequences_infernal_scores = SamApp2024.infernal_score_sequences(Uknotted_cm_permutted.cmout, [replace(string(seq), '-' => "") for seq = Untangled_cm_permuted_emitted_sequences]; informat="FASTA", notrunc=false).bit_sc
 
 # ╔═╡ f2ac783c-22ac-460a-a680-5be2455fa35c
 RBM_samples_Rfam_CM_infernal_scores = SamApp2024.infernal_score_sequences(Rfam_cm.out, [replace(string(seq), '-' => "") for seq = SamApp2024.rnaseq(sampled_v)]; informat="FASTA", notrunc=false).bit_sc
@@ -206,7 +192,7 @@ RBM_samples_Rfam_CM_infernal_scores = SamApp2024.infernal_score_sequences(Rfam_c
 RBM_samples_Denoised_CM_infernal_scores = SamApp2024.infernal_score_sequences(Denoised_cm.cmout, [replace(string(seq), '-' => "") for seq = SamApp2024.rnaseq(sampled_v)]; informat="FASTA", notrunc=false).bit_sc
 
 # ╔═╡ 3e35e9d4-efab-4c57-bc84-7888c92852d1
-RBM_samples_Untangled_CM_infernal_scores = SamApp2024.infernal_score_sequences(Untangled_cm_permuted.cmout, [replace(string(seq)[perm], '-' => "") for seq = SamApp2024.rnaseq(sampled_v)]; informat="FASTA", notrunc=false).bit_sc
+RBM_samples_Untangled_CM_infernal_scores = SamApp2024.infernal_score_sequences(Uknotted_cm_permutted.cmout, [replace(string(seq)[perm], '-' => "") for seq = SamApp2024.rnaseq(sampled_v)]; informat="FASTA", notrunc=false).bit_sc
 
 # ╔═╡ e4a649b4-19ed-4573-9c2a-c122fd61e81f
 md"""
@@ -303,7 +289,6 @@ end
 # ╠═952066b8-9430-43f4-8f27-895888875891
 # ╠═7bd2c5f8-16bf-4d98-aa19-96b97fc7332f
 # ╠═fbce70a0-3b12-4ce6-87e3-34bfbd884382
-# ╠═3ed4e68b-1d42-42a2-bcef-a1acd3da10c9
 # ╠═a89f2164-0baa-4613-bae9-941d04ef7a31
 # ╠═5d30684a-fb71-4621-9c2d-e7896dbfd50f
 # ╠═9ccdf111-1d2b-41e1-b330-5eb096f5f901
@@ -312,10 +297,7 @@ end
 # ╠═f5d1965d-21b8-4395-ab37-6d59a7d5658f
 # ╠═8dc56958-fac1-4971-ad6b-8f8c8c79fc48
 # ╠═01ba4b08-5135-48dc-bfa6-9cd7e8f9ee8e
-# ╠═0f3a48b5-863c-4afe-8c5f-912e2b5e7c89
-# ╠═e8663b57-c9ea-421f-851b-e05e3d7c67e8
-# ╠═5ac9b927-fcbb-4ab7-903f-2d78ad6e6e3f
-# ╠═4557272d-7bb3-4449-807a-bd15b1a0f285
+# ╠═8a5fe11d-6857-47ca-921b-c6dd30d71dc3
 # ╠═3f5b9040-6cb8-4445-a010-9215d8128456
 # ╠═9e2d19b1-581a-4529-8b25-6d537263224b
 # ╠═699d33dc-474b-4d15-b78c-5ab778c30a34

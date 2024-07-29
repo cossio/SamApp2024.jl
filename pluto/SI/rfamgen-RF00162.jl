@@ -172,7 +172,7 @@ let fig = Makie.Figure()
 	Makie.stephist!(ax, -RBMs.free_energy(rbm, SamApp2024.rbm2022samples()); normalization=:pdf, label="RBM", bins=200:2:370, color=:blue, linewidth=2)
 	Makie.axislegend(ax; position=:lt, framevisible=false)
 
-	ax = Makie.Axis(fig[1,2]; width=_sz, height=_sz, xlabel=L"\log(P_{\mathrm{CMVAE}}(z))", ylabel="frequency", xgridvisible=false, ygridvisible=false)
+	ax = Makie.Axis(fig[1,2]; width=_sz, height=_sz, xlabel=L"\log(P_{\mathrm{CMVAE}}(z)) + \mathrm{const.}", ylabel="frequency", xgridvisible=false, ygridvisible=false)
 	Makie.hist!(ax, rfamgen_P_latent_MSA; normalization=:pdf, label="MSA", color=(:gray, 0.5), bins=-70:1:0)
 	Makie.stephist!(ax, rfamgen_P_latent_rCM; normalization=:pdf, label="rCM", color=:red, linewidth=2, bins=-70:1:0)
 	Makie.stephist!(ax, rfamgen_P_latent_RBM; normalization=:pdf, label="RBM", color=:blue, linewidth=2, bins=-70:1:0)

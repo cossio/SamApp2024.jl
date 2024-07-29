@@ -14,6 +14,10 @@ function rfam_RF00162_unknotted_permutation()
 end
 
 function rfam_RF00162_unknotted_hits_stk()
+    Rfam_cm = SamApp2024.rfam_RF00162_rfam_cm()
+    RF00162_hits_stk = Infernal.cmalign(Rfam_cm.out, Rfam.fasta_file("RF00162"); matchonly=true);
+
+    wuss = rfam_ss("RF00162")
     perm = rfam_RF00162_unknotted_permutation()
 
     # build training alignment for the Untangled CM
