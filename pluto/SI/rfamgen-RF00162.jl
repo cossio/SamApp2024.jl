@@ -10,26 +10,17 @@ import Pkg, Revise; Pkg.activate(Base.current_project())
 # ╔═╡ 794b3eb0-55b8-4f5c-ba03-675e23d2c471
 using BioSequences: LongRNA
 
-# ╔═╡ 62704882-f5f7-44d3-9c2b-a5a72212319f
-using DataFrames: DataFrame
-
-# ╔═╡ 96f37f86-ee7d-47b6-be86-8984823354a4
-using Distributions: Gamma, logpdf, pdf, Poisson
-
-# ╔═╡ 58e89990-976b-4308-86d8-cadf3986a98c
-using LinearAlgebra: Diagonal, eigen
-
 # ╔═╡ ef0e0da8-d64a-4496-94a5-74d683b8cf4d
 using Makie: @L_str
 
 # ╔═╡ f2ccacb2-dab7-4054-b25d-7075f8a20580
 using NaNStatistics: nansum
 
-# ╔═╡ 9058d796-56ba-4fed-bc10-2684bfc07add
-using Random: bitrand
-
 # ╔═╡ c7e6ceff-23f5-4ad5-be6f-a968f5bdf030
-using Statistics: cor, mean
+using Statistics: cor
+
+# ╔═╡ cb1b7457-21be-4c1e-9363-6258f4b9377a
+using Statistics: mean
 
 # ╔═╡ 2e28c501-fdca-46ee-b354-309d632c24bf
 using DelimitedFiles: readdlm
@@ -38,13 +29,16 @@ using DelimitedFiles: readdlm
 md"# Imports" 
 
 # ╔═╡ 7327676a-736e-498a-b80e-5d74dc163a35
-import Makie, CairoMakie
+import Makie
 
-# ╔═╡ f483c527-e02a-477e-a1a9-62aa75613ca0
-import CSV, HDF5
+# ╔═╡ 07d606f2-0dc0-470b-83ed-8d0eb1a1a2be
+import CairoMakie
 
 # ╔═╡ f847fe47-b2b5-46c6-bf43-41ee3887c56b
-import FASTX, Infernal
+import FASTX
+
+# ╔═╡ 8962064d-dfda-4a30-9194-af0a743d0273
+import Infernal
 
 # ╔═╡ ccc08755-a3ca-43c3-bf3d-ebf6a32afa2c
 import SamApp2024
@@ -56,7 +50,7 @@ import RestrictedBoltzmannMachines as RBMs
 import Rfam
 
 # ╔═╡ 8616a37c-9f23-41c8-85b5-654b6ec7689b
-import StatsBase, KernelDensity
+import StatsBase
 
 # ╔═╡ 061e8cb0-6c3a-4e1a-93d3-eeb400fca037
 md"# Load data"
@@ -167,49 +161,57 @@ let fig = Makie.Figure()
 	
 	ax = Makie.Axis(fig[1,1]; width=_sz, height=_sz, xlabel="RBM score", ylabel="frequency", xgridvisible=false, ygridvisible=false)
 	Makie.hist!(ax, -RBMs.free_energy(rbm, SamApp2024.onehot(hits_sequences)); normalization=:pdf, label="MSA", bins=200:2:370, color=(:gray, 0.5))
-	Makie.stephist!(ax, -RBMs.free_energy(rbm, SamApp2024.onehot(rfamgen_seqs_aln_sampl)); normalization=:pdf, label="RfamGen", bins=200:2:370, color=:brown, linewidth=2)
-	Makie.stephist!(ax, -RBMs.free_energy(rbm, SamApp2024.onehot(rfamgen_seqs_aln)); normalization=:pdf, label="RfamGen (argmax)", bins=200:2:370, color=:brown, linewidth=2, linestyle=:dash)
+	Makie.stephist!(ax, -RBMs.free_energy(rbm, SamApp2024.onehot(rfamgen_seqs_aln_sampl)); normalization=:pdf, label="RfamGen", bins=200:2:400, color=:brown, linewidth=2)
+	Makie.stephist!(ax, -RBMs.free_energy(rbm, SamApp2024.onehot(rfamgen_seqs_aln)); normalization=:pdf, label="RfamGen (argmax)", bins=200:2:400, color=:brown, linewidth=2, linestyle=:dash)
 	Makie.stephist!(ax, -RBMs.free_energy(rbm, SamApp2024.rbm2022samples()); normalization=:pdf, label="RBM", bins=200:2:370, color=:blue, linewidth=2)
+	Makie.stephist!(ax, -RBMs.free_energy(rbm, SamApp2024.onehot(Rfam_cm_emitted_sequences)); normalization=:pdf, label="rCM", bins=100:2:400, color=:red, linewidth=2)
 	Makie.axislegend(ax; position=:lt, framevisible=false)
+	Makie.xlims!(ax, 120, 370)
+	Makie.ylims!(ax, 0, 0.04)
 
-	ax = Makie.Axis(fig[1,2]; width=_sz, height=_sz, xlabel=L"\log(P_{\mathrm{CMVAE}}(z)) + \mathrm{const.}", ylabel="frequency", xgridvisible=false, ygridvisible=false)
+	ax = Makie.Axis(fig[1,2]; width=_sz, height=_sz, xlabel="CMVAE latent score", ylabel="frequency", xgridvisible=false, ygridvisible=false)
 	Makie.hist!(ax, rfamgen_P_latent_MSA; normalization=:pdf, label="MSA", color=(:gray, 0.5), bins=-70:1:0)
 	Makie.stephist!(ax, rfamgen_P_latent_rCM; normalization=:pdf, label="rCM", color=:red, linewidth=2, bins=-70:1:0)
 	Makie.stephist!(ax, rfamgen_P_latent_RBM; normalization=:pdf, label="RBM", color=:blue, linewidth=2, bins=-70:1:0)
 	Makie.stephist!(ax, -dropdims(sum(abs2, randn(16, length(rfamgen_P_latent_RBM)); dims=1); dims=1); normalization=:pdf, label="RfamGen", color=:brown, linewidth=2, bins=-70:1:0)
 
-	ax = Makie.Axis(fig[1,3]; width=_sz, height=_sz, xlabel="Infernal bit score", ylabel="frequency", xgridvisible=false, ygridvisible=false)
-	Makie.hist!(ax, cm_score_hits; normalization=:pdf, label="MSA", bins=30:2:120, color=(:gray, 0.5))
-	Makie.stephist!(ax, cm_score_rfamgen_sampl; normalization=:pdf, label="RfamGen", bins=30:2:120, color=:brown, linewidth=2)
-	Makie.stephist!(ax, cm_score_rfamgen; normalization=:pdf, label="RfamGen (argmax)", bins=30:2:120, color=:brown, linewidth=2, linestyle=:dash)
+	ax = Makie.Axis(fig[1,3]; width=_sz, height=_sz, xlabel="Rfam CM bit score", ylabel="frequency", xgridvisible=false, ygridvisible=false)
+	Makie.hist!(ax, cm_score_hits; normalization=:pdf, label="MSA", bins=30:2:150, color=(:gray, 0.5))
+	Makie.stephist!(ax, cm_score_rfamgen_sampl; normalization=:pdf, label="RfamGen", bins=30:2:150, color=:brown, linewidth=2)
+	Makie.stephist!(ax, cm_score_rfamgen; normalization=:pdf, label="RfamGen (argmax)", bins=30:2:150, color=:brown, linewidth=2, linestyle=:dash)
 	Makie.stephist!(ax, cm_score_rbm; normalization=:pdf, label="RBM", bins=30:2:120, color=:blue, linewidth=2)
+	Makie.stephist!(ax, Rfam_cm_emitted_sequences_infernal_scores; normalization=:pdf, label="rCM", bins=-50:2:150, color=:red, linewidth=2)
+	Makie.xlims!(ax, -1, 120)
+	Makie.ylims!(ax, 0, 0.08)
 
 	Makie.Label(fig[1,1][1, 1, Makie.TopLeft()], "A)", fontsize = 16, font = :bold, padding = (0, 5, 5, 0), halign = :right)
 	Makie.Label(fig[1,2][1, 1, Makie.TopLeft()], "B)", fontsize = 16, font = :bold, padding = (0, 5, 5, 0), halign = :right)
 	Makie.Label(fig[1,3][1, 1, Makie.TopLeft()], "C)", fontsize = 16, font = :bold, padding = (0, 5, 5, 0), halign = :right)
 
 	Makie.resize_to_layout!(fig)
+	Makie.save("/DATA/cossio/SAM/2024/SamApp2024.jl/pluto/SI/Figures/fig-SI_RfamGen.pdf", fig)
 	fig
 end
+
+# ╔═╡ 3768ddcd-57fb-4fc1-85fd-898c9b6193e1
+L"\log(P_{\mathrm{CMVAE}}(z)) + \mathrm{const.}"
 
 # ╔═╡ Cell order:
 # ╠═e98903a9-5faf-4cc0-ab42-a7a7bd5ccfc9
 # ╠═c9ddb318-70db-4592-afde-80772aaa2244
 # ╠═7327676a-736e-498a-b80e-5d74dc163a35
-# ╠═f483c527-e02a-477e-a1a9-62aa75613ca0
+# ╠═07d606f2-0dc0-470b-83ed-8d0eb1a1a2be
 # ╠═f847fe47-b2b5-46c6-bf43-41ee3887c56b
+# ╠═8962064d-dfda-4a30-9194-af0a743d0273
 # ╠═ccc08755-a3ca-43c3-bf3d-ebf6a32afa2c
 # ╠═f05273b2-c9b4-4b15-96e0-bdc3f45dfd63
 # ╠═5492b03c-c32e-4471-9748-ec46b7e1dbaa
 # ╠═8616a37c-9f23-41c8-85b5-654b6ec7689b
 # ╠═794b3eb0-55b8-4f5c-ba03-675e23d2c471
-# ╠═62704882-f5f7-44d3-9c2b-a5a72212319f
-# ╠═96f37f86-ee7d-47b6-be86-8984823354a4
-# ╠═58e89990-976b-4308-86d8-cadf3986a98c
 # ╠═ef0e0da8-d64a-4496-94a5-74d683b8cf4d
 # ╠═f2ccacb2-dab7-4054-b25d-7075f8a20580
-# ╠═9058d796-56ba-4fed-bc10-2684bfc07add
 # ╠═c7e6ceff-23f5-4ad5-be6f-a968f5bdf030
+# ╠═cb1b7457-21be-4c1e-9363-6258f4b9377a
 # ╠═2e28c501-fdca-46ee-b354-309d632c24bf
 # ╠═061e8cb0-6c3a-4e1a-93d3-eeb400fca037
 # ╠═b638a0dc-a03a-482e-8479-08da23b40494
@@ -241,3 +243,4 @@ end
 # ╠═048284c6-3a38-4196-8da7-ba55dea5bee0
 # ╠═3a2cdb94-1c0a-4798-a14d-80beb09e7716
 # ╠═2b90f592-5a28-485e-84bf-232d900f1abc
+# ╠═3768ddcd-57fb-4fc1-85fd-898c9b6193e1
