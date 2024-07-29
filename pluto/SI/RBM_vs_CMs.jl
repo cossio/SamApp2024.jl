@@ -78,32 +78,13 @@ md"""
 # RBM samples
 sampled_v = SamApp2024.rbm2022samples(); # faster
 
-# ╔═╡ 066e9cd6-afc9-49f9-8bcf-e17d94dae992
+# ╔═╡ 602fa5d2-88dd-48f7-ad67-f7331d63c473
 # CM model from Rfam (this has the noisy floor!)
-Rfam_cm = Infernal.cmfetch(Rfam.cm(), "RF00162");
+Rfam_cm = SamApp2024.rfam_RF00162_rfam_cm()
 
-# ╔═╡ fe359d48-38d6-40b8-bc17-4646f8d154a2
-RF00162_seed_stk = Infernal.esl_afetch(Rfam.seed(), "RF00162")
-
-# ╔═╡ 35ff35dd-ec34-4080-9831-45ac5d044356
-RF00162_seed_match_cols = findall(≠('.'), SamApp2024.stockholm_ss(RF00162_seed_stk.out));
-
-# ╔═╡ 7db1e9ea-d181-419c-9b02-c30b77c6e197
-RF00162_seed_afa = Infernal.esl_reformat("AFA", RF00162_seed_stk.out; informat="STOCKHOLM") # WARNING: this has inserts marked as '-'
-
-# ╔═╡ cdd43222-a6b0-426b-96d0-407d5b7106c8
-RF00162_seed_records = collect(FASTX.FASTA.Reader(open(RF00162_seed_afa.out)))
-
-# ╔═╡ 66617a9a-b345-4ad8-8522-80665c81c66d
-RF00162_seed_seqs_noinserts = LongRNA{4}.([FASTX.sequence(record)[RF00162_seed_match_cols] for record in RF00162_seed_records]);
-
-# ╔═╡ 9b352035-98c7-416f-8a9f-5c47c62ebda8
-# trimmed (no inserts) aligned fasta
-RF00162_hits_afa = Infernal.cmalign(Rfam_cm.out, Rfam.fasta_file("RF00162"); matchonly=true, outformat="AFA");
-
-# ╔═╡ cad7df2d-d465-45d2-9ce6-4737adb18fcb
+# ╔═╡ 952066b8-9430-43f4-8f27-895888875891
 # these are already aligned and without inserts
-RF00162_hits_sequences = LongRNA{4}.(FASTX.sequence.(FASTX.FASTA.Reader(open(RF00162_hits_afa.out))));
+RF00162_hits_sequences = SamApp2024.rfam_RF00162_hits();
 
 # ╔═╡ 7bd2c5f8-16bf-4d98-aa19-96b97fc7332f
 # aligned hits, used to train a new noiseless CM model (in Stockholm format, without inserts!)
@@ -111,34 +92,25 @@ RF00162_hits_stk = Infernal.cmalign(Rfam_cm.out, Rfam.fasta_file("RF00162"); mat
 
 # ╔═╡ fbce70a0-3b12-4ce6-87e3-34bfbd884382
 # fit new CM model using full alignment (without inserts), and without entropic noise
-Denoised_cm = Infernal.cmbuild(RF00162_hits_stk.out; enone=true);
+Denoised_cm = SamApp2024.rfam_RF00162_denoised_cm()
 
-# ╔═╡ cec2e5cc-2ebf-41a5-b678-49fff9939131
-# emit sequences from Rfam CM model
-Rfam_cm_emitted_sequences_afa = Infernal.cmemit(Rfam_cm.out; N=5000, aligned=true, outformat="AFA");
+# ╔═╡ 3ed4e68b-1d42-42a2-bcef-a1acd3da10c9
 
-# ╔═╡ 8de1da12-cf86-4b5a-81b5-0f4c12724f20
-Rfam_cm_emitted_sequences_with_inserts = FASTX.sequence.(FASTX.FASTA.Reader(open(Rfam_cm_emitted_sequences_afa.out)));
 
-# ╔═╡ c9afcea6-36b8-4574-ac6e-6434fbfcbf2e
-# remove inserts
-Rfam_cm_emitted_sequences = LongRNA{4}.([filter(!=('.'), filter(!islowercase, seq)) for seq = Rfam_cm_emitted_sequences_with_inserts]);
+# ╔═╡ a89f2164-0baa-4613-bae9-941d04ef7a31
+Rfam_cm_emitted_sequences = SamApp2024.infernal_cm_emit_sequences(Rfam_cm.out; N=5000, inserts=false)
 
-# ╔═╡ b68ea3ea-8b92-4b71-9b6b-f5172efc3f14
-# emit sequences from Denoised CM model
-Denoised_cm_emitted_sequences_afa = Infernal.cmemit(Denoised_cm.cmout; N=5000, aligned=true, outformat="AFA");
-
-# ╔═╡ 12fe5491-b37a-4052-95d8-19f1d53e6799
-Denoised_cm_emitted_sequences_with_inserts = FASTX.sequence.(FASTX.FASTA.Reader(open(Denoised_cm_emitted_sequences_afa.out)))
-
-# ╔═╡ 4611b398-5030-4d0d-bf5c-9b41d57967d4
-# remove inserts
-Denoised_cm_emitted_sequences = LongRNA{4}.([filter(!=('.'), filter(!islowercase, seq)) for seq in Denoised_cm_emitted_sequences_with_inserts])
+# ╔═╡ 5d30684a-fb71-4621-9c2d-e7896dbfd50f
+Denoised_cm_emitted_sequences = SamApp2024.infernal_cm_emit_sequences(Denoised_cm.cmout; N=5000, inserts=false)
 
 # ╔═╡ 9ccdf111-1d2b-41e1-b330-5eb096f5f901
 md"""
-# Untangled CM
+# Unknotted CM
 """
+
+# ╔═╡ cd2bc167-d3dd-4bf8-ae33-608b22dcd9be
+# fit new CM model using full alignment, with untangled pseudoknot (without inserts), and without entropic noise
+Uknotted_cm_permutted = SamApp2024.rfam_RF00162_unknotted_cm()
 
 # ╔═╡ 457541e2-2638-4fe1-a9ba-1b58d96da6c0
 # Consensus secondary structure of RF00162 in WUSS format
@@ -183,10 +155,6 @@ open(RF00162_hits_stk_permuted, "w") do file
     end
 end
 
-# ╔═╡ ffc1c63c-6bc2-4ddf-a4e1-47afc8ac2b70
-# fit new CM model using full alignment, with untangled pseudoknot (without inserts), and without entropic noise
-Untangled_cm_permuted = Infernal.cmbuild(RF00162_hits_stk_permuted; enone=true)
-
 # ╔═╡ 0f3a48b5-863c-4afe-8c5f-912e2b5e7c89
 # emit sequences from CM model
 Untangled_cm_permuted_emitted_sequences_afa = Infernal.cmemit(Untangled_cm_permuted.cmout; N=5000, aligned=true, outformat="AFA");
@@ -196,7 +164,10 @@ Untangled_cm_permuted_emitted_sequences_with_inserts = FASTX.sequence.(FASTX.FAS
 
 # ╔═╡ 5ac9b927-fcbb-4ab7-903f-2d78ad6e6e3f
 # remove inserts
-Untangled_cm_permuted_emitted_sequences = LongRNA{4}.([filter(!=('.'), filter(!islowercase, seq)) for seq in Untangled_cm_permuted_emitted_sequences_with_inserts]);
+#Untangled_cm_permuted_emitted_sequences = LongRNA{4}.([filter(!=('.'), filter(!islowercase, seq)) for seq in Untangled_cm_permuted_emitted_sequences_with_inserts]);
+
+# ╔═╡ 4557272d-7bb3-4449-807a-bd15b1a0f285
+Untangled_cm_permuted_emitted_sequences = SamApp2024.infernal_cm_emit_sequences(Untangled_cm_permuted.cmout; N=5000, inserts=false)
 
 # ╔═╡ 3f5b9040-6cb8-4445-a010-9215d8128456
 # Permute back to correct column locations
@@ -328,31 +299,23 @@ end
 # ╠═bb893d2b-25aa-49ef-bd50-a2c6ada2448c
 # ╠═85c19ce6-4096-4331-aec2-082cc4c5f24a
 # ╠═3e66fef9-612a-4a9b-89aa-eefb2b82cd8c
-# ╠═066e9cd6-afc9-49f9-8bcf-e17d94dae992
-# ╠═fe359d48-38d6-40b8-bc17-4646f8d154a2
-# ╠═35ff35dd-ec34-4080-9831-45ac5d044356
-# ╠═7db1e9ea-d181-419c-9b02-c30b77c6e197
-# ╠═cdd43222-a6b0-426b-96d0-407d5b7106c8
-# ╠═66617a9a-b345-4ad8-8522-80665c81c66d
-# ╠═9b352035-98c7-416f-8a9f-5c47c62ebda8
-# ╠═cad7df2d-d465-45d2-9ce6-4737adb18fcb
+# ╠═602fa5d2-88dd-48f7-ad67-f7331d63c473
+# ╠═952066b8-9430-43f4-8f27-895888875891
 # ╠═7bd2c5f8-16bf-4d98-aa19-96b97fc7332f
 # ╠═fbce70a0-3b12-4ce6-87e3-34bfbd884382
-# ╠═cec2e5cc-2ebf-41a5-b678-49fff9939131
-# ╠═8de1da12-cf86-4b5a-81b5-0f4c12724f20
-# ╠═c9afcea6-36b8-4574-ac6e-6434fbfcbf2e
-# ╠═b68ea3ea-8b92-4b71-9b6b-f5172efc3f14
-# ╠═12fe5491-b37a-4052-95d8-19f1d53e6799
-# ╠═4611b398-5030-4d0d-bf5c-9b41d57967d4
+# ╠═3ed4e68b-1d42-42a2-bcef-a1acd3da10c9
+# ╠═a89f2164-0baa-4613-bae9-941d04ef7a31
+# ╠═5d30684a-fb71-4621-9c2d-e7896dbfd50f
 # ╠═9ccdf111-1d2b-41e1-b330-5eb096f5f901
+# ╠═cd2bc167-d3dd-4bf8-ae33-608b22dcd9be
 # ╠═457541e2-2638-4fe1-a9ba-1b58d96da6c0
 # ╠═f5d1965d-21b8-4395-ab37-6d59a7d5658f
 # ╠═8dc56958-fac1-4971-ad6b-8f8c8c79fc48
 # ╠═01ba4b08-5135-48dc-bfa6-9cd7e8f9ee8e
-# ╠═ffc1c63c-6bc2-4ddf-a4e1-47afc8ac2b70
 # ╠═0f3a48b5-863c-4afe-8c5f-912e2b5e7c89
 # ╠═e8663b57-c9ea-421f-851b-e05e3d7c67e8
 # ╠═5ac9b927-fcbb-4ab7-903f-2d78ad6e6e3f
+# ╠═4557272d-7bb3-4449-807a-bd15b1a0f285
 # ╠═3f5b9040-6cb8-4445-a010-9215d8128456
 # ╠═9e2d19b1-581a-4529-8b25-6d537263224b
 # ╠═699d33dc-474b-4d15-b78c-5ab778c30a34

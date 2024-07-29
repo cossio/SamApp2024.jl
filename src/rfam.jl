@@ -106,7 +106,7 @@ end
 
 function rfam_RF00162_seed()
     RF00162_seed_stk = Infernal.esl_afetch(Rfam.seed(), "RF00162")
-    RF00162_seed_match_cols = findall(≠('.'), SamApp.stockholm_ss(RF00162_seed_stk.out))
+    RF00162_seed_match_cols = findall(≠('.'), stockholm_ss(RF00162_seed_stk.out))
 
      # WARNING: this has inserts marked as '-'
     RF00162_seed_afa = Infernal.esl_reformat("AFA", RF00162_seed_stk.out; informat="STOCKHOLM")
@@ -117,4 +117,12 @@ function rfam_RF00162_seed()
     @assert only(unique(length.(RF00162_seed_seqs_noinserts))) == 108
 
     return LongRNA{4}.(RF00162_seed_seqs_noinserts)
+end
+
+function rfam_RF00162_rfam_cm()
+    return Infernal.cmfetch(Rfam.cm(), "RF00162")
+end
+
+function rfam_RF00162_denoised_cm()
+    return rfam_cmenone("RF00162")
 end

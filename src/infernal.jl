@@ -21,3 +21,13 @@ function infernal_score_sequences(cm_path::AbstractString, sequences::AbstractVe
         return Infernal.cmalign_parse_sfile(result.sfile)
     end
 end
+
+function infernal_cm_emit_sequences(cm_path::AbstractString; N::Int=5000, inserts::Bool=false)
+    emitted_sequences_afa = Infernal.cmemit(cm_path; N, aligned=true, outformat="AFA")
+    emitted_sequences_with_inserts = FASTX.sequence.(FASTX.FASTA.Reader(open(emitted_sequences_afa.out)))
+    if inserts
+        return LongRNA{4}.(emitted_sequences_with_inserts)
+    else
+        return LongRNA{4}.(filter(!=('.'), filter(!islowercase, seq)) for seq = emitted_sequences_with_inserts)
+    end
+end

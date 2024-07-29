@@ -53,5 +53,6 @@ include("shape_alignment.jl")
 include("secondary_structure.jl")
 include("util.jl")
 include("infernal.jl")
+include("unknotted_rf00162.jl")
 
 end
