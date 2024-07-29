@@ -182,7 +182,7 @@ let fig = Makie.Figure()
 	Makie.stephist!(ax, cm_score_rbm; normalization=:pdf, label="RBM", bins=30:2:120, color=:blue, linewidth=2)
 	Makie.stephist!(ax, Rfam_cm_emitted_sequences_infernal_scores; normalization=:pdf, label="rCM", bins=-50:2:150, color=:red, linewidth=2)
 	Makie.xlims!(ax, -1, 120)
-	Makie.ylims!(ax, 0, 0.08)
+	Makie.ylims!(ax, 0, 0.077)
 
 	Makie.Label(fig[1,1][1, 1, Makie.TopLeft()], "A)", fontsize = 16, font = :bold, padding = (0, 5, 5, 0), halign = :right)
 	Makie.Label(fig[1,2][1, 1, Makie.TopLeft()], "B)", fontsize = 16, font = :bold, padding = (0, 5, 5, 0), halign = :right)
@@ -195,6 +195,9 @@ end
 
 # ╔═╡ 3768ddcd-57fb-4fc1-85fd-898c9b6193e1
 L"\log(P_{\mathrm{CMVAE}}(z)) + \mathrm{const.}"
+
+# ╔═╡ ce7a137e-7fe9-4cdf-a827-e6db6d93d069
+md"# Final figure using Denoised CM"
 
 # ╔═╡ Cell order:
 # ╠═e98903a9-5faf-4cc0-ab42-a7a7bd5ccfc9
@@ -244,3 +247,4 @@ L"\log(P_{\mathrm{CMVAE}}(z)) + \mathrm{const.}"
 # ╠═3a2cdb94-1c0a-4798-a14d-80beb09e7716
 # ╠═2b90f592-5a28-485e-84bf-232d900f1abc
 # ╠═3768ddcd-57fb-4fc1-85fd-898c9b6193e1
+# ╠═ce7a137e-7fe9-4cdf-a827-e6db6d93d069
