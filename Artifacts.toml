@@ -85,3 +85,11 @@ lazy = true
     [[SAMAP_ALL-REP-MERGED-2023-10-27.download]]
     sha256 = "23ab34615776fdacbe83ab7dcb7ead9ae9ea59aa90a1e0687886f4e6c392bddc"
     url = "https://gist.github.com/cossio/661ce7c22cb66c5549635b0e6cb7971b/raw/3fb28142091e8b33b12f3a2ba09bf54faf56b039.tar.gz"
+
+[2022-08-12-SAMAP_with_cristalized_Rep3_5000depth]
+git-tree-sha1 = "e3564ba084aca4391f4196a4320388b74b0c1c34"
+lazy = true
+
+    [[2022-08-12-SAMAP_with_cristalized_Rep3_5000depth.download]]
+    sha256 = "23f5079b1d39464d95badca816ec5b669673f806b8e43d734dd922940d5b479f"
+    url = "https://gist.github.com/cossio/ae2f070f636524658f1d68935415c35f/raw/e3564ba084aca4391f4196a4320388b74b0c1c34.tar.gz"
