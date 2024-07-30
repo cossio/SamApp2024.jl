@@ -55,4 +55,4 @@ For an alternative implementation of Restricted Boltzmann machines in Python, se
 
 # Issues
 
-If you encounter any problems, please [open an issue](https://github.com/cossio/SamApp2024.jl/issues/new/choose) in this repository.
+If you encounter any problems, or need help setting up this package, please [open an issue](https://github.com/cossio/SamApp2024.jl/issues/new/choose) in this repository.

@@ -22,6 +22,9 @@ using NaNStatistics: nanmean
 # ╔═╡ 8d5835b7-950c-4c16-82e9-53376e9df802
 using NaNStatistics: nanstd
 
+# ╔═╡ 9640f397-ce77-4ce2-b963-5e7297b00019
+using NaNStatistics: nancor
+
 # ╔═╡ c111079d-2fe2-4abf-894b-e5a0567e0351
 using RestrictedBoltzmannMachines: free_energy
 
@@ -135,11 +138,23 @@ _rbmhi = rbm_seqs ∩ findall((!ismissing).(aptamer_rbm_energies) .&& (aptamer_r
     shape_data_rep0.shape_reactivities[:, :, only(conds_mg_rep0)]
 );
 
+# ╔═╡ e9e4caf5-53a4-45c0-b60a-8f30c86a1f0a
+ΔR_mg = (
+    shape_data_rep0.shape_reactivities[:, :, only(conds_mg_rep0)] .-
+    shape_data_rep0.shape_reactivities[:, :, only(conds_30C_rep0)]
+);
+
 # ╔═╡ ea7d249a-2f97-4257-a384-23bcf898e1d1
 ΔR_sam_avg_seed = nanmean(ΔR_sam[:, seed_seqs]; dim=2)
 
 # ╔═╡ d46610f4-5880-4ed9-a11b-f46af4a350ec
-ΔR_sam_std_seed = nanstd(ΔR_sam[:, seed_seqs]; dim=2);
+ΔR_sam_std_seed = nanstd(ΔR_sam[:, seed_seqs]; dim=2)
+
+# ╔═╡ c6d25a44-acae-4ac1-85d8-9c771ade2ad2
+ΔR_mg_avg_seed = nanmean(ΔR_mg[:, seed_seqs]; dim=2)
+
+# ╔═╡ 521c0736-50b6-402e-bd66-993f573f5bd2
+ΔR_mg_std_seed = nanstd(ΔR_mg[:, seed_seqs]; dim=2)
 
 # ╔═╡ 2bf75879-eb41-4811-af27-2b75d5a03b94
 ΔR_sam_avg_full = nanmean(ΔR_sam[:, full_seqs]; dim=2)
@@ -151,27 +166,155 @@ _rbmhi = rbm_seqs ∩ findall((!ismissing).(aptamer_rbm_energies) .&& (aptamer_r
 ΔR_sam_avg_rbmlo = nanmean(ΔR_sam[:, _rbmlo]; dim=2)
 
 # ╔═╡ ab59563c-24aa-4343-aabd-bc83af634d47
-ΔR_sam_std_rbmlo = nanstd(ΔR_sam[:, _rbmlo]; dim=2);
+ΔR_sam_std_rbmlo = nanstd(ΔR_sam[:, _rbmlo]; dim=2)
+
+# ╔═╡ 3a341520-7ec3-47c5-bff0-69dcde6befa3
+ΔR_mg_avg_rbmlo = nanmean(ΔR_mg[:, _rbmlo]; dim=2)
+
+# ╔═╡ a0759269-97b3-46e8-a116-08c92044094a
+ΔR_mg_std_rbmlo = nanstd(ΔR_mg[:, _rbmlo]; dim=2)
 
 # ╔═╡ 85529c26-e375-4fd3-a0ac-2c29214d2932
 ΔR_sam_avg_rbmhi = nanmean(ΔR_sam[:, _rbmhi]; dim=2)
 
 # ╔═╡ 28e44344-004f-4d49-9dc4-736ca1232f0b
-ΔR_sam_std_rbmhi = nanstd(ΔR_sam[:, _rbmhi]; dim=2);
+ΔR_sam_std_rbmhi = nanstd(ΔR_sam[:, _rbmhi]; dim=2)
+
+# ╔═╡ 7ae461b8-e707-42cd-b5fa-45416de4959a
+ΔR_mg_avg_rbmhi = nanmean(ΔR_mg[:, _rbmhi]; dim=2)
+
+# ╔═╡ 5f55fb6d-1d25-4d08-a221-f1e965c32e18
+ΔR_mg_std_rbmhi = nanstd(ΔR_mg[:, _rbmhi]; dim=2)
 
 # ╔═╡ 2e1dcf63-3045-4b3c-aec6-b0226a0dd509
 ΔR_sam_avg_inf = nanmean(ΔR_sam[:, inf_seqs]; dim=2)
 
 # ╔═╡ 4338e4c9-b19a-45c4-b183-7c0bdb722849
-ΔR_sam_std_inf = nanstd(ΔR_sam[:, inf_seqs]; dim=2);
+ΔR_sam_std_inf = nanstd(ΔR_sam[:, inf_seqs]; dim=2)
+
+# ╔═╡ 3f5ec14c-d887-41f4-8729-ff8eb7f9b66d
+ΔR_mg_avg_inf = nanmean(ΔR_mg[:, inf_seqs]; dim=2)
+
+# ╔═╡ 66300085-651d-4a5a-86c9-5366e4d2388c
+ΔR_mg_std_inf = nanstd(ΔR_mg[:, inf_seqs]; dim=2)
 
 # ╔═╡ 1e1f186f-0d28-4dcf-9fee-adbafe9317cb
-_sites = 3:107
+_sites = 3:107 # do not plot sites at the edges because they contain NAN / Inf
 
 # ╔═╡ ccef9ed1-5921-4db7-b31f-6c4f7158810b
 md"""
-# Figure
+# Figure: Response to Mg
 """
+
+# ╔═╡ 8aefd350-7e20-494f-9422-d1351d729dff
+let fig = Makie.Figure()
+
+	ax = Makie.Axis(fig[1,1]; width=700, height=100, xticks=1:5:108, yticks=-2:1:1, xlabel="site", ylabel="diff. reactivity", xgridvisible=false, ygridvisible=false)
+	
+	Makie.band!(ax, _sites, (ΔR_mg_avg_seed - ΔR_mg_std_seed/2)[_sites], (ΔR_mg_avg_seed + ΔR_mg_std_seed/2)[_sites], markersize=5, color=(:gray, 0.25))
+	Makie.lines!(ax, _sites, ΔR_mg_avg_seed[_sites], linewidth=1, color=:gray)
+	Makie.scatter!(ax, _sites, ΔR_mg_avg_seed[_sites], markersize=5, color=:black)
+	
+	Makie.band!(ax, _sites, (ΔR_mg_avg_rbmlo - ΔR_mg_std_rbmlo/2)[_sites], (ΔR_mg_avg_rbmlo + ΔR_mg_std_rbmlo/2)[_sites], markersize=5, color=(:blue, 0.25))
+	Makie.lines!(ax, _sites, ΔR_mg_avg_rbmlo[_sites], linewidth=1, color=:blue)
+	Makie.scatter!(ax, _sites, ΔR_mg_avg_rbmlo[_sites], markersize=5, color=:blue)
+	
+	
+	ax = Makie.Axis(fig[2,1], width=700, height=100, xticks=1:5:108, yticks=-2:1:1, xlabel="site", ylabel="diff. reactivity", xgridvisible=false, ygridvisible=false)
+	
+	Makie.band!(ax, _sites, (ΔR_mg_avg_seed - ΔR_mg_std_seed/2)[_sites], (ΔR_mg_avg_seed + ΔR_mg_std_seed/2)[_sites], markersize=5, color=(:gray, 0.25))
+	Makie.lines!(ax, _sites, ΔR_mg_avg_seed[_sites], linewidth=1, color=:gray)
+	Makie.scatter!(ax, _sites, ΔR_mg_avg_seed[_sites], markersize=5, color=:black)
+	
+	Makie.band!(ax, _sites, (ΔR_mg_avg_rbmhi - ΔR_mg_std_rbmhi/2)[_sites], (ΔR_mg_avg_rbmhi + ΔR_mg_std_rbmhi/2)[_sites], markersize=5, color=(:red, 0.25))
+	Makie.lines!(ax, _sites, ΔR_mg_avg_rbmhi[_sites], linewidth=1, color=:red)
+	Makie.scatter!(ax, _sites, ΔR_mg_avg_rbmhi[_sites], markersize=5, color=:red)
+	
+	
+	ax = Makie.Axis(fig[3,1], width=700, height=100, xticks=1:5:108, yticks=-2:1:1, xlabel="site", ylabel="diff. reactivity", xgridvisible=false, ygridvisible=false)
+	
+	Makie.band!(ax, _sites, (ΔR_mg_avg_seed - ΔR_mg_std_seed/2)[_sites], (ΔR_mg_avg_seed + ΔR_mg_std_seed/2)[_sites], markersize=5, color=(:gray, 0.25))
+	Makie.lines!(ax, _sites, ΔR_mg_avg_seed[_sites], linewidth=1, color=:gray)
+	Makie.scatter!(ax, _sites, ΔR_mg_avg_seed[_sites], markersize=5, color=:black)
+	
+	Makie.band!(ax, _sites, (ΔR_mg_avg_inf - ΔR_mg_std_inf/2)[_sites], (ΔR_mg_avg_inf + ΔR_mg_std_inf/2)[_sites], markersize=5, color=(:red, 0.25))
+	Makie.lines!(ax, _sites, ΔR_mg_avg_inf[_sites], linewidth=1, color=:red)
+	Makie.scatter!(ax, _sites, ΔR_mg_avg_inf[_sites], markersize=5, color=:red)
+
+	Makie.Label(fig[1,1][1, 1, Makie.TopLeft()], "A)", fontsize = 18, font = :bold, padding = (0, 5, 5, 0), halign = :right)
+	Makie.Label(fig[2,1][1, 1, Makie.TopLeft()], "B)", fontsize = 18, font = :bold, padding = (0, 5, 5, 0), halign = :right)
+	Makie.Label(fig[3,1][1, 1, Makie.TopLeft()], "C)", fontsize = 18, font = :bold, padding = (0, 5, 5, 0), halign = :right)
+
+	Makie.resize_to_layout!(fig)
+	Makie.save("/DATA/cossio/SAM/2024/SamApp2024.jl/pluto/SI/Figures/2024-07-30 Avg SHAPE profiles - Mg.pdf", fig)
+	fig
+end
+
+# ╔═╡ 95ecd643-da11-4b50-b7dc-00dfff1c54ce
+nancor(ΔR_mg_avg_seed[_sites], ΔR_mg_avg_rbmlo[_sites])
+
+# ╔═╡ b802efbc-1246-4437-a743-8b9e359df09f
+nancor(ΔR_mg_avg_seed[_sites], ΔR_mg_avg_inf[_sites])
+
+# ╔═╡ bf4201e8-ea61-49dd-9746-06f6d283e931
+nancor(ΔR_mg_avg_seed[_sites], ΔR_mg_avg_rbmhi[_sites])
+
+# ╔═╡ 462694bb-2ed1-4b0b-9a1b-c3f5e046ea32
+md"""
+# Figure: Response to SAM
+"""
+
+# ╔═╡ 273aa7d7-dea1-409d-9e1a-e845b3cadaec
+let fig = Makie.Figure()
+	ax = Makie.Axis(fig[1,1]; width=700, height=100, xticks=1:5:108, yticks=-2:1:1, xlabel="site", ylabel="diff. reactivity", xgridvisible=false, ygridvisible=false)
+	
+	Makie.band!(ax, _sites, (ΔR_sam_avg_seed - ΔR_sam_std_seed/2)[_sites], (ΔR_sam_avg_seed + ΔR_sam_std_seed/2)[_sites], markersize=5, color=(:gray, 0.25))
+	Makie.lines!(ax, _sites, ΔR_sam_avg_seed[_sites], linewidth=1, color=:gray)
+	Makie.scatter!(ax, _sites, ΔR_sam_avg_seed[_sites], markersize=5, color=:black)
+	
+	Makie.band!(ax, _sites, (ΔR_sam_avg_rbmlo - ΔR_sam_std_rbmlo/2)[_sites], (ΔR_sam_avg_rbmlo + ΔR_sam_std_rbmlo/2)[_sites], markersize=5, color=(:blue, 0.25))
+	Makie.lines!(ax, _sites, ΔR_sam_avg_rbmlo[_sites], linewidth=1, color=:blue)
+	Makie.scatter!(ax, _sites, ΔR_sam_avg_rbmlo[_sites], markersize=5, color=:blue)
+	
+	
+	ax = Makie.Axis(fig[2,1], width=700, height=100, xticks=1:5:108, yticks=-2:1:1, xlabel="site", ylabel="diff. reactivity", xgridvisible=false, ygridvisible=false)
+	
+	Makie.band!(ax, _sites, (ΔR_sam_avg_seed - ΔR_sam_std_seed/2)[_sites], (ΔR_sam_avg_seed + ΔR_sam_std_seed/2)[_sites], markersize=5, color=(:gray, 0.25))
+	Makie.lines!(ax, _sites, ΔR_sam_avg_seed[_sites], linewidth=1, color=:gray)
+	Makie.scatter!(ax, _sites, ΔR_sam_avg_seed[_sites], markersize=5, color=:black)
+	
+	Makie.band!(ax, _sites, (ΔR_sam_avg_rbmhi - ΔR_sam_std_rbmhi/2)[_sites], (ΔR_sam_avg_rbmhi + ΔR_sam_std_rbmhi/2)[_sites], markersize=5, color=(:red, 0.25))
+	Makie.lines!(ax, _sites, ΔR_sam_avg_rbmhi[_sites], linewidth=1, color=:red)
+	Makie.scatter!(ax, _sites, ΔR_sam_avg_rbmhi[_sites], markersize=5, color=:red)
+	
+	
+	ax = Makie.Axis(fig[3,1], width=700, height=100, xticks=1:5:108, yticks=-2:1:1, xlabel="site", ylabel="diff. reactivity", xgridvisible=false, ygridvisible=false)
+	
+	Makie.band!(ax, _sites, (ΔR_sam_avg_seed - ΔR_sam_std_seed/2)[_sites], (ΔR_sam_avg_seed + ΔR_sam_std_seed/2)[_sites], markersize=5, color=(:gray, 0.25))
+	Makie.lines!(ax, _sites, ΔR_sam_avg_seed[_sites], linewidth=1, color=:gray)
+	Makie.scatter!(ax, _sites, ΔR_sam_avg_seed[_sites], markersize=5, color=:black)
+	
+	Makie.band!(ax, _sites, (ΔR_sam_avg_inf - ΔR_sam_std_inf/2)[_sites], (ΔR_sam_avg_inf + ΔR_sam_std_inf/2)[_sites], markersize=5, color=(:red, 0.25))
+	Makie.lines!(ax, _sites, ΔR_sam_avg_inf[_sites], linewidth=1, color=:red)
+	Makie.scatter!(ax, _sites, ΔR_sam_avg_inf[_sites], markersize=5, color=:red)
+
+	Makie.Label(fig[1,1][1, 1, Makie.TopLeft()], "A)", fontsize = 18, font = :bold, padding = (0, 5, 5, 0), halign = :right)
+	Makie.Label(fig[2,1][1, 1, Makie.TopLeft()], "B)", fontsize = 18, font = :bold, padding = (0, 5, 5, 0), halign = :right)
+	Makie.Label(fig[3,1][1, 1, Makie.TopLeft()], "C)", fontsize = 18, font = :bold, padding = (0, 5, 5, 0), halign = :right)
+
+	Makie.resize_to_layout!(fig)
+	Makie.save("/DATA/cossio/SAM/2024/SamApp2024.jl/pluto/SI/Figures/2024-07-30 Avg SHAPE profiles - SAM.pdf", fig)
+	fig
+end
+
+# ╔═╡ 211a2d6f-bb96-4a9d-83c8-3e653d85ba47
+nancor(ΔR_sam_avg_seed[_sites], ΔR_sam_avg_rbmlo[_sites])
+
+# ╔═╡ d1e686b6-2e9b-4c75-9b6a-51d97e65c23f
+nancor(ΔR_sam_avg_seed[_sites], ΔR_sam_avg_inf[_sites])
+
+# ╔═╡ 7b236bcd-6127-4ff5-bb32-d18bd0b197b1
+nancor(ΔR_sam_avg_seed[_sites], ΔR_sam_avg_rbmhi[_sites])
 
 # ╔═╡ Cell order:
 # ╠═68115a4a-e980-4194-aafa-069616330d43
@@ -190,6 +333,7 @@ md"""
 # ╠═b4a50bf4-dc61-4279-860e-149555c1ef1b
 # ╠═98157aeb-819d-41ce-b453-1a7535a13fd7
 # ╠═8d5835b7-950c-4c16-82e9-53376e9df802
+# ╠═9640f397-ce77-4ce2-b963-5e7297b00019
 # ╠═c111079d-2fe2-4abf-894b-e5a0567e0351
 # ╠═d0da5b04-9fd8-48f0-ab9d-829d2daacbc8
 # ╠═4ddd5cb8-93c9-4dcd-ad69-01926f2c56a7
@@ -213,15 +357,33 @@ md"""
 # ╠═ce97d10c-57be-4e3c-b0fa-7dc0200d85ae
 # ╠═f9da2ba1-5e14-4b66-a8d5-35dd293de6b5
 # ╠═662dad5e-309e-4a51-8aa9-7b8e9a68b933
+# ╠═e9e4caf5-53a4-45c0-b60a-8f30c86a1f0a
 # ╠═ea7d249a-2f97-4257-a384-23bcf898e1d1
 # ╠═d46610f4-5880-4ed9-a11b-f46af4a350ec
+# ╠═c6d25a44-acae-4ac1-85d8-9c771ade2ad2
+# ╠═521c0736-50b6-402e-bd66-993f573f5bd2
 # ╠═2bf75879-eb41-4811-af27-2b75d5a03b94
 # ╠═50630028-9ef9-4a99-9960-239e78905ea1
 # ╠═2422f14c-0b02-4059-8fd2-72bd6110ac9c
 # ╠═ab59563c-24aa-4343-aabd-bc83af634d47
+# ╠═3a341520-7ec3-47c5-bff0-69dcde6befa3
+# ╠═a0759269-97b3-46e8-a116-08c92044094a
 # ╠═85529c26-e375-4fd3-a0ac-2c29214d2932
 # ╠═28e44344-004f-4d49-9dc4-736ca1232f0b
+# ╠═7ae461b8-e707-42cd-b5fa-45416de4959a
+# ╠═5f55fb6d-1d25-4d08-a221-f1e965c32e18
 # ╠═2e1dcf63-3045-4b3c-aec6-b0226a0dd509
 # ╠═4338e4c9-b19a-45c4-b183-7c0bdb722849
+# ╠═3f5ec14c-d887-41f4-8729-ff8eb7f9b66d
+# ╠═66300085-651d-4a5a-86c9-5366e4d2388c
 # ╠═1e1f186f-0d28-4dcf-9fee-adbafe9317cb
 # ╠═ccef9ed1-5921-4db7-b31f-6c4f7158810b
+# ╠═8aefd350-7e20-494f-9422-d1351d729dff
+# ╠═95ecd643-da11-4b50-b7dc-00dfff1c54ce
+# ╠═b802efbc-1246-4437-a743-8b9e359df09f
+# ╠═bf4201e8-ea61-49dd-9746-06f6d283e931
+# ╠═462694bb-2ed1-4b0b-9a1b-c3f5e046ea32
+# ╠═273aa7d7-dea1-409d-9e1a-e845b3cadaec
+# ╠═211a2d6f-bb96-4a9d-83c8-3e653d85ba47
+# ╠═d1e686b6-2e9b-4c75-9b6a-51d97e65c23f
+# ╠═7b236bcd-6127-4ff5-bb32-d18bd0b197b1
