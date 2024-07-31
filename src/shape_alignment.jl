@@ -136,11 +136,11 @@ function shape_positions_alignment_2022()
     natural_seed_positions_mapping = Array{Union{Missing,Int}}(undef, sum(aptamers_df.source .== "RF00162_seed70"), 108)
     natural_seed_positions_mapping .= missing
 
-    for (n, idx) in enumerate(aptamer_seed_index)
+    for (n, idx) = enumerate(aptamer_seed_index)
         @assert !isnothing(idx) # all seed sequences are found in Rfam!
         aligned_sequence = replace(natural_seed_sequences_afa[idx], '.' => "")
         seq_pos = match_pos = 0
-        for (i,c) in enumerate(aligned_sequence)
+        for (i,c) = enumerate(aligned_sequence)
             if c == '-'
                 match_pos += 1 # deletion
                 natural_seed_positions_mapping[n, match_pos] = missing
@@ -163,10 +163,10 @@ function shape_positions_alignment_2022()
     synthetic_positions_mapping = Array{Union{Missing,Int}}(undef, 100, 108)
     synthetic_positions_mapping .= missing
 
-    for n in 1:100
+    for n = 1:100
         aligned_sequence = synthetic_df.sequence[n]
         seq_pos = match_pos = 0
-        for (i,c) in enumerate(aligned_sequence)
+        for (i,c) = enumerate(aligned_sequence)
             if c == '-'
                 match_pos += 1 # deletion
                 synthetic_positions_mapping[n, match_pos] = missing
