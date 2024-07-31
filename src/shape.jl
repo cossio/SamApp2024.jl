@@ -39,6 +39,17 @@ function select_conditions_20231002(shape_data, conditions)
     )
 end
 
+function shapemapper_data_pierre_demux_20230920_dir(; demux::Bool=true)
+    @assert demux
+    if demux
+        shape_dir = artifact"SAMAP-demux-repl0-and-repl4+5-2023-09"
+    else
+        #shape_dir = artifact"SAMAP-nodemux-repl0-and-repl4+5-2023-09"
+    end
+    @assert isdir(shape_dir)
+    return shape_dir
+end
+
 #=
 Loads the SHAPE data produced by SHAPE-Mapper2 pipeline.
 This part does not do the statistical analysis yet.
@@ -46,15 +57,8 @@ Data demuxed by Pierre, for replicates 4+5
 Also available at "pCloud Drive/data/2023/SAM-Riboswitch/20230920-Pierre_demux"
 (Here downloaded automatically as Julia Artifacts)
 =#
-function load_shapemapper_data_pierre_demux_20230920(; demux = true)
-    @assert demux
-    if demux
-        shape_dir = artifact"SAMAP-demux-repl0-and-repl4+5-2023-09"
-    else
-        #shape_dir = artifact"SAMAP-nodemux-repl0-and-repl4+5-2023-09"
-    end
-
-    @assert isdir(shape_dir)
+function load_shapemapper_data_pierre_demux_20230920(; demux::Bool=true)
+    shape_dir = shapemapper_data_pierre_demux_20230920_dir(; demux)
 
     conditions = filter(startswith("SAMAP"), readdir(shape_dir))
     @assert issorted(conditions)

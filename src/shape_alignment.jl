@@ -65,9 +65,9 @@ function shape_positions_alignment_2022()
     @assert parse.(Int, aptamers_df.id[aptamers_df.source .== "RF00162_syn"]) == 1:100
 
     # For the natural sequences, aptamer names (indices) are also sorted simply, with the first being the hits, then the seed sequences
-    @assert parse.(Int, [s[7:end] for s in aptamers_df.name[aptamers_df.source .== "RF00162_full30"]]) == 1:55
-    @assert parse.(Int, [s[7:end] for s in aptamers_df.name[aptamers_df.source .== "RF00162_seed70"]]) == 56:206
-    @assert parse.(Int, [s[7:end] for s in aptamers_df.name[(aptamers_df.source .== "RF00162_full30") .| (aptamers_df.source .== "RF00162_seed70")]]) == 1:206
+    @assert parse.(Int, [s[7:end] for s = aptamers_df.name[aptamers_df.source .== "RF00162_full30"]]) == 1:55
+    @assert parse.(Int, [s[7:end] for s = aptamers_df.name[aptamers_df.source .== "RF00162_seed70"]]) == 56:206
+    @assert parse.(Int, [s[7:end] for s = aptamers_df.name[(aptamers_df.source .== "RF00162_full30") .| (aptamers_df.source .== "RF00162_seed70")]]) == 1:206
     @assert sum(aptamers_df.source .== "RF00162_full30") + sum(aptamers_df.source .== "RF00162_seed70") == 206
 
     # considering only those that match Rfam ids
@@ -113,11 +113,11 @@ function shape_positions_alignment_2022()
     natural_hits_positions_mapping = Array{Union{Missing,Int}}(undef, sum(aptamers_df.source .== "RF00162_full30"), 108);
     natural_hits_positions_mapping .= missing
 
-    for (n, idx) in enumerate(aptamer_hits_index)
+    for (n, idx) = enumerate(aptamer_hits_index)
         isnothing(idx) && continue # sequence not found in Rfam
         aligned_sequence = replace(natural_hits_sequences[idx], '.' => "")
         seq_pos = match_pos = 0
-        for (i,c) in enumerate(aligned_sequence)
+        for (i,c) = enumerate(aligned_sequence)
             if c == '-'
                 match_pos += 1 # deletion
                 natural_hits_positions_mapping[n, match_pos] = missing # deletion

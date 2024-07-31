@@ -253,11 +253,11 @@ end
 # ╔═╡ 95ecd643-da11-4b50-b7dc-00dfff1c54ce
 nancor(ΔR_mg_avg_seed[_sites], ΔR_mg_avg_rbmlo[_sites])
 
-# ╔═╡ b802efbc-1246-4437-a743-8b9e359df09f
-nancor(ΔR_mg_avg_seed[_sites], ΔR_mg_avg_inf[_sites])
-
 # ╔═╡ bf4201e8-ea61-49dd-9746-06f6d283e931
 nancor(ΔR_mg_avg_seed[_sites], ΔR_mg_avg_rbmhi[_sites])
+
+# ╔═╡ b802efbc-1246-4437-a743-8b9e359df09f
+nancor(ΔR_mg_avg_seed[_sites], ΔR_mg_avg_inf[_sites])
 
 # ╔═╡ 462694bb-2ed1-4b0b-9a1b-c3f5e046ea32
 md"""

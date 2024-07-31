@@ -84,3 +84,8 @@ function rf00162_hits_taxonomy()
     path = joinpath(artifact"rf00162_14_7_taxonomy", "RF00162_hits_taxonomies.csv")
     return CSV.read(path, DataFrame)
 end
+
+function shape_crystalized_20240730_dir()
+    base_dir = artifact"2022-08-12-SAMAP_with_cristalized_Rep3_5000depth"
+    return joinpath(base_dir, "2022-08-12-SAMAP_with_cristalized_Rep3_5000depth")
+end
