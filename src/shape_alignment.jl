@@ -52,11 +52,7 @@ function shape_positions_alignment_2022()
 
     # The following file contains sequences (also + tag and primer) probed in 2022 experiments, and their IDs
     # The column sequence_tag_primer has the same sequence that appears in the SHAPE files below
-    aptamers_df = probed_aptamers_table_20221027()
-
-    # Note that sequences in `aptamers_df` are DNA, so we want to replace `T` with `U`
-    # We add a column with RNA sequences for convenience
-    aptamers_df.sequence_rna = replace.(aptamers_df.sequence, 'T' => 'U')
+    aptamers_df = probed_aptamers_table_20221027_rna()
 
     # Seed IDs match exactly what I get from Rfam
     @assert aptamers_df.id[aptamers_df.source .== "RF00162_seed70"] ⊆ natural_seed_ids
@@ -179,5 +175,56 @@ function shape_positions_alignment_2022()
         end
     end
 
-    return (; natural = natural_positions_mapping, synthetic = synthetic_positions_mapping)
+    pdb_positions_mapping = shape_pdb_positions_mapping_20240731()
+
+    return (; natural = natural_positions_mapping, synthetic = synthetic_positions_mapping, pdb = pdb_positions_mapping)
+end
+
+
+function shape_pdb_positions_mapping_20240731()
+	aptamers_df = probed_aptamers_table_20221027_rna()
+
+	natural_hits_afa_1410 = Infernal.cmalign(
+	   Infernal.cmfetch(Rfam.cm(; rfam_version="14.10"), "RF00162").out,
+	   Rfam.fasta_file("RF00162"; rfam_version="14.10");
+	   outformat="afa"
+	)
+
+	natural_hits_dsc_1410 = FASTX.description.(FASTX.FASTA.Reader(open(natural_hits_afa_1410.out)))
+	natural_hits_sequences_1410 = FASTX.sequence.(FASTX.FASTA.Reader(open(natural_hits_afa_1410.out)))
+
+	indexes_in_aptamers_df = [
+		[i for (i, id) = enumerate(aptamers_df.id) if occursin("2GIS", id)];
+		[i for (i, id) = enumerate(aptamers_df.id) if occursin("4KQY", id)]
+	]
+
+	indexes_in_hits410 = [
+		[i for (i, dsc) = enumerate(natural_hits_dsc_1410) if occursin("2GIS", dsc)];
+		[i for (i, dsc) = enumerate(natural_hits_dsc_1410) if occursin("4KQY", dsc)]
+	]
+
+	@assert length(indexes_in_aptamers_df) == length(indexes_in_hits410) == 2
+
+	pdb_positions_mapping = Array{Union{Missing,Int}}(undef, 2, 108);
+	pdb_positions_mapping .= missing
+
+	for (n, index_in_aptamers_df, index_in_hits410) = zip(1:2, indexes_in_aptamers_df, indexes_in_hits410)
+        aligned_sequence = replace(natural_hits_sequences_1410[index_in_hits410], '.' => "")
+        seq_pos = match_pos = 0
+        for (i, c) = enumerate(aligned_sequence)
+            if c == '-'
+                match_pos += 1 # deletion
+                pdb_positions_mapping[n, match_pos] = missing # deletion
+            elseif isuppercase(c)
+                seq_pos += 1
+                match_pos += 1 # match
+                pdb_positions_mapping[n, match_pos] = seq_pos # deletion
+            else
+                @assert islowercase(c) # insertion
+                seq_pos += 1
+            end
+        end
+    end
+
+	return pdb_positions_mapping
 end

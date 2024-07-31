@@ -26,6 +26,15 @@ function probed_aptamers_table_20221027()
     return aptamers_df
 end
 
+function probed_aptamers_table_20221027_rna()
+    # Note that sequences in `aptamers_df` are DNA, so we want to replace `T` with `U`
+    # We add a column with RNA sequences for convenience
+    aptamers_df = probed_aptamers_table_20221027()
+    aptamers_df.sequence_rna = replace.(aptamers_df.sequence, 'T' => 'U')
+    return aptamers_df
+end
+
+
 """
     pierre20221107post(:natural)
     pierre20221107post(:synthetic)
