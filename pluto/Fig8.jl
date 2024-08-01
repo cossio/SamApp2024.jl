@@ -38,9 +38,7 @@ using Statistics: cor
 using Statistics: mean
 
 # ╔═╡ ca2287c5-2509-4870-a335-605c7ec1022d
-md"""
-# imports
-"""
+md"# Imports"
 
 # ╔═╡ 60221493-44cb-41ff-b871-3352d42b0c21
 import CairoMakie
@@ -66,9 +64,15 @@ import Rfam
 # ╔═╡ ac311ee6-062d-4e88-9c58-8852126c0924
 import SamApp2024
 
+# ╔═╡ d354f10d-2eb1-4e74-bcb9-a4f01028cdf7
+import PlutoUI
+
+# ╔═╡ b7e64deb-3140-4038-abaf-6a7d2996358c
+PlutoUI.TableOfContents()
+
 # ╔═╡ 85110743-90c3-40a1-ab08-abc481480223
 md"""
-# load data
+# Load data
 """
 
 # ╔═╡ b214a89f-7a82-46ee-8b04-2a55cc257bc9
@@ -216,11 +220,11 @@ RF00162_hits_eig = eigen(RF00162_hits_cor);
 
 # ╔═╡ dcf44d38-95df-4e27-b4ef-3858cb0a40ac
 # remap the variable sites eigenvectors back to the original consensus sequence numbering
-RF00162_hits_eigvec = zeros(5, 108, size(RF00162_hits_eig.vectors, 1))
-
-# ╔═╡ 9fff9135-d131-475a-87b2-ff86552b316f
-for n in 1:size(RF00162_hits_eig.vectors, 1)
-    vec(view(RF00162_hits_eigvec, :, _variable_sites, n)) .= RF00162_hits_eig.vectors[:, n]
+begin
+	RF00162_hits_eigvec = zeros(5, 108, size(RF00162_hits_eig.vectors, 1))
+	for n in 1:size(RF00162_hits_eig.vectors, 1)
+	    vec(view(RF00162_hits_eigvec, :, _variable_sites, n)) .= RF00162_hits_eig.vectors[:, n]
+	end
 end
 
 # ╔═╡ 2c4015ad-8778-44f9-9d27-58a5ccbb5bd5
@@ -252,9 +256,7 @@ struct_bands = [
 ];
 
 # ╔═╡ 57fea3b4-eb6c-4064-87b5-314d83b1e117
-md"""
-# plots
-"""
+md"# Plots"
 
 # ╔═╡ 36eb9427-db56-4265-9621-0a91efe99a93
 let fig = Makie.Figure()
@@ -375,6 +377,53 @@ let fig = Makie.Figure()
 	fig
 end
 
+# ╔═╡ 292a1bb8-09b2-422c-9513-c09a27f04997
+md"# Examples"
+
+# ╔═╡ 6cb429f0-55ca-4d6e-9e3f-5e508d3d1a30
+shape_data.aptamer_criteria
+
+# ╔═╡ 31cb84b5-4bb7-486f-b818-6979072dac6b
+let fig = Makie.Figure()
+	n_ex = 116
+	_width = 700
+	_height = 100
+	
+	_R_mg = shape_data.shape_reactivities[:, n_ex, only(conds_mg)]
+	_R_sam = shape_data.shape_reactivities[:, n_ex, conds_sam[2]]
+	
+	ax_react_1 = Makie.Axis(fig[1,1]; valign=:bottom, width=_width, height=_height, xticks=5:10:108, ylabel="react.", xgridvisible=false, ygridvisible=false, yticks=0:4:8, xtrimspine=true, ytrimspine=true)
+	for (x0, xf, color, alpha) = struct_bands
+	    Makie.vspan!(ax_react_1, x0, xf; color=(color, alpha))
+	end
+	Makie.stairs!(ax_react_1, 1:108, _R_mg, color=:gray, step=:center, label="no SAM")
+	Makie.stairs!(ax_react_1, 1:108, _R_sam, color=:purple, step=:center, label="with SAM")
+	Makie.hidespines!(ax_react_1, :t, :r, :b)
+	Makie.hidexdecorations!(ax_react_1)
+	#Makie.axislegend(ax_react_1, position=(0.0, -13), framevisible=false)
+	
+	ax_diff_1 = Makie.Axis(fig[2,1]; valign=:bottom, width=_width, height=_height, xticks=5:10:108, xlabel="site", ylabel="Δreact.", xgridvisible=false, ygridvisible=false, yticks=-1:1, xtrimspine=true, ytrimspine=true)
+	for (x0, xf, color, alpha) = struct_bands
+	    Makie.vspan!(ax_diff_1, x0, xf; color=(color, alpha))
+	end
+	Makie.barplot!(ax_diff_1, 1:108, _R_sam - _R_mg, color=ifelse.(_R_sam - _R_mg .< 0, :green, :gray))
+	Makie.scatter!(ax_diff_1, _sites, -1.4one.(_sites), markersize=7, color=:black, marker=:utriangle)
+	Makie.xlims!(ax_diff_1, 0, 109)
+	Makie.hidespines!(ax_diff_1, :r, :b, :t)
+	Makie.hidexdecorations!(ax_diff_1)
+	#Makie.scatter!(ax_diff_1, _sites, -0.2one.(_sites), color=:blue, markersize=5)
+
+	Makie.linkxaxes!(ax_react_1, ax_diff_1)
+	Makie.ylims!(ax_diff_1, -1.5, 1)
+	Makie.ylims!(ax_react_1, -0.5, 8)
+	
+	Makie.xlims!(ax_react_1, 0.5, 108.5)
+	Makie.xlims!(ax_diff_1,  0.5, 108.5)
+
+	Makie.resize_to_layout!(fig)
+	fig
+end
+
 # ╔═╡ Cell order:
 # ╠═ca2287c5-2509-4870-a335-605c7ec1022d
 # ╠═b3c73892-1482-11ef-1248-f70b8e38afbd
@@ -386,6 +435,7 @@ end
 # ╠═845a563a-1853-4c00-b5ed-7768d8f852b5
 # ╠═a7379a53-a3e5-4e8e-9c9f-1fa9c58ff8a1
 # ╠═ac311ee6-062d-4e88-9c58-8852126c0924
+# ╠═d354f10d-2eb1-4e74-bcb9-a4f01028cdf7
 # ╠═38405504-270a-4b53-83f9-c250f84430e7
 # ╠═53290a43-f19a-43e0-a4be-7be73dcc339b
 # ╠═4bc1fbc6-c7b3-471d-bd86-6f7a59cc0749
@@ -396,6 +446,7 @@ end
 # ╠═e162b72f-d324-4725-abc4-c8ab73770cf1
 # ╠═e908abe1-dd9e-4f5d-bb81-941d6edd08d9
 # ╠═d806c591-00b9-49ba-a755-e3923ae41670
+# ╠═b7e64deb-3140-4038-abaf-6a7d2996358c
 # ╠═85110743-90c3-40a1-ab08-abc481480223
 # ╠═b214a89f-7a82-46ee-8b04-2a55cc257bc9
 # ╠═07bdfaa2-587f-49b3-a50d-e92618399eb1
@@ -440,10 +491,12 @@ end
 # ╠═d82b6d02-a0ef-418b-898f-6dca245ff100
 # ╠═d2b92466-6365-41b7-822e-2bf2df895dd3
 # ╠═dcf44d38-95df-4e27-b4ef-3858cb0a40ac
-# ╠═9fff9135-d131-475a-87b2-ff86552b316f
 # ╠═2c4015ad-8778-44f9-9d27-58a5ccbb5bd5
 # ╠═b588e294-6449-45c7-afbc-6535f1dfa6eb
 # ╠═e6028e8e-e58e-475e-994f-60bdecf164eb
 # ╠═91597c20-dace-4a3b-854a-8682173d9476
 # ╠═57fea3b4-eb6c-4064-87b5-314d83b1e117
 # ╠═36eb9427-db56-4265-9621-0a91efe99a93
+# ╠═292a1bb8-09b2-422c-9513-c09a27f04997
+# ╠═6cb429f0-55ca-4d6e-9e3f-5e508d3d1a30
+# ╠═31cb84b5-4bb7-486f-b818-6979072dac6b

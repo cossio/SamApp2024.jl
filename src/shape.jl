@@ -402,14 +402,18 @@ function shape_basepair_log_odds_v4(;
 end
 
 
+function load_shapemapper_data_pierre_demux_20240801_dir()
+    shape_dir = artifact"SAMAP_ALL-REP-MERGED-2023-10-27"
+    @assert isdir(shape_dir)
+    return shape_dir
+end
+
 
 #=
 Merged replicates. Data demuxed by Pierre, and then processed by ShapeMapper.
 =#
 function load_shapemapper_data_pierre_demux_20231027_repls_merged()
-    shape_dir = artifact"SAMAP_ALL-REP-MERGED-2023-10-27"
-    @assert isdir(shape_dir)
-
+    shape_dir = load_shapemapper_data_pierre_demux_20240801_dir()
     conditions = filter(startswith("SAMAP"), readdir(shape_dir))
     @assert issorted(conditions)
 

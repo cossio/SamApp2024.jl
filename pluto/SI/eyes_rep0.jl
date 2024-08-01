@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.42
+# v0.19.45
 
 using Markdown
 using InteractiveUtils
@@ -99,6 +99,12 @@ import ViennaRNA
 
 # ╔═╡ af740c9c-bfb1-4a5a-afa1-badf804be1ec
 import ViennaRNA_jll
+
+# ╔═╡ ae85207c-862e-4221-a983-37044952e9c1
+import PlutoUI
+
+# ╔═╡ ca9ee2cd-c8b4-49ec-bac9-e2288b4fd877
+PlutoUI.TableOfContents()
 
 # ╔═╡ b51759a0-df1d-4b4e-af11-51618bb31574
 md"# Load data"
@@ -236,6 +242,7 @@ _selection = ["APSAMN172", "APSAMN75", "APSAMN96", "APSAMS25", "APSAMS10"]
 # ╠═81a16243-3915-4135-ad89-5e2cc4b9b9d3
 # ╠═18572c57-560d-4503-8e68-a55bb8595e00
 # ╠═af740c9c-bfb1-4a5a-afa1-badf804be1ec
+# ╠═ae85207c-862e-4221-a983-37044952e9c1
 # ╠═1f9db468-3570-42d0-9d69-de3a4d8fae2c
 # ╠═852b0931-fc64-4915-b816-3d714f13eff0
 # ╠═1d213d26-0f44-4607-b688-4c31f037b24f
@@ -253,6 +260,7 @@ _selection = ["APSAMN172", "APSAMN75", "APSAMN96", "APSAMS25", "APSAMS10"]
 # ╠═658c3424-a2e2-4d28-a475-6dd34ea67b04
 # ╠═3f29b445-5d71-4b5a-a054-eb98ec7d24c4
 # ╠═cc0b4412-9d86-4f71-b614-7c2a19385657
+# ╠═ca9ee2cd-c8b4-49ec-bac9-e2288b4fd877
 # ╠═b51759a0-df1d-4b4e-af11-51618bb31574
 # ╠═5be4163b-374c-4901-8376-7c1fe6ac0066
 # ╠═6a735f9e-2f44-4bcb-8828-58d3983ceec0
