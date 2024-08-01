@@ -236,14 +236,16 @@ struct_bands = [
 
 # ╔═╡ ad38de09-1a74-413f-8676-3a3c261b7310
 let fig = Makie.Figure()
-	n_ex = only(findall(shape_data_045.aptamer_names .== "SAMAP-PDB0"))
+	n_ex = only(findall(shape_data_045.aptamer_names .== "SAMAP-PDB10"))
 	_width = 700
 	_height = 100
 
 	_R_sam = shape_data_all_merged.shape_reactivities[:, n_ex, conds_SAM_all_merged[1]]
 	_R_mg = shape_data_all_merged.shape_reactivities[:, n_ex, only(conds_Mg_all_merged)]
 	
-	ax_react_1 = Makie.Axis(fig[1,1]; valign=:bottom, width=_width, height=_height, xticks=5:10:108, ylabel="react.", xgridvisible=false, ygridvisible=false, yticks=0:4:8, xtrimspine=true, ytrimspine=true)
+	ax_react_1 = Makie.Axis(
+		fig[1,1]; valign=:bottom, width=_width, height=_height, xticks=5:10:108, ylabel="react.", xgridvisible=false, ygridvisible=false, yticks=0:4:8, xtrimspine=true, ytrimspine=true, title=shape_data_045.aptamer_ids[n_ex]
+	)
 	for (x0, xf, color, alpha) = struct_bands
 	    Makie.vspan!(ax_react_1, x0, xf; color=(color, alpha))
 	end

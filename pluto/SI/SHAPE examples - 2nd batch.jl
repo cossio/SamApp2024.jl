@@ -86,10 +86,10 @@ shape_data = SamApp2024.load_shapemapper_data_500v2_20240315();
 RF00162_hits = SamApp2024.rfam_RF00162_hits();
 
 # ╔═╡ e41bdff5-4805-4fbf-bd2a-a960c06ec469
-rbm_energies = free_energy(SamApp2024.rbm2022(), onehot(shape_data.aligned_sequences));
+rbm_energies = free_energy(SamApp2024.rbm2022(), SamApp2024.onehot(shape_data.aligned_sequences));
 
 # ╔═╡ 66deb70b-af97-4c31-b20e-0e9c2cdbb99c
-aptamer_natural_distances = SamApp2024.hamming(onehot(shape_data.aligned_sequences), onehot(RF00162_hits));
+aptamer_natural_distances = SamApp2024.hamming(SamApp2024.onehot(shape_data.aligned_sequences), onehot(RF00162_hits));
 
 # ╔═╡ cb48035d-af9b-4693-ada6-2cc9fb06923b
 conds_sam = [1,2];
