@@ -143,6 +143,31 @@ seed_seqs = findall(shape_data_045.aptamer_origin .== "RF00162_seed70")
 # ╔═╡ 5233e4f7-9519-4f54-9462-ed86fed7967b
 nat_seqs = full_seqs ∪ seed_seqs;
 
+# ╔═╡ 84b73033-032d-4166-9530-77bf2e7a9156
+_thresh = log(5)
+
+# ╔═╡ 1390357f-3524-4ec5-abbc-7976ddd988ae
+_sites = SamApp2024.hallmark_sites_20230507;
+
+# ╔═╡ 2b47c8c3-33a8-43b9-be9f-37f3594846d1
+# structural motifs
+struct_bands = [
+    (; x0=0.5, xf=8.5, color="blue", alpha=0.1), # P1
+    (; x0=100.5, xf=108.5, color="blue", alpha=0.1), # P1
+    (; x0=11.5, xf=16.5, color="green", alpha=0.1), # P2
+    (; x0=20.5, xf=23.5, color="green", alpha=0.1), # P2
+    (; x0=28.5, xf=31.5, color="green", alpha=0.1), # P2
+    (; x0=37.5, xf=42.5, color="green", alpha=0.1), # P2
+    (; x0=42.5, xf=46.5, color="orange", alpha=0.1), # P3
+    (; x0=47.5, xf=53.5, color="orange", alpha=0.1), # P3
+    (; x0=60.5, xf=64.5, color="orange", alpha=0.1), # P3
+    (; x0=66.5, xf=72.5, color="orange", alpha=0.1), # P3
+    (; x0=80.5, xf=86.5, color="teal", alpha=0.1), # P4
+    (; x0=91.5, xf=97.5, color="teal", alpha=0.1), # P4
+    (; x0=24.5, xf=28.5, color="red", alpha=0.1), # Pk
+    (; x0=76.5, xf=80.5, color="red", alpha=0.1), # Pk
+];
+
 # ╔═╡ cb9b6efc-68e1-4774-974d-44bd5236eabe
 md"# Natural and PDB examples (from Repl. 0)"
 
@@ -163,12 +188,6 @@ shape_stats_rep0 = SamApp2024.shape_basepair_log_odds_v4(;
     all_reactivities = all_reactivities_rep0,
     only_hq_profile = true, p_thresh = 1e-3, nsamples = 1000
 );
-
-# ╔═╡ 84b73033-032d-4166-9530-77bf2e7a9156
-_thresh = log(1)
-
-# ╔═╡ 1390357f-3524-4ec5-abbc-7976ddd988ae
-_sites = SamApp2024.hallmark_sites_20230507;
 
 # ╔═╡ 0b59b6a0-ce7d-4a07-8021-c278892629ef
 x_mg_rep0 = nansum(shape_stats_rep0.shape_log_odds[_sites, :,  conds_mg_rep0]; dim=(1,3))
@@ -237,27 +256,35 @@ shape_stats_rep45 = SamApp2024.shape_basepair_log_odds_v4(;
     only_hq_profile = true, p_thresh = 1e-3, nsamples = 1000
 );
 
-# ╔═╡ f810b7ef-c682-4cd8-847d-e8adfc54ac42
-md"# Reactivity profiles of PDB examples (from Repl. 0)"
+# ╔═╡ 484c72dd-6441-483d-815d-ca9ed8f2b238
+x_mg_rep45 = nansum(shape_stats_rep45.shape_log_odds[_sites, :,  conds_mg_rep45]; dim=(1,3))
 
-# ╔═╡ 2b47c8c3-33a8-43b9-be9f-37f3594846d1
-# structural motifs
-struct_bands = [
-    (; x0=0.5, xf=8.5, color="blue", alpha=0.1), # P1
-    (; x0=100.5, xf=108.5, color="blue", alpha=0.1), # P1
-    (; x0=11.5, xf=16.5, color="green", alpha=0.1), # P2
-    (; x0=20.5, xf=23.5, color="green", alpha=0.1), # P2
-    (; x0=28.5, xf=31.5, color="green", alpha=0.1), # P2
-    (; x0=37.5, xf=42.5, color="green", alpha=0.1), # P2
-    (; x0=42.5, xf=46.5, color="orange", alpha=0.1), # P3
-    (; x0=47.5, xf=53.5, color="orange", alpha=0.1), # P3
-    (; x0=60.5, xf=64.5, color="orange", alpha=0.1), # P3
-    (; x0=66.5, xf=72.5, color="orange", alpha=0.1), # P3
-    (; x0=80.5, xf=86.5, color="teal", alpha=0.1), # P4
-    (; x0=91.5, xf=97.5, color="teal", alpha=0.1), # P4
-    (; x0=24.5, xf=28.5, color="red", alpha=0.1), # Pk
-    (; x0=76.5, xf=80.5, color="red", alpha=0.1), # Pk
-];
+# ╔═╡ 7a5911f7-9839-4d84-bec9-8f985a760ecf
+x_sam_rep45 = nansum(shape_stats_rep45.shape_log_odds[_sites, :, conds_sam_rep45]; dim=(1,3))
+
+# ╔═╡ 584ea35c-51d7-427c-93e6-8f0cbd9489c6
+_responds_sam_yes_rep45 = (x_mg_rep45 .< -_thresh) .& (x_sam_rep45 .> +_thresh);
+
+# ╔═╡ b5f2161d-852d-4e9e-ad45-f66f9d0fffca
+_responds_sam_nop_rep45 = (x_mg_rep45 .> +_thresh) .| (x_sam_rep45 .< -_thresh);
+
+# ╔═╡ 013403ba-3595-49b8-95b3-a20d34e54003
+_inconclusive_rep45 = ((!).(_responds_sam_yes_rep45)) .& ((!).(_responds_sam_nop_rep45));
+
+# ╔═╡ e9be0fc7-c8e0-4e6e-b2af-c2a0342f8c88
+_conclusive_rep45 = _responds_sam_yes_rep45 .| _responds_sam_nop_rep45;
+
+# ╔═╡ 1fed5c25-8110-4780-999b-578ce4d73309
+shape_data_045.aptamer_ids[shape_data_045.aptamer_origin .== "PDB"]
+
+# ╔═╡ 77fb2435-8b9e-419f-b741-f9b01997f7cc
+_responds_sam_yes_rep45[shape_data_045.aptamer_origin .== "PDB"]
+
+# ╔═╡ 4b13af48-f912-4791-8210-b7dd2856856e
+_responds_sam_nop_rep45[shape_data_045.aptamer_origin .== "PDB"]
+
+# ╔═╡ f810b7ef-c682-4cd8-847d-e8adfc54ac42
+md"# Reactivity profiles of PDB examples (from merged)"
 
 # ╔═╡ ad38de09-1a74-413f-8676-3a3c261b7310
 let fig = Makie.Figure()
@@ -267,49 +294,6 @@ let fig = Makie.Figure()
 
 	_R_sam = shape_data_all_merged.shape_reactivities[:, n_ex, conds_SAM_all_merged[1]]
 	_R_mg = shape_data_all_merged.shape_reactivities[:, n_ex, only(conds_Mg_all_merged)]
-	
-	ax_react_1 = Makie.Axis(
-		fig[1,1]; valign=:bottom, width=_width, height=_height, xticks=5:10:108, ylabel="react.", xgridvisible=false, ygridvisible=false, yticks=0:4:8, xtrimspine=true, ytrimspine=true, title=shape_data_045.aptamer_ids[n_ex]
-	)
-	for (x0, xf, color, alpha) = struct_bands
-	    Makie.vspan!(ax_react_1, x0, xf; color=(color, alpha))
-	end
-	Makie.stairs!(ax_react_1, 1:108, _R_mg, color=:gray, step=:center, label="no SAM")
-	Makie.stairs!(ax_react_1, 1:108, _R_sam, color=:purple, step=:center, label="with SAM")
-	Makie.hidespines!(ax_react_1, :t, :r, :b)
-	Makie.hidexdecorations!(ax_react_1)
-	#Makie.axislegend(ax_react_1, position=(0.0, -13), framevisible=false)
-	
-	ax_diff_1 = Makie.Axis(fig[2,1]; valign=:bottom, width=_width, height=_height, xticks=5:10:108, xlabel="site", ylabel="Δreact.", xgridvisible=false, ygridvisible=false, yticks=-1:1, xtrimspine=true, ytrimspine=true)
-	for (x0, xf, color, alpha) = struct_bands
-	    Makie.vspan!(ax_diff_1, x0, xf; color=(color, alpha))
-	end
-	Makie.barplot!(ax_diff_1, 1:108, _R_sam - _R_mg, color=ifelse.(_R_sam - _R_mg .< 0, :green, :gray))
-	Makie.scatter!(ax_diff_1, _sites, -1.4one.(_sites), markersize=7, color=:black, marker=:utriangle)
-	Makie.xlims!(ax_diff_1, 0, 109)
-	Makie.hidespines!(ax_diff_1, :r, :t)
-	#Makie.hidexdecorations!(ax_diff_1)
-	#Makie.scatter!(ax_diff_1, _sites, -0.2one.(_sites), color=:blue, markersize=5)
-
-	Makie.linkxaxes!(ax_react_1, ax_diff_1)
-	Makie.ylims!(ax_diff_1, -1.5, 1)
-	Makie.ylims!(ax_react_1, -0.5, 8)
-	
-	Makie.xlims!(ax_react_1, 0.5, 108.5)
-	Makie.xlims!(ax_diff_1,  0.5, 108.5)
-
-	Makie.resize_to_layout!(fig)
-	fig
-end
-
-# ╔═╡ 7d867cb8-23f0-45c0-b3b9-b377e5de73eb
-let fig = Makie.Figure()
-	n_ex = only(findall(shape_data_045.aptamer_names .== "SAMAP-PDB0"))
-	_width = 700
-	_height = 100
-
-	_R_sam = shape_data_rep0.shape_reactivities[:, n_ex, conds_sam_rep0[3]]
-	_R_mg = shape_data_rep0.shape_reactivities[:, n_ex, only(conds_mg_rep0)]
 	
 	ax_react_1 = Makie.Axis(
 		fig[1,1]; valign=:bottom, width=_width, height=_height, xticks=5:10:108, ylabel="react.", xgridvisible=false, ygridvisible=false, yticks=0:4:8, xtrimspine=true, ytrimspine=true, title=shape_data_045.aptamer_ids[n_ex]
@@ -403,13 +387,14 @@ any(isfinite, shape_data_rep45.shape_reactivities[:, only(findall(shape_data_045
 # ╠═c99ea59e-015d-490c-96a2-45c7f669e46e
 # ╠═bc0664d7-370d-4f62-a4c0-5db8b4e61141
 # ╠═5233e4f7-9519-4f54-9462-ed86fed7967b
+# ╠═84b73033-032d-4166-9530-77bf2e7a9156
+# ╠═1390357f-3524-4ec5-abbc-7976ddd988ae
+# ╠═2b47c8c3-33a8-43b9-be9f-37f3594846d1
 # ╠═cb9b6efc-68e1-4774-974d-44bd5236eabe
 # ╠═0b64262b-0955-48fa-b21c-dc583b766f20
 # ╠═71e94a83-69c7-4be4-a78f-f9e64c23b509
 # ╠═2db2fd10-8e88-444a-9a47-44c20d58f328
 # ╠═4c8e11c4-e7b2-450f-92d1-0bd02c914a4f
-# ╠═84b73033-032d-4166-9530-77bf2e7a9156
-# ╠═1390357f-3524-4ec5-abbc-7976ddd988ae
 # ╠═0b59b6a0-ce7d-4a07-8021-c278892629ef
 # ╠═02b44cc7-ab81-486f-a47e-aca031042003
 # ╠═714afebd-0f15-4a64-9e59-4d63352432d2
@@ -429,9 +414,16 @@ any(isfinite, shape_data_rep45.shape_reactivities[:, only(findall(shape_data_045
 # ╠═060ad3b4-0ef4-4d36-a26e-1609b27635c6
 # ╠═e4c2f662-f6a9-4b9d-b591-ffb8e1ceb6d3
 # ╠═cabe9e9b-c9f4-4a36-bde9-12ee38e7ff9a
+# ╠═484c72dd-6441-483d-815d-ca9ed8f2b238
+# ╠═7a5911f7-9839-4d84-bec9-8f985a760ecf
+# ╠═584ea35c-51d7-427c-93e6-8f0cbd9489c6
+# ╠═b5f2161d-852d-4e9e-ad45-f66f9d0fffca
+# ╠═013403ba-3595-49b8-95b3-a20d34e54003
+# ╠═e9be0fc7-c8e0-4e6e-b2af-c2a0342f8c88
+# ╠═1fed5c25-8110-4780-999b-578ce4d73309
+# ╠═77fb2435-8b9e-419f-b741-f9b01997f7cc
+# ╠═4b13af48-f912-4791-8210-b7dd2856856e
 # ╠═f810b7ef-c682-4cd8-847d-e8adfc54ac42
-# ╠═2b47c8c3-33a8-43b9-be9f-37f3594846d1
 # ╠═ad38de09-1a74-413f-8676-3a3c261b7310
-# ╠═7d867cb8-23f0-45c0-b3b9-b377e5de73eb
 # ╠═dc5ea24a-704f-49ee-b384-68c5168d4ef6
 # ╠═1943e448-20a3-413b-b96c-13950225d861

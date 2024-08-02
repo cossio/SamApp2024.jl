@@ -19,6 +19,9 @@ using Makie: @L_str
 # ╔═╡ 8973e48f-df81-4749-b71d-aea5ac4614b3
 using NaNStatistics: nanmean
 
+# ╔═╡ 48ab42a5-3ea8-4b69-acfb-3e2471de7144
+using NaNStatistics: nanstd
+
 # ╔═╡ 61fcf845-c1b9-4798-8b11-1bee95c8d0e0
 using NaNStatistics: nansum
 
@@ -433,24 +436,47 @@ md"# Read depths"
 # ╔═╡ 008acc2e-9cca-47d7-921f-a041c6f73259
 nanmean(shape_data_rep0.shape_D_depth; dim=2)
 
+# ╔═╡ 04f8bed0-9bfe-4539-9945-5ac041bde016
+nanstd(shape_data_rep0.shape_D_depth; dim=2)
+
 # ╔═╡ 6b38d182-a901-4b20-bfdf-9441e4586e7b
-let fig = Makie.Figures()
-	_width = 550
-	_height = 70
+let fig = Makie.Figure()
+	width = 550
+	height = 100
+	xticks = 5:10:108
+	yticks = (0:10000:30000, ["0", "10000", "20000", "30000"])
+
+	depth_M_avg = nanmean(shape_data_rep0.shape_M_depth; dim=(2,3))
+	depth_U_avg = nanmean(shape_data_rep0.shape_U_depth; dim=(2,3))
+	depth_D_avg = nanmean(shape_data_rep0.shape_D_depth; dim=(2,3))
 	
-	_R_sam = shape_data_all_merged.shape_reactivities[:, n_ex_rbm, conds_SAM_all_merged[1]]
-	_R_mg = shape_data_all_merged.shape_reactivities[:, n_ex_rbm, only(conds_Mg_all_merged)]
-	
-	ax_react_1 = Makie.Axis(fig[2,1][1,1], width=_width, height=_height, xticks=5:10:108, ylabel="reactivity", xgridvisible=false, ygridvisible=false, yticks=0:2:5, ytrimspine=true)
+	depth_M_err = nanstd(shape_data_rep0.shape_M_depth; dim=(2,3))
+	depth_U_err = nanstd(shape_data_rep0.shape_U_depth; dim=(2,3))
+	depth_D_err = nanstd(shape_data_rep0.shape_D_depth; dim=(2,3))
+		
+	ax_M = Makie.Axis(fig[1,1]; width, height, xticks, yticks, ylabel="Read depth (M)", xgridvisible=false, ygridvisible=false, ytrimspine=true)
+	ax_U = Makie.Axis(fig[2,1]; width, height, xticks, yticks, ylabel="Read depth (U)", xgridvisible=false, ygridvisible=false, ytrimspine=true)
+	ax_D = Makie.Axis(fig[3,1]; width, height, xticks, yticks, ylabel="Read depth (D)", xgridvisible=false, ygridvisible=false, ytrimspine=true)
 	for (x0, xf, color, alpha) = struct_bands
-	    Makie.vspan!(ax_react_1, x0, xf; color=(color, alpha))
+	    Makie.vspan!(ax_M, x0, xf; color=(color, alpha))
+	    Makie.vspan!(ax_U, x0, xf; color=(color, alpha))
+	    Makie.vspan!(ax_D, x0, xf; color=(color, alpha))
 	end
-	Makie.stairs!(ax_react_1, 1:108, _R_mg, color=:gray, step=:center)
-	Makie.stairs!(ax_react_1, 1:108, _R_sam, color=:purple, step=:center)
-	Makie.xlims!(ax_react_1, 0.5, 108.5)
-	Makie.ylims!(ax_react_1, -1, 4)
-	Makie.hidespines!(ax_react_1, :t, :r, :b)
-	Makie.hidexdecorations!(ax_react_1)
+
+	Makie.band!(ax_M, 1:108, depth_M_avg - depth_M_err, depth_M_avg + depth_M_err; color=(:gray, 0.3))
+	Makie.band!(ax_U, 1:108, depth_U_avg - depth_U_err, depth_U_avg + depth_U_err; color=(:gray, 0.3))
+	Makie.band!(ax_D, 1:108, depth_D_avg - depth_D_err, depth_D_avg + depth_D_err; color=(:gray, 0.3))
+	
+	Makie.stairs!(ax_M, 1:108, depth_M_avg, color=:black, step=:center)
+	Makie.stairs!(ax_U, 1:108, depth_U_avg, color=:black, step=:center)
+	Makie.stairs!(ax_D, 1:108, depth_D_avg, color=:black, step=:center)
+
+	for ax = (ax_M, ax_U, ax_D)
+		Makie.xlims!(ax, 0.5, 108.5)
+	end
+	#Makie.ylims!(ax_M, -1, 4)
+	#Makie.hidespines!(ax_M, :t, :r, :b)
+	#Makie.hidexdecorations!(ax_M)
 
 	Makie.resize_to_layout!(fig)
 	fig
@@ -476,6 +502,7 @@ end
 # ╠═55735555-c2f7-41f0-becd-cbad5717d7be
 # ╠═fb8e8cbd-050d-4d0e-81ac-32528f628a0e
 # ╠═8973e48f-df81-4749-b71d-aea5ac4614b3
+# ╠═48ab42a5-3ea8-4b69-acfb-3e2471de7144
 # ╠═61fcf845-c1b9-4798-8b11-1bee95c8d0e0
 # ╠═e73b3886-162a-4a77-a28b-cdf269109b98
 # ╠═2abcc581-8722-4cf7-bc09-8bf98a9b8648
@@ -553,4 +580,5 @@ end
 # ╠═9fcca185-180f-4478-8fa2-d0cf37e1937b
 # ╠═9255fa38-9004-43c9-8817-5657e6cfb2d5
 # ╠═008acc2e-9cca-47d7-921f-a041c6f73259
+# ╠═04f8bed0-9bfe-4539-9945-5ac041bde016
 # ╠═6b38d182-a901-4b20-bfdf-9441e4586e7b
