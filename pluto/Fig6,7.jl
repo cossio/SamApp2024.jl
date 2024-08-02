@@ -34,6 +34,9 @@ using Statistics: cor
 # ╔═╡ 6d6e3dc8-28eb-496d-9622-8128422ed2ed
 using Statistics: mean
 
+# ╔═╡ c7378daf-3efe-4317-a95e-cd538a64e1a6
+using Statistics: std
+
 # ╔═╡ 7edc30fd-a2d6-4818-855c-c7f69c9f589b
 using Statistics: middle
 
@@ -482,6 +485,100 @@ let fig = Makie.Figure()
 	fig
 end
 
+# ╔═╡ 2cc26b9a-c18b-4321-ad79-a00f8085b525
+let fig = Makie.Figure()
+	width = 600
+	height = 100
+	xticks = 5:10:108
+	yticks = (0:10000:30000, ["0", "10000", "20000", "30000"])
+
+	depth_M_avg = dropdims(mean(replace(shape_data_rep0.shape_M_depth, NaN => 0); dims=(2,3)); dims=(2,3))
+	depth_U_avg = dropdims(mean(replace(shape_data_rep0.shape_U_depth, NaN => 0); dims=(2,3)); dims=(2,3))
+	depth_D_avg = dropdims(mean(replace(shape_data_rep0.shape_D_depth, NaN => 0); dims=(2,3)); dims=(2,3))
+	
+	depth_M_err = dropdims(std(replace(shape_data_rep0.shape_M_depth, NaN => 0); dims=(2,3)); dims=(2,3))
+	depth_U_err = dropdims(std(replace(shape_data_rep0.shape_U_depth, NaN => 0); dims=(2,3)); dims=(2,3))
+	depth_D_err = dropdims(std(replace(shape_data_rep0.shape_D_depth, NaN => 0); dims=(2,3)); dims=(2,3))
+	
+	ax_M = Makie.Axis(fig[1,1]; width, height, xticks, yticks, ylabel="Read depth (M)", xgridvisible=false, ygridvisible=false, ytrimspine=true)
+	ax_U = Makie.Axis(fig[2,1]; width, height, xticks, yticks, ylabel="Read depth (U)", xgridvisible=false, ygridvisible=false, ytrimspine=true)
+	ax_D = Makie.Axis(fig[3,1]; width, height, xticks, yticks, ylabel="Read depth (D)", xgridvisible=false, ygridvisible=false, ytrimspine=true)
+	for (x0, xf, color, alpha) = struct_bands
+	    Makie.vspan!(ax_M, x0, xf; color=(color, alpha))
+	    Makie.vspan!(ax_U, x0, xf; color=(color, alpha))
+	    Makie.vspan!(ax_D, x0, xf; color=(color, alpha))
+	end
+
+	Makie.band!(ax_M, 1:108, depth_M_avg - depth_M_err, depth_M_avg + depth_M_err; color=(:gray, 0.3))
+	Makie.band!(ax_U, 1:108, depth_U_avg - depth_U_err, depth_U_avg + depth_U_err; color=(:gray, 0.3))
+	Makie.band!(ax_D, 1:108, depth_D_avg - depth_D_err, depth_D_avg + depth_D_err; color=(:gray, 0.3))
+	
+	Makie.stairs!(ax_M, 1:108, depth_M_avg; color=:black, step=:center, linewidth=2)
+	Makie.stairs!(ax_U, 1:108, depth_U_avg; color=:black, step=:center, linewidth=2)
+	Makie.stairs!(ax_D, 1:108, depth_D_avg; color=:black, step=:center, linewidth=2)
+
+	for ax = (ax_M, ax_U, ax_D)
+		Makie.xlims!(ax, 0.5, 108.5)
+	end
+	#Makie.ylims!(ax_M, -1, 4)
+	#Makie.hidespines!(ax_M, :t, :r, :b)
+	#Makie.hidexdecorations!(ax_M)
+
+	Makie.Label(fig[1,1][1, 1, Makie.TopLeft()], "A)", fontsize = 14, font = :bold, padding = (0, 5, 5, 0), halign = :right)
+	Makie.Label(fig[2,1][1, 1, Makie.TopLeft()], "B)", fontsize = 14, font = :bold, padding = (0, 5, 5, 0), halign = :right)
+	Makie.Label(fig[3,1][1, 1, Makie.TopLeft()], "C)", fontsize = 14, font = :bold, padding = (0, 5, 5, 0), halign = :right)
+
+	Makie.resize_to_layout!(fig)
+	Makie.save("/DATA/cossio/SAM/2024/SamApp2024.jl/pluto/SI/Figures/read_depths.pdf", fig)
+	fig
+end
+
+# ╔═╡ cd53cfd1-ec82-4c3b-93fe-62f0138c6f25
+let fig = Makie.Figure()
+	sz = 300
+	cutoff = 20
+	bins = 0:1e3:1e5
+	
+	ax_M = Makie.Axis(fig[1,1]; width=sz, height=sz, ylabel="Frequency", title="M", xgridvisible=false, ygridvisible=false, ytrimspine=true)
+	ax_U = Makie.Axis(fig[1,2]; width=sz, height=sz, ylabel="Frequency", title="U", xgridvisible=false, ygridvisible=false, ytrimspine=true)
+	ax_D = Makie.Axis(fig[1,3]; width=sz, height=sz, ylabel="Frequency", title="D", xgridvisible=false, ygridvisible=false, ytrimspine=true)
+
+	Makie.stephist!(ax_M, vec(replace(shape_data_rep0.shape_M_depth[begin:cutoff, :, :], NaN => 0)); bins, normalization=:pdf, color=:red)
+	Makie.stephist!(ax_M, vec(replace(shape_data_rep0.shape_M_depth[cutoff:end, :, :], NaN => 0)); bins, normalization=:pdf, color=:blue)
+
+	Makie.stephist!(ax_U, filter(isfinite, shape_data_rep0.shape_U_depth[begin:cutoff, :, :]); bins, normalization=:pdf, color=:red)
+	Makie.stephist!(ax_U, filter(isfinite, shape_data_rep0.shape_U_depth[cutoff:end, :, :]); bins, normalization=:pdf, color=:blue)
+
+	Makie.stephist!(ax_D, filter(isfinite, shape_data_rep0.shape_D_depth[begin:cutoff, :, :]); bins, normalization=:pdf, color=:red)
+	Makie.stephist!(ax_D, filter(isfinite, shape_data_rep0.shape_D_depth[cutoff:end, :, :]); bins, normalization=:pdf, color=:blue)
+
+	Makie.resize_to_layout!(fig)
+	fig
+end
+
+# ╔═╡ d7cd6fac-95f6-4612-bd5a-bb6b839e3f2c
+let fig = Makie.Figure()
+	width = 550
+	height = 100
+	xticks = 0:5:108
+	
+	ax_M = Makie.Axis(fig[1,1]; width, height, xticks, ylabel="Null fraction", title="M", xgridvisible=false, ygridvisible=false, ytrimspine=true, yscale=log10)
+	ax_U = Makie.Axis(fig[2,1]; width, height, xticks, ylabel="Null fraction", title="U", xgridvisible=false, ygridvisible=false, ytrimspine=true, yscale=log10)
+	ax_D = Makie.Axis(fig[3,1]; width, height, xticks, ylabel="Null fraction", title="D", xgridvisible=false, ygridvisible=false, ytrimspine=true, yscale=log10)
+
+	Makie.lines!(ax_M, 1:108, dropdims(1 .- mean((shape_data_rep0.shape_M_depth .> 0) .&& (shape_data_rep0.shape_M .> 0); dims=(2,3)); dims=(2,3)))
+	Makie.lines!(ax_U, 1:108, dropdims(1 .- mean((shape_data_rep0.shape_U_depth .> 0) .&& (shape_data_rep0.shape_U .> 0); dims=(2,3)); dims=(2,3)))
+	Makie.lines!(ax_D, 1:108, dropdims(1 .- mean((shape_data_rep0.shape_D_depth .> 0) .&& (shape_data_rep0.shape_D .> 0); dims=(2,3)); dims=(2,3)))
+
+	for ax = (ax_M, ax_U, ax_D)
+		Makie.xlims!(ax, 0.5, 108.5)
+		Makie.ylims!(ax, 0.001, 1)
+	end
+
+	Makie.resize_to_layout!(fig)
+	fig
+end
+
 # ╔═╡ Cell order:
 # ╠═a06dbeed-cd34-464f-95fc-f3659f95f760
 # ╠═77855f93-2b64-45bc-a307-df7f6e6187b3
@@ -507,6 +604,7 @@ end
 # ╠═e73b3886-162a-4a77-a28b-cdf269109b98
 # ╠═2abcc581-8722-4cf7-bc09-8bf98a9b8648
 # ╠═6d6e3dc8-28eb-496d-9622-8128422ed2ed
+# ╠═c7378daf-3efe-4317-a95e-cd538a64e1a6
 # ╠═7edc30fd-a2d6-4818-855c-c7f69c9f589b
 # ╠═4974c2e2-058d-41ca-924d-16709e4a58e6
 # ╠═94d99837-7415-4acb-b5d3-3b1dec5af05e
@@ -582,3 +680,6 @@ end
 # ╠═008acc2e-9cca-47d7-921f-a041c6f73259
 # ╠═04f8bed0-9bfe-4539-9945-5ac041bde016
 # ╠═6b38d182-a901-4b20-bfdf-9441e4586e7b
+# ╠═2cc26b9a-c18b-4321-ad79-a00f8085b525
+# ╠═cd53cfd1-ec82-4c3b-93fe-62f0138c6f25
+# ╠═d7cd6fac-95f6-4612-bd5a-bb6b839e3f2c
