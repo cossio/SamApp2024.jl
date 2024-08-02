@@ -13,32 +13,14 @@ using BioSequences: LongRNA
 # ╔═╡ 55735555-c2f7-41f0-becd-cbad5717d7be
 using DataFrames: DataFrame
 
-# ╔═╡ eff20728-e3ee-470a-afc0-3e26a30c11be
-using Distributions: Gamma
-
-# ╔═╡ 746ffc2b-1be1-4f10-8d79-12364a8a8251
-using Distributions: logpdf
-
-# ╔═╡ b0997272-f623-43d8-a5ff-c1b1d6be99a4
-using Distributions: pdf
-
-# ╔═╡ a1807f68-6f16-4114-98ab-b075b45b7201
-using Distributions: Poisson
-
-# ╔═╡ 483d3154-5222-40b8-a380-aea037e4618c
-using LinearAlgebra: Diagonal
-
-# ╔═╡ 2132164b-51c2-4415-9d07-022a24011f3d
-using LinearAlgebra: eigen
-
 # ╔═╡ fb8e8cbd-050d-4d0e-81ac-32528f628a0e
 using Makie: @L_str
 
 # ╔═╡ 8973e48f-df81-4749-b71d-aea5ac4614b3
-using NaNStatistics: nanmean, nansum
+using NaNStatistics: nanmean
 
-# ╔═╡ 96e03cbd-dc6f-4923-bb56-106ca66c1867
-using Random: bitrand
+# ╔═╡ 61fcf845-c1b9-4798-8b11-1bee95c8d0e0
+using NaNStatistics: nansum
 
 # ╔═╡ e73b3886-162a-4a77-a28b-cdf269109b98
 using RestrictedBoltzmannMachines: free_energy
@@ -57,6 +39,9 @@ using StatsBase: countmap
 
 # ╔═╡ 94d99837-7415-4acb-b5d3-3b1dec5af05e
 using Unitful: ustrip
+
+# ╔═╡ a06dbeed-cd34-464f-95fc-f3659f95f760
+md"# Imports"
 
 # ╔═╡ 45907f4d-29ec-4be7-97e8-bfcb4695416b
 import CairoMakie
@@ -94,8 +79,14 @@ import StatsBase
 # ╔═╡ b471828b-0822-4a08-a63c-5fa01e8d90b2
 import ViennaRNA
 
-# ╔═╡ 13f58dca-f8c6-40d9-bf2c-d20995181775
-import ViennaRNA_jll
+# ╔═╡ 66de62df-32fb-4dc0-b3b5-05d0e5ca718c
+import PlutoUI
+
+# ╔═╡ 02bcf2aa-204e-4385-8790-3c76432deacf
+PlutoUI.TableOfContents()
+
+# ╔═╡ b02ae72e-1892-4fdc-8c71-4e2007c65895
+md"# Load data"
 
 # ╔═╡ 2a3fff7d-a1e5-474e-8981-ac9c05494d4d
 @show Rfam.get_rfam_directory() Rfam.get_rfam_version();
@@ -309,6 +300,9 @@ shape_stats_merged = SamApp2024.shape_basepair_log_odds_v4(;
     only_hq_profile = true, p_thresh = 1e-3, nsamples = 1000
 );
 
+# ╔═╡ c87fa471-dbb6-4802-8bd0-aae1eafd7fc0
+md"# Plot"
+
 # ╔═╡ 4c4144ca-9f36-44f0-b697-7411df2fac6a
 # structural motifs
 struct_bands = [
@@ -433,7 +427,37 @@ let fig = Makie.Figure(; halign = :left)
 	fig
 end
 
+# ╔═╡ 9255fa38-9004-43c9-8817-5657e6cfb2d5
+md"# Read depths"
+
+# ╔═╡ 008acc2e-9cca-47d7-921f-a041c6f73259
+nanmean(shape_data_rep0.shape_D_depth; dim=2)
+
+# ╔═╡ 6b38d182-a901-4b20-bfdf-9441e4586e7b
+let fig = Makie.Figures()
+	_width = 550
+	_height = 70
+	
+	_R_sam = shape_data_all_merged.shape_reactivities[:, n_ex_rbm, conds_SAM_all_merged[1]]
+	_R_mg = shape_data_all_merged.shape_reactivities[:, n_ex_rbm, only(conds_Mg_all_merged)]
+	
+	ax_react_1 = Makie.Axis(fig[2,1][1,1], width=_width, height=_height, xticks=5:10:108, ylabel="reactivity", xgridvisible=false, ygridvisible=false, yticks=0:2:5, ytrimspine=true)
+	for (x0, xf, color, alpha) = struct_bands
+	    Makie.vspan!(ax_react_1, x0, xf; color=(color, alpha))
+	end
+	Makie.stairs!(ax_react_1, 1:108, _R_mg, color=:gray, step=:center)
+	Makie.stairs!(ax_react_1, 1:108, _R_sam, color=:purple, step=:center)
+	Makie.xlims!(ax_react_1, 0.5, 108.5)
+	Makie.ylims!(ax_react_1, -1, 4)
+	Makie.hidespines!(ax_react_1, :t, :r, :b)
+	Makie.hidexdecorations!(ax_react_1)
+
+	Makie.resize_to_layout!(fig)
+	fig
+end
+
 # ╔═╡ Cell order:
+# ╠═a06dbeed-cd34-464f-95fc-f3659f95f760
 # ╠═77855f93-2b64-45bc-a307-df7f6e6187b3
 # ╠═45907f4d-29ec-4be7-97e8-bfcb4695416b
 # ╠═f743167e-8552-4002-b9ca-c995cf3e9829
@@ -447,24 +471,20 @@ end
 # ╠═ca499e53-296f-4cf3-9df1-5070e22fd6f0
 # ╠═15974106-a5c6-4867-acfb-cdc69f5a57be
 # ╠═b471828b-0822-4a08-a63c-5fa01e8d90b2
-# ╠═13f58dca-f8c6-40d9-bf2c-d20995181775
+# ╠═66de62df-32fb-4dc0-b3b5-05d0e5ca718c
 # ╠═c50ef155-e21a-4fa6-9d59-4ff6aa870f1e
 # ╠═55735555-c2f7-41f0-becd-cbad5717d7be
-# ╠═eff20728-e3ee-470a-afc0-3e26a30c11be
-# ╠═746ffc2b-1be1-4f10-8d79-12364a8a8251
-# ╠═b0997272-f623-43d8-a5ff-c1b1d6be99a4
-# ╠═a1807f68-6f16-4114-98ab-b075b45b7201
-# ╠═483d3154-5222-40b8-a380-aea037e4618c
-# ╠═2132164b-51c2-4415-9d07-022a24011f3d
 # ╠═fb8e8cbd-050d-4d0e-81ac-32528f628a0e
 # ╠═8973e48f-df81-4749-b71d-aea5ac4614b3
-# ╠═96e03cbd-dc6f-4923-bb56-106ca66c1867
+# ╠═61fcf845-c1b9-4798-8b11-1bee95c8d0e0
 # ╠═e73b3886-162a-4a77-a28b-cdf269109b98
 # ╠═2abcc581-8722-4cf7-bc09-8bf98a9b8648
 # ╠═6d6e3dc8-28eb-496d-9622-8128422ed2ed
 # ╠═7edc30fd-a2d6-4818-855c-c7f69c9f589b
 # ╠═4974c2e2-058d-41ca-924d-16709e4a58e6
 # ╠═94d99837-7415-4acb-b5d3-3b1dec5af05e
+# ╠═02bcf2aa-204e-4385-8790-3c76432deacf
+# ╠═b02ae72e-1892-4fdc-8c71-4e2007c65895
 # ╠═2a3fff7d-a1e5-474e-8981-ac9c05494d4d
 # ╠═c182ce25-a47f-4368-9ca7-9b5b93983dcb
 # ╠═3c96e229-e909-4de6-849e-753109b229d5
@@ -528,5 +548,9 @@ end
 # ╠═44321d83-09e4-4928-ac36-b32a12297320
 # ╠═d5b6b49a-9721-4c4c-a735-743f3cd852ab
 # ╠═309bf006-c0e1-46a6-9bc8-0834450340d9
+# ╠═c87fa471-dbb6-4802-8bd0-aae1eafd7fc0
 # ╠═4c4144ca-9f36-44f0-b697-7411df2fac6a
 # ╠═9fcca185-180f-4478-8fa2-d0cf37e1937b
+# ╠═9255fa38-9004-43c9-8817-5657e6cfb2d5
+# ╠═008acc2e-9cca-47d7-921f-a041c6f73259
+# ╠═6b38d182-a901-4b20-bfdf-9441e4586e7b

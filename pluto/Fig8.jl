@@ -424,6 +424,12 @@ let fig = Makie.Figure()
 	fig
 end
 
+# ╔═╡ 07f14049-8db8-4f11-a1c5-4698c8f2e613
+_responds_sam_yes[281 + 1], _responds_sam_nop[281 + 1]
+
+# ╔═╡ ca68f4e5-7aaa-4394-b285-8fe165917003
+_responds_sam_yes[312 + 1], _responds_sam_nop[312 + 1]
+
 # ╔═╡ Cell order:
 # ╠═ca2287c5-2509-4870-a335-605c7ec1022d
 # ╠═b3c73892-1482-11ef-1248-f70b8e38afbd
@@ -500,3 +506,5 @@ end
 # ╠═292a1bb8-09b2-422c-9513-c09a27f04997
 # ╠═6cb429f0-55ca-4d6e-9e3f-5e508d3d1a30
 # ╠═31cb84b5-4bb7-486f-b818-6979072dac6b
+# ╠═07f14049-8db8-4f11-a1c5-4698c8f2e613
+# ╠═ca68f4e5-7aaa-4394-b285-8fe165917003

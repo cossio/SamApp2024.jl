@@ -143,6 +143,9 @@ seed_seqs = findall(shape_data_045.aptamer_origin .== "RF00162_seed70")
 # ╔═╡ 5233e4f7-9519-4f54-9462-ed86fed7967b
 nat_seqs = full_seqs ∪ seed_seqs;
 
+# ╔═╡ cb9b6efc-68e1-4774-974d-44bd5236eabe
+md"# Natural and PDB examples (from Repl. 0)"
+
 # ╔═╡ 0b64262b-0955-48fa-b21c-dc583b766f20
 bps_reactivities_rep0 = shape_data_rep0.shape_reactivities[bps, nat_seqs, conds_sam_rep0];
 
@@ -151,9 +154,6 @@ nps_reactivities_rep0 = shape_data_rep0.shape_reactivities[nps, nat_seqs, conds_
 
 # ╔═╡ 2db2fd10-8e88-444a-9a47-44c20d58f328
 all_reactivities_rep0 = shape_data_rep0.shape_reactivities[:, nat_seqs, conds_sam_rep0];
-
-# ╔═╡ cb9b6efc-68e1-4774-974d-44bd5236eabe
-md"# Natural and PDB examples (from Repl. 0)"
 
 # ╔═╡ 4c8e11c4-e7b2-450f-92d1-0bd02c914a4f
 shape_stats_rep0 = SamApp2024.shape_basepair_log_odds_v4(;
@@ -212,6 +212,31 @@ only(_responds_sam_yes_rep0[shape_data_045.aptamer_names .== "APSAMS25"]), only(
 # ╔═╡ a247dad7-844d-4f9a-ba71-b27a24d3c028
 only(_responds_sam_yes_rep0[shape_data_045.aptamer_names .== "APSAMS10"]), only(_responds_sam_nop_rep0[shape_data_045.aptamer_names .== "APSAMS10"])
 
+# ╔═╡ 82c4b4c7-48cc-48ce-86cd-8633e239541f
+md"""
+# PDB examples (from Repl. 45)
+
+PDB examples are present only in Repl 45 (they have no data in repl. 0).
+"""
+
+# ╔═╡ a1eddfa2-2600-4c1c-af16-c179a1bf3c4b
+bps_reactivities_rep45 = shape_data_rep45.shape_reactivities[bps, nat_seqs, conds_sam_rep45];
+
+# ╔═╡ 060ad3b4-0ef4-4d36-a26e-1609b27635c6
+nps_reactivities_rep45 = shape_data_rep45.shape_reactivities[nps, nat_seqs, conds_sam_rep45];
+
+# ╔═╡ e4c2f662-f6a9-4b9d-b591-ffb8e1ceb6d3
+all_reactivities_rep45 = shape_data_rep45.shape_reactivities[:, nat_seqs, conds_sam_rep45];
+
+# ╔═╡ cabe9e9b-c9f4-4a36-bde9-12ee38e7ff9a
+shape_stats_rep45 = SamApp2024.shape_basepair_log_odds_v4(;
+    shape_data = shape_data_rep45,
+    paired_reactivities = bps_reactivities_rep45,
+    unpaired_reactivities = nps_reactivities_rep45,
+    all_reactivities = all_reactivities_rep45,
+    only_hq_profile = true, p_thresh = 1e-3, nsamples = 1000
+);
+
 # ╔═╡ f810b7ef-c682-4cd8-847d-e8adfc54ac42
 md"# Reactivity profiles of PDB examples (from Repl. 0)"
 
@@ -262,8 +287,8 @@ let fig = Makie.Figure()
 	Makie.barplot!(ax_diff_1, 1:108, _R_sam - _R_mg, color=ifelse.(_R_sam - _R_mg .< 0, :green, :gray))
 	Makie.scatter!(ax_diff_1, _sites, -1.4one.(_sites), markersize=7, color=:black, marker=:utriangle)
 	Makie.xlims!(ax_diff_1, 0, 109)
-	Makie.hidespines!(ax_diff_1, :r, :b, :t)
-	Makie.hidexdecorations!(ax_diff_1)
+	Makie.hidespines!(ax_diff_1, :r, :t)
+	#Makie.hidexdecorations!(ax_diff_1)
 	#Makie.scatter!(ax_diff_1, _sites, -0.2one.(_sites), color=:blue, markersize=5)
 
 	Makie.linkxaxes!(ax_react_1, ax_diff_1)
@@ -276,6 +301,61 @@ let fig = Makie.Figure()
 	Makie.resize_to_layout!(fig)
 	fig
 end
+
+# ╔═╡ 7d867cb8-23f0-45c0-b3b9-b377e5de73eb
+let fig = Makie.Figure()
+	n_ex = only(findall(shape_data_045.aptamer_names .== "SAMAP-PDB0"))
+	_width = 700
+	_height = 100
+
+	_R_sam = shape_data_rep0.shape_reactivities[:, n_ex, conds_sam_rep0[3]]
+	_R_mg = shape_data_rep0.shape_reactivities[:, n_ex, only(conds_mg_rep0)]
+	
+	ax_react_1 = Makie.Axis(
+		fig[1,1]; valign=:bottom, width=_width, height=_height, xticks=5:10:108, ylabel="react.", xgridvisible=false, ygridvisible=false, yticks=0:4:8, xtrimspine=true, ytrimspine=true, title=shape_data_045.aptamer_ids[n_ex]
+	)
+	for (x0, xf, color, alpha) = struct_bands
+	    Makie.vspan!(ax_react_1, x0, xf; color=(color, alpha))
+	end
+	Makie.stairs!(ax_react_1, 1:108, _R_mg, color=:gray, step=:center, label="no SAM")
+	Makie.stairs!(ax_react_1, 1:108, _R_sam, color=:purple, step=:center, label="with SAM")
+	Makie.hidespines!(ax_react_1, :t, :r, :b)
+	Makie.hidexdecorations!(ax_react_1)
+	#Makie.axislegend(ax_react_1, position=(0.0, -13), framevisible=false)
+	
+	ax_diff_1 = Makie.Axis(fig[2,1]; valign=:bottom, width=_width, height=_height, xticks=5:10:108, xlabel="site", ylabel="Δreact.", xgridvisible=false, ygridvisible=false, yticks=-1:1, xtrimspine=true, ytrimspine=true)
+	for (x0, xf, color, alpha) = struct_bands
+	    Makie.vspan!(ax_diff_1, x0, xf; color=(color, alpha))
+	end
+	Makie.barplot!(ax_diff_1, 1:108, _R_sam - _R_mg, color=ifelse.(_R_sam - _R_mg .< 0, :green, :gray))
+	Makie.scatter!(ax_diff_1, _sites, -1.4one.(_sites), markersize=7, color=:black, marker=:utriangle)
+	Makie.xlims!(ax_diff_1, 0, 109)
+	Makie.hidespines!(ax_diff_1, :r, :t)
+	#Makie.hidexdecorations!(ax_diff_1)
+	#Makie.scatter!(ax_diff_1, _sites, -0.2one.(_sites), color=:blue, markersize=5)
+
+	Makie.linkxaxes!(ax_react_1, ax_diff_1)
+	Makie.ylims!(ax_diff_1, -1.5, 1)
+	Makie.ylims!(ax_react_1, -0.5, 8)
+	
+	Makie.xlims!(ax_react_1, 0.5, 108.5)
+	Makie.xlims!(ax_diff_1,  0.5, 108.5)
+
+	Makie.resize_to_layout!(fig)
+	fig
+end
+
+# ╔═╡ dc5ea24a-704f-49ee-b384-68c5168d4ef6
+any(isfinite, shape_data_rep0.shape_reactivities[:, only(findall(shape_data_045.aptamer_names .== "SAMAP-PDB0")), conds_sam_rep0]),
+any(isfinite, shape_data_rep0.shape_reactivities[:, only(findall(shape_data_045.aptamer_names .== "SAMAP-PDB0")), conds_mg_rep0]),
+any(isfinite, shape_data_rep0.shape_reactivities[:, only(findall(shape_data_045.aptamer_names .== "SAMAP-PDB10")), conds_sam_rep0]),
+any(isfinite, shape_data_rep0.shape_reactivities[:, only(findall(shape_data_045.aptamer_names .== "SAMAP-PDB10")), conds_mg_rep0])
+
+# ╔═╡ 1943e448-20a3-413b-b96c-13950225d861
+any(isfinite, shape_data_rep45.shape_reactivities[:, only(findall(shape_data_045.aptamer_names .== "SAMAP-PDB0")), conds_sam_rep45]),
+any(isfinite, shape_data_rep45.shape_reactivities[:, only(findall(shape_data_045.aptamer_names .== "SAMAP-PDB0")), conds_mg_rep45]),
+any(isfinite, shape_data_rep45.shape_reactivities[:, only(findall(shape_data_045.aptamer_names .== "SAMAP-PDB10")), conds_sam_rep45]),
+any(isfinite, shape_data_rep45.shape_reactivities[:, only(findall(shape_data_045.aptamer_names .== "SAMAP-PDB10")), conds_mg_rep45])
 
 # ╔═╡ Cell order:
 # ╠═b6a715f3-153e-445c-a61e-87382d15a0ba
@@ -323,10 +403,10 @@ end
 # ╠═c99ea59e-015d-490c-96a2-45c7f669e46e
 # ╠═bc0664d7-370d-4f62-a4c0-5db8b4e61141
 # ╠═5233e4f7-9519-4f54-9462-ed86fed7967b
+# ╠═cb9b6efc-68e1-4774-974d-44bd5236eabe
 # ╠═0b64262b-0955-48fa-b21c-dc583b766f20
 # ╠═71e94a83-69c7-4be4-a78f-f9e64c23b509
 # ╠═2db2fd10-8e88-444a-9a47-44c20d58f328
-# ╠═cb9b6efc-68e1-4774-974d-44bd5236eabe
 # ╠═4c8e11c4-e7b2-450f-92d1-0bd02c914a4f
 # ╠═84b73033-032d-4166-9530-77bf2e7a9156
 # ╠═1390357f-3524-4ec5-abbc-7976ddd988ae
@@ -344,6 +424,14 @@ end
 # ╠═b4de3dcd-dc4d-4a24-a228-48a85dfa8163
 # ╠═6eb31fd6-59f6-4311-87ed-94a59670a72b
 # ╠═a247dad7-844d-4f9a-ba71-b27a24d3c028
+# ╠═82c4b4c7-48cc-48ce-86cd-8633e239541f
+# ╠═a1eddfa2-2600-4c1c-af16-c179a1bf3c4b
+# ╠═060ad3b4-0ef4-4d36-a26e-1609b27635c6
+# ╠═e4c2f662-f6a9-4b9d-b591-ffb8e1ceb6d3
+# ╠═cabe9e9b-c9f4-4a36-bde9-12ee38e7ff9a
 # ╠═f810b7ef-c682-4cd8-847d-e8adfc54ac42
 # ╠═2b47c8c3-33a8-43b9-be9f-37f3594846d1
 # ╠═ad38de09-1a74-413f-8676-3a3c261b7310
+# ╠═7d867cb8-23f0-45c0-b3b9-b377e5de73eb
+# ╠═dc5ea24a-704f-49ee-b384-68c5168d4ef6
+# ╠═1943e448-20a3-413b-b96c-13950225d861
