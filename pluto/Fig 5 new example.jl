@@ -190,53 +190,127 @@ shape_data_all_merged.aligned_sequences[only(findall(shape_data_045.aptamer_name
 length("GUCUUAUCAAGAGAAGCAGAGGGACUGGCCCGACGAAGCUUCAGCAACCGGUGUAAUGAUGACCAAGGUGCUAAAUCCAGCAAGCUCGAACAGCUUGGAAGAUAAGAC")
 
 # ╔═╡ 1e5a5d35-3b84-4c42-af1c-310375ba449a
-md"# Figure"
+md"# Example 1: 4KQY"
 
 # ╔═╡ 23e51bbf-8db0-470f-ba50-d6999480d922
 let fig = Makie.Figure()
 	n_ex = only(findall(shape_data_045.aptamer_names .== "SAMAP-PDB10"))
-	_width = 700
-	_height = 100
+	@show shape_data_045.aptamer_ids[n_ex]
+	
+	width = 700
+	height = 100
+	xticks = 5:5:108
 
 	_R_sam = shape_data_all_merged.shape_reactivities[:, n_ex, conds_SAM_all_merged[1]]
 	_R_mg = shape_data_all_merged.shape_reactivities[:, n_ex, only(conds_Mg_all_merged)]
 	
-	ax_react_1 = Makie.Axis(
-		fig[1,1]; valign=:bottom, width=_width, height=_height, 
-		xticks=(1:108, string.(collect("GUCUUAUCAAGAGAAGCAGAGGGACUGGCCCGACGAAGCUUCAGCAACCGGUGUAAUGAUGACCAAGGUGCUAAAUCCAGCAAGCUCGAACAGCUUGGAAGAUAAGAC"))),
-		xticklabelsize=10,
-		ylabel="react.", xgridvisible=false, ygridvisible=false, yticks=0:4:8, xtrimspine=true, ytrimspine=true, title=shape_data_045.aptamer_ids[n_ex]
+	ax_react = Makie.Axis(
+		fig[1,1]; valign=:bottom, width, height, xticks, ylabel="react.", xgridvisible=false, ygridvisible=false, yticks=0:2:8, xtrimspine=true, ytrimspine=true
 	)
+	ax_diff = Makie.Axis(
+		fig[2,1]; valign=:bottom, width, height, xticks, xlabel="site", ylabel="Δreact.", xgridvisible=false, ygridvisible=false, yticks=-1:1, xtrimspine=true, ytrimspine=true
+	)
+
 	for (x0, xf, color, alpha) = struct_bands
-	    Makie.vspan!(ax_react_1, x0, xf; color=(color, alpha))
+	    Makie.vspan!(ax_react, x0, xf; color=(color, alpha))
+		Makie.vspan!(ax_diff, x0, xf; color=(color, alpha))
 	end
-	Makie.stairs!(ax_react_1, 1:108, _R_mg, color=:gray, step=:center, label="no SAM")
-	Makie.stairs!(ax_react_1, 1:108, _R_sam, color=:purple, step=:center, label="with SAM")
+	
+	Makie.stairs!(ax_react, 1:108, _R_mg; step=:center, color=:gray, label="no SAM")
+	Makie.stairs!(ax_react, 1:108, _R_sam; step=:center, color=:purple, label="with SAM")
+	#Makie.axislegend(ax_react, position=(0.0, -13), framevisible=false)
 	#Makie.hidespines!(ax_react_1, :t, :r, :b)
 	#Makie.hidexdecorations!(ax_react_1)
-	#Makie.axislegend(ax_react_1, position=(0.0, -13), framevisible=false)
 	
-	ax_diff_1 = Makie.Axis(fig[2,1]; valign=:bottom, width=_width, height=_height, xticks=5:10:108, xlabel="site", ylabel="Δreact.", xgridvisible=false, ygridvisible=false, yticks=-1:1, xtrimspine=true, ytrimspine=true)
-	for (x0, xf, color, alpha) = struct_bands
-	    Makie.vspan!(ax_diff_1, x0, xf; color=(color, alpha))
-	end
-	Makie.barplot!(ax_diff_1, 1:108, _R_sam - _R_mg, color=ifelse.(_R_sam - _R_mg .< 0, :green, :gray))
-	Makie.scatter!(ax_diff_1, _sites, -1.4one.(_sites), markersize=7, color=:black, marker=:utriangle)
-	Makie.xlims!(ax_diff_1, 0, 109)
-	Makie.hidespines!(ax_diff_1, :r, :t)
-	#Makie.hidexdecorations!(ax_diff_1)
+	Makie.barplot!(ax_diff, 1:108, _R_sam - _R_mg, color=ifelse.(_R_sam - _R_mg .< 0, :green, :gray))
+	#Makie.scatter!(ax_diff, _sites, -1.4one.(_sites), markersize=7, color=:black, marker=:utriangle)
+	Makie.xlims!(ax_diff, 0, 109)
+	
+	Makie.hidespines!(ax_diff, :r, :t)
+	Makie.hidespines!(ax_react, :r, :t, :b)
+	Makie.hidexdecorations!(ax_react)
 	#Makie.scatter!(ax_diff_1, _sites, -0.2one.(_sites), color=:blue, markersize=5)
 
-	Makie.linkxaxes!(ax_react_1, ax_diff_1)
-	Makie.ylims!(ax_diff_1, -1.5, 1)
-	Makie.ylims!(ax_react_1, -0.5, 8)
+	Makie.linkxaxes!(ax_react, ax_diff)
+	Makie.ylims!(ax_diff, -1.5, 1)
+	Makie.ylims!(ax_react, -0.5, 6)
 	
-	Makie.xlims!(ax_react_1, 0.5, 108.5)
-	Makie.xlims!(ax_diff_1,  0.5, 108.5)
+	Makie.xlims!(ax_react, 0.5, 108.5)
+	Makie.xlims!(ax_diff,  0.5, 108.5)
 
 	Makie.resize_to_layout!(fig)
+	Makie.save("/DATA/cossio/SAM/2024/SamApp2024.jl/pluto/Figures/Fig5new_SHAPE_example.pdf", fig)
 	fig
 end
+
+# ╔═╡ ea8e20bc-fd8e-43cd-8ef5-6a653f28f53f
+aptamers_df = SamApp2024.probed_aptamers_table_20221027()
+
+# ╔═╡ ff713d18-cb3a-4707-b694-a7acc6f0d1d2
+pdb10_index_in_aptamers_df = only(findall(aptamers_df.name .== "SAMAP-PDB10"))
+
+# ╔═╡ 9f491a8e-fee1-409c-b2bd-0fbc0be1270c
+replace(aptamers_df.sequence[pdb10_index_in_aptamers_df], 'T' => 'U')
+
+# ╔═╡ d12fb5cb-1315-4284-bb3b-57deb741cb87
+length("GUUCUUAUCAAGAGAAGCAGAGGGACUGGCCCGACGAAGCUUCAGCAACCGGUGUAAUGGCGAAAGCCAUGACCAAGGUGCUAAAUCCAGCAAGCUCGAACAGCUUGGAAGAUAAGAAC")
+
+# ╔═╡ 4826b171-a3b5-4411-8357-bf2fc13c2f01
+md"# Example 2"
+
+# ╔═╡ af800276-6e2f-4a14-b6f4-d565b0de6f45
+let fig = Makie.Figure()
+	n_ex = only(findall(shape_data_045.aptamer_names .== "APSAMN7"))
+	@show shape_data_045.aptamer_ids[n_ex]
+	
+	width = 800
+	height = 80
+	xticks = 5:5:108
+
+	_R_sam = shape_data_all_merged.shape_reactivities[:, n_ex, conds_SAM_all_merged[1]]
+	_R_mg = shape_data_all_merged.shape_reactivities[:, n_ex, only(conds_Mg_all_merged)]
+	
+	ax_react = Makie.Axis(
+		fig[1,1]; valign=:bottom, width, height, xticks, ylabel="react.", xgridvisible=false, ygridvisible=false, yticks=0:2:8, xtrimspine=true, ytrimspine=true
+	)
+	ax_diff = Makie.Axis(
+		fig[2,1]; valign=:bottom, width, height, xticks, xlabel="site", ylabel="Δreact.", xgridvisible=false, ygridvisible=false, yticks=-1:1, xtrimspine=true, ytrimspine=true
+	)
+
+	for (x0, xf, color, alpha) = struct_bands
+	    Makie.vspan!(ax_react, x0, xf; color=(color, alpha))
+		Makie.vspan!(ax_diff, x0, xf; color=(color, alpha))
+	end
+	
+	Makie.stairs!(ax_react, 1:108, _R_mg; step=:center, color=:gray, label="no SAM")
+	Makie.stairs!(ax_react, 1:108, _R_sam; step=:center, color=:purple, label="with SAM")
+	#Makie.axislegend(ax_react, position=(0.0, -13), framevisible=false)
+	#Makie.hidespines!(ax_react_1, :t, :r, :b)
+	#Makie.hidexdecorations!(ax_react_1)
+	
+	Makie.barplot!(ax_diff, 1:108, _R_sam - _R_mg, color=ifelse.(_R_sam - _R_mg .< 0, :green, :gray))
+	#Makie.scatter!(ax_diff, _sites, -1.4one.(_sites), markersize=7, color=:black, marker=:utriangle)
+	Makie.xlims!(ax_diff, 0, 109)
+	
+	Makie.hidespines!(ax_diff, :r, :t)
+	Makie.hidespines!(ax_react, :r, :t, :b)
+	Makie.hidexdecorations!(ax_react)
+	#Makie.scatter!(ax_diff_1, _sites, -0.2one.(_sites), color=:blue, markersize=5)
+
+	Makie.linkxaxes!(ax_react, ax_diff)
+	Makie.ylims!(ax_diff, -1.5, 1)
+	Makie.ylims!(ax_react, -0.5, 6)
+	
+	Makie.xlims!(ax_react, 0.5, 108.5)
+	Makie.xlims!(ax_diff,  0.5, 108.5)
+
+	Makie.resize_to_layout!(fig)
+	Makie.save("/DATA/cossio/SAM/2024/SamApp2024.jl/pluto/Figures/Fig5new_SHAPE_example2.pdf", fig)
+	fig
+end
+
+# ╔═╡ cbd07af7-0688-467b-bf06-6e51f0cd9693
+aptamers_df.description[only(findall(aptamers_df.name .== "APSAMN7"))]
 
 # ╔═╡ Cell order:
 # ╠═1f9e4648-3b0f-4ce8-acc1-8aa4a51e7242
@@ -296,3 +370,10 @@ end
 # ╠═09ed5c06-8ab8-4ea9-b0c5-98b256838071
 # ╠═1e5a5d35-3b84-4c42-af1c-310375ba449a
 # ╠═23e51bbf-8db0-470f-ba50-d6999480d922
+# ╠═ea8e20bc-fd8e-43cd-8ef5-6a653f28f53f
+# ╠═ff713d18-cb3a-4707-b694-a7acc6f0d1d2
+# ╠═9f491a8e-fee1-409c-b2bd-0fbc0be1270c
+# ╠═d12fb5cb-1315-4284-bb3b-57deb741cb87
+# ╠═4826b171-a3b5-4411-8357-bf2fc13c2f01
+# ╠═af800276-6e2f-4a14-b6f4-d565b0de6f45
+# ╠═cbd07af7-0688-467b-bf06-6e51f0cd9693

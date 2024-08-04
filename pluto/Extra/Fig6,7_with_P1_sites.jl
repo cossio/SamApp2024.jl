@@ -46,7 +46,7 @@ using StatsBase: countmap
 # ╔═╡ 94d99837-7415-4acb-b5d3-3b1dec5af05e
 using Unitful: ustrip
 
-# ╔═╡ f6d726bd-4493-4aee-a824-a36c72b16e95
+# ╔═╡ 7050fd73-5e33-4473-ad6f-a8e89e3bd947
 using SamApp2024: successes_tuple_str
 
 # ╔═╡ a06dbeed-cd34-464f-95fc-f3659f95f760
@@ -176,7 +176,8 @@ shape_stats_rep0 = SamApp2024.shape_basepair_log_odds_v4(;
 _thresh = log(5)
 
 # ╔═╡ 3922c5e8-6d40-4cf7-ae2a-3bcb5ae48d73
-_sites = SamApp2024.hallmark_sites_20230507;
+# Add sites 10, 11, that are SAM contacts in P1. Normally we ignore these sites
+_sites = [SamApp2024.hallmark_sites_20230507; 10; 11]
 
 # ╔═╡ acf8bb76-bf87-4cf8-b280-e0e13c65fdff
 x_mg_rep0 = nansum(shape_stats_rep0.shape_log_odds[_sites, :,  conds_mg_rep0]; dim=(1,3))
@@ -439,6 +440,12 @@ end
 # ╔═╡ 9255fa38-9004-43c9-8817-5657e6cfb2d5
 md"# Read depths"
 
+# ╔═╡ 008acc2e-9cca-47d7-921f-a041c6f73259
+nanmean(shape_data_rep0.shape_D_depth; dim=2)
+
+# ╔═╡ 04f8bed0-9bfe-4539-9945-5ac041bde016
+nanstd(shape_data_rep0.shape_D_depth; dim=2)
+
 # ╔═╡ 6b38d182-a901-4b20-bfdf-9441e4586e7b
 let fig = Makie.Figure()
 	width = 550
@@ -576,10 +583,10 @@ let fig = Makie.Figure()
 	fig
 end
 
-# ╔═╡ 34cc67fd-f567-425b-bad0-117b00c85a1d
+# ╔═╡ 6c37f2f7-70a9-4d28-a309-a5e0d9076f9e
 md"# Counts"
 
-# ╔═╡ dd25496f-e430-42df-a0b4-143bcb26f9f3
+# ╔═╡ 4debaed6-4e6c-4b26-ad12-4fa79a8875f1
 begin
 	println("Replicate 0")
 
@@ -677,7 +684,7 @@ end
 # ╠═7edc30fd-a2d6-4818-855c-c7f69c9f589b
 # ╠═4974c2e2-058d-41ca-924d-16709e4a58e6
 # ╠═94d99837-7415-4acb-b5d3-3b1dec5af05e
-# ╠═f6d726bd-4493-4aee-a824-a36c72b16e95
+# ╠═7050fd73-5e33-4473-ad6f-a8e89e3bd947
 # ╠═02bcf2aa-204e-4385-8790-3c76432deacf
 # ╠═b02ae72e-1892-4fdc-8c71-4e2007c65895
 # ╠═2a3fff7d-a1e5-474e-8981-ac9c05494d4d
@@ -747,9 +754,11 @@ end
 # ╠═4c4144ca-9f36-44f0-b697-7411df2fac6a
 # ╠═9fcca185-180f-4478-8fa2-d0cf37e1937b
 # ╠═9255fa38-9004-43c9-8817-5657e6cfb2d5
+# ╠═008acc2e-9cca-47d7-921f-a041c6f73259
+# ╠═04f8bed0-9bfe-4539-9945-5ac041bde016
 # ╠═6b38d182-a901-4b20-bfdf-9441e4586e7b
 # ╠═2cc26b9a-c18b-4321-ad79-a00f8085b525
 # ╠═cd53cfd1-ec82-4c3b-93fe-62f0138c6f25
 # ╠═d7cd6fac-95f6-4612-bd5a-bb6b839e3f2c
-# ╠═34cc67fd-f567-425b-bad0-117b00c85a1d
-# ╠═dd25496f-e430-42df-a0b4-143bcb26f9f3
+# ╠═6c37f2f7-70a9-4d28-a309-a5e0d9076f9e
+# ╠═4debaed6-4e6c-4b26-ad12-4fa79a8875f1

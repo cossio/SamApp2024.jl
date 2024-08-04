@@ -130,7 +130,8 @@ shape_stats = SamApp2024.shape_basepair_log_odds_v4(;
 );
 
 # ╔═╡ e4dc6b05-8f9d-4177-87a8-7c8ae622894b
-_sites = SamApp2024.hallmark_sites_20230507
+# Add sites 10, 11, that are SAM contacts in P1. Normally we ignore these sites
+_sites = [SamApp2024.hallmark_sites_20230507; 10; 11]
 
 # ╔═╡ f7517c96-ae0d-43bb-9f12-f0d077172e70
 p4_pos = union(81:86, 92:97); # P4 helix positions
