@@ -312,6 +312,60 @@ end
 # ╔═╡ cbd07af7-0688-467b-bf06-6e51f0cd9693
 aptamers_df.description[only(findall(aptamers_df.name .== "APSAMN7"))]
 
+# ╔═╡ 41102bd6-a2dc-46c6-9510-50f35ade2c12
+md"# Example 3: 2GIS"
+
+# ╔═╡ f028cfab-f18a-43d3-86f6-809833b13d81
+let fig = Makie.Figure()
+	n_ex = only(findall(shape_data_045.aptamer_names .== "SAMAP-PDB0"))
+	@show shape_data_045.aptamer_ids[n_ex]
+	
+	width = 700
+	height = 100
+	xticks = 5:5:108
+
+	_R_sam = shape_data_all_merged.shape_reactivities[:, n_ex, conds_SAM_all_merged[1]]
+	_R_mg = shape_data_all_merged.shape_reactivities[:, n_ex, only(conds_Mg_all_merged)]
+	
+	ax_react = Makie.Axis(
+		fig[1,1]; valign=:bottom, width, height, xticks, ylabel="react.", xgridvisible=false, ygridvisible=false, yticks=0:2:8, xtrimspine=true, ytrimspine=true
+	)
+	ax_diff = Makie.Axis(
+		fig[2,1]; valign=:bottom, width, height, xticks, xlabel="site", ylabel="Δreact.", xgridvisible=false, ygridvisible=false, yticks=-1:1, xtrimspine=true, ytrimspine=true
+	)
+
+	for (x0, xf, color, alpha) = struct_bands
+	    Makie.vspan!(ax_react, x0, xf; color=(color, alpha))
+		Makie.vspan!(ax_diff, x0, xf; color=(color, alpha))
+	end
+	
+	Makie.stairs!(ax_react, 1:108, _R_mg; step=:center, color=:gray, label="no SAM")
+	Makie.stairs!(ax_react, 1:108, _R_sam; step=:center, color=:purple, label="with SAM")
+	#Makie.axislegend(ax_react, position=(0.0, -13), framevisible=false)
+	#Makie.hidespines!(ax_react_1, :t, :r, :b)
+	#Makie.hidexdecorations!(ax_react_1)
+	
+	Makie.barplot!(ax_diff, 1:108, _R_sam - _R_mg, color=ifelse.(_R_sam - _R_mg .< 0, :green, :gray))
+	#Makie.scatter!(ax_diff, _sites, -1.4one.(_sites), markersize=7, color=:black, marker=:utriangle)
+	Makie.xlims!(ax_diff, 0, 109)
+	
+	Makie.hidespines!(ax_diff, :r, :t)
+	Makie.hidespines!(ax_react, :r, :t, :b)
+	Makie.hidexdecorations!(ax_react)
+	#Makie.scatter!(ax_diff_1, _sites, -0.2one.(_sites), color=:blue, markersize=5)
+
+	Makie.linkxaxes!(ax_react, ax_diff)
+	Makie.ylims!(ax_diff, -1.5, 1)
+	Makie.ylims!(ax_react, -0.5, 6)
+	
+	Makie.xlims!(ax_react, 0.5, 108.5)
+	Makie.xlims!(ax_diff,  0.5, 108.5)
+
+	Makie.resize_to_layout!(fig)
+	Makie.save("/DATA/cossio/SAM/2024/SamApp2024.jl/pluto/Figures/Fig5new_SHAPE_example_2GIS.pdf", fig)
+	fig
+end
+
 # ╔═╡ Cell order:
 # ╠═1f9e4648-3b0f-4ce8-acc1-8aa4a51e7242
 # ╠═8e34985c-368c-4a4f-99c0-5cc16d195974
@@ -377,3 +431,5 @@ aptamers_df.description[only(findall(aptamers_df.name .== "APSAMN7"))]
 # ╠═4826b171-a3b5-4411-8357-bf2fc13c2f01
 # ╠═af800276-6e2f-4a14-b6f4-d565b0de6f45
 # ╠═cbd07af7-0688-467b-bf06-6e51f0cd9693
+# ╠═41102bd6-a2dc-46c6-9510-50f35ade2c12
+# ╠═f028cfab-f18a-43d3-86f6-809833b13d81
