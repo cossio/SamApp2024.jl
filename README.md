@@ -24,10 +24,26 @@ Then, navigate to this directory in your terminal, start Julia (by running `juli
 julia> import Pkg
 julia> Pkg.activate(pwd()) # activate the project in the current directory
 julia> Pkg.instantiate() # install all the dependencies
-julia> import SamApp2024 # import the package
 ```
 
-The second to last command will install all the dependencies of this package. The last command, imports the package, so you can use it in the Julia REPL. The first time you import it, it might some time for precompilation (but future imports should be faster).
+The last command will install all the dependencies of this package.
+
+Next, we will configure storage for downloading data from Rfam. Julia uses a startup configuration file, that by default is located under your Home folder, in `~/.julia/config/startup.jl` (if the file or folders do not exist, create them). Note that the actual location of this file might vary depending on your operating system and local configuration (see https://docs.julialang.org/en/v1/manual/command-line-interface/#Startup-file for more details). Having located your `startup.jl` file, add the following lines to it:
+
+```julia
+ENV["RFAM_DIR"] = "[path to local Rfam directory]"
+ENV["RFAM_VERSION"] = "14.7"
+```
+
+where `[path to local Rfam directory]` should be replaced by the path to a local directory, where the package will place data downloaded from Rfam.
+
+Lastly, import the package within a Julia session by running:
+
+```julia
+julia> import SamApp2024
+```
+
+You can use this command in the Julia REPL. The first time you import it, it might some time for precompilation (but future imports should be faster).
 
 At this point you can call any of the functions in the package.
 
