@@ -28,14 +28,15 @@ julia> Pkg.instantiate() # install all the dependencies
 
 The last command will install all the dependencies of this package.
 
-Next, we will configure storage for downloading data from Rfam. Julia uses a startup configuration file, that by default is located under your Home folder, in `~/.julia/config/startup.jl` (if the file or folders do not exist, create them). Note that the actual location of this file might vary depending on your operating system and local configuration (see https://docs.julialang.org/en/v1/manual/command-line-interface/#Startup-file for more details). Having located your `startup.jl` file, add the following lines to it:
+Next, we will configure storage for downloading data from Rfam. Create a file named `LocalPreferences.toml` in the root directory of this package, and add the following lines:
 
-```julia
-ENV["RFAM_DIR"] = "[path to local Rfam directory]"
-ENV["RFAM_VERSION"] = "14.7"
+```toml
+[Rfam]
+RFAM_DIR = "[path to local Rfam directory]"
+RFAM_VERSION = "14.7"
 ```
 
-where `[path to local Rfam directory]` should be replaced by the path to a local directory, where the package will place data downloaded from Rfam.
+where `[path to local Rfam directory]` should be replaced with the path to some local directory of your choosing, where the package will place data downloaded from Rfam.
 
 Lastly, import the package within a Julia session by running:
 
