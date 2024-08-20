@@ -1,3 +1,3 @@
 [Rfam]
-RFAM_DIR = "/DATA/cossio/data/Rfam"
+RFAM_DIR = "/DATA1/cossio/data/Rfam"
 RFAM_VERSION = "14.7"
