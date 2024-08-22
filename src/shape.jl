@@ -1,4 +1,5 @@
 const hallmark_sites_20230507 = [
+    10, 11, # P1
     25, 26, 27, 28, 77, 79, # Pseudoknot
     34, 35, 36, 37, # Kink-turn
     73, 74, 75, # A-minor

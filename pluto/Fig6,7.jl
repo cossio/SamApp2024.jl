@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.45
+# v0.19.46
 
 using Markdown
 using InteractiveUtils
@@ -309,6 +309,9 @@ shape_stats_merged = SamApp2024.shape_basepair_log_odds_v4(;
     only_hq_profile = true, p_thresh = 1e-3, nsamples = 1000
 );
 
+# ╔═╡ 32d66706-b17d-4c58-8464-1128348ce06a
+findall(_responds_sam_yes_rep0) ∩ rbm_seqs
+
 # ╔═╡ c87fa471-dbb6-4802-8bd0-aae1eafd7fc0
 md"# Plot"
 
@@ -368,7 +371,8 @@ let fig = Makie.Figure(; halign = :left)
 	
 	n_ex_rbm = 299 # rbm example, switcher
 	#n_ex_nat = 112 # natural example, responsive but not switcher
-	n_ex_nat = 101 # natural example, responsive but not switcher
+	#n_ex_nat = 101 # natural example, responsive but not switcher
+	n_ex_rbm_2 = 207 # other RBM example, switcher
 	
 	_width = 550
 	_height = 70
@@ -397,8 +401,8 @@ let fig = Makie.Figure(; halign = :left)
 	Makie.hidespines!(ax_diff_1, :t, :b, :r)
 	Makie.hidexdecorations!(ax_diff_1)
 	
-	_R_sam = shape_data_all_merged.shape_reactivities[:, n_ex_nat, conds_SAM_all_merged[1]]
-	_R_mg = shape_data_all_merged.shape_reactivities[:, n_ex_nat, only(conds_Mg_all_merged)]
+	_R_sam = shape_data_all_merged.shape_reactivities[:, n_ex_rbm_2, conds_SAM_all_merged[1]]
+	_R_mg = shape_data_all_merged.shape_reactivities[:, n_ex_rbm_2, only(conds_Mg_all_merged)]
 	
 	ax_react_2 = Makie.Axis(fig[2,1][3,1], width=_width, height=_height, xticks=10:10:108, ylabel="reactivity", xgridvisible=false, ygridvisible=false, yticks=0:2:5, ytrimspine=true)
 	for (x0, xf, color, alpha) = struct_bands
@@ -526,7 +530,7 @@ let fig = Makie.Figure()
 	Makie.Label(fig[3,1][1, 1, Makie.TopLeft()], "C)", fontsize = 14, font = :bold, padding = (0, 5, 5, 0), halign = :right)
 
 	Makie.resize_to_layout!(fig)
-	Makie.save("/DATA/cossio/SAM/2024/SamApp2024.jl/pluto/SI/Figures/read_depths.pdf", fig)
+	#Makie.save("/DATA/cossio/SAM/2024/SamApp2024.jl/pluto/SI/Figures/read_depths.pdf", fig)
 	fig
 end
 
@@ -743,6 +747,7 @@ end
 # ╠═44321d83-09e4-4928-ac36-b32a12297320
 # ╠═d5b6b49a-9721-4c4c-a735-743f3cd852ab
 # ╠═309bf006-c0e1-46a6-9bc8-0834450340d9
+# ╠═32d66706-b17d-4c58-8464-1128348ce06a
 # ╠═c87fa471-dbb6-4802-8bd0-aae1eafd7fc0
 # ╠═4c4144ca-9f36-44f0-b697-7411df2fac6a
 # ╠═9fcca185-180f-4478-8fa2-d0cf37e1937b
