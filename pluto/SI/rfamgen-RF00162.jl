@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.45
+# v0.19.46
 
 using Markdown
 using InteractiveUtils
@@ -61,8 +61,14 @@ Rfam_id = "RF00162"
 # ╔═╡ 94c85a6b-8061-43cf-a92b-4e87cac1e147
 Rfam_cm = Infernal.cmfetch(Rfam.cm(), Rfam_id).out
 
+# ╔═╡ 17313d40-77c9-426a-a8d8-4946ec12e7a9
+SamApp2024_jl_dirname = dirname(Base.current_project())
+
+# ╔═╡ a53943fc-3019-49c2-8a6a-febc55afb0bd
+rfamgen_basedir = "/DATA-SSD/cossio/projects/2022/SAM-I_Riboswitch/rfamgen"
+
 # ╔═╡ 9d2c22af-e34c-433e-8915-f7dd2f2214b6
-rfamgen_seqs_fasta = "/DATA/cossio/SAM/2024/rfamgen/outputs/$Rfam_id/sampled_seq.fa"
+rfamgen_seqs_fasta = "$rfamgen_basedir/outputs/$Rfam_id/sampled_seq.fa"
 
 # ╔═╡ ee4923e5-53c6-4410-a5c0-47e6c57ee4b6
 rfamgen_seqs_aln = SamApp2024.infernal_align_fasta_to_cm(rfamgen_seqs_fasta, Rfam_cm)
@@ -71,7 +77,7 @@ rfamgen_seqs_aln = SamApp2024.infernal_align_fasta_to_cm(rfamgen_seqs_fasta, Rfa
 rfamgen_seqs_raw = LongRNA{4}.(FASTX.sequence.(FASTX.FASTA.Reader(open(rfamgen_seqs_fasta))))
 
 # ╔═╡ 1d590af4-a11f-4cc7-890e-2c54c5bebb60
-rfamgen_seqs_fasta_sampl = "/DATA/cossio/SAM/2024/rfamgen/outputs/$Rfam_id/sampled_seq_sampl.fa"
+rfamgen_seqs_fasta_sampl = "$rfamgen_basedir/outputs/$Rfam_id/sampled_seq_sampl.fa"
 
 # ╔═╡ c036fba4-baff-4e8c-973b-fb9f059251ae
 rfamgen_seqs_raw_sampl = LongRNA{4}.(FASTX.sequence.(FASTX.FASTA.Reader(open(rfamgen_seqs_fasta_sampl))))
@@ -104,13 +110,13 @@ cm_score_rbm = SamApp2024.infernal_score_sequences(Rfam_cm, [replace(string(seq)
 rbm = SamApp2024.rbm2022()
 
 # ╔═╡ c4e777fd-5e85-42d2-a72a-b46e84015a50
-rfamgen_P_latent_MSA = vec(readdlm("/DATA/cossio/SAM/2024/rfamgen/outputs/RF00162/log_p_latent_msa.txt"))
+rfamgen_P_latent_MSA = vec(readdlm("$rfamgen_basedir/outputs/RF00162/log_p_latent_msa.txt"))
 
 # ╔═╡ ad60eadc-a368-40e5-8ed6-6506dd75f48b
-rfamgen_P_latent_RBM = vec(readdlm("/DATA/cossio/SAM/2024/rfamgen/outputs/RF00162/log_p_latent_RBM.txt"))
+rfamgen_P_latent_RBM = vec(readdlm("$rfamgen_basedir/outputs/RF00162/log_p_latent_RBM.txt"))
 
 # ╔═╡ be816ba7-5d00-4f92-91d7-1725e75e2110
-rfamgen_P_latent_rCM = vec(readdlm("/DATA/cossio/SAM/2024/rfamgen/outputs/RF00162/log_p_latent_rCM.txt"))
+rfamgen_P_latent_rCM = vec(readdlm("$rfamgen_basedir/outputs/RF00162/log_p_latent_rCM.txt"))
 
 # ╔═╡ 034ced77-82be-41cc-a2eb-2e23d47fec9c
 md"# CM emitted sequences"
@@ -162,7 +168,7 @@ let fig = Makie.Figure()
 	ax = Makie.Axis(fig[1,1]; width=_sz, height=_sz, xlabel="RBM score", ylabel="frequency", xgridvisible=false, ygridvisible=false)
 	Makie.hist!(ax, -RBMs.free_energy(rbm, SamApp2024.onehot(hits_sequences)); normalization=:pdf, label="MSA", bins=200:2:370, color=(:gray, 0.5))
 	Makie.stephist!(ax, -RBMs.free_energy(rbm, SamApp2024.onehot(rfamgen_seqs_aln_sampl)); normalization=:pdf, label="RfamGen", bins=200:2:400, color=:brown, linewidth=2)
-	Makie.stephist!(ax, -RBMs.free_energy(rbm, SamApp2024.onehot(rfamgen_seqs_aln)); normalization=:pdf, label="RfamGen (argmax)", bins=200:2:400, color=:brown, linewidth=2, linestyle=:dash)
+	#Makie.stephist!(ax, -RBMs.free_energy(rbm, SamApp2024.onehot(rfamgen_seqs_aln)); normalization=:pdf, label="RfamGen (argmax)", bins=200:2:400, color=:brown, linewidth=2, linestyle=:dash)
 	Makie.stephist!(ax, -RBMs.free_energy(rbm, SamApp2024.rbm2022samples()); normalization=:pdf, label="RBM", bins=200:2:370, color=:blue, linewidth=2)
 	Makie.stephist!(ax, -RBMs.free_energy(rbm, SamApp2024.onehot(Rfam_cm_emitted_sequences)); normalization=:pdf, label="rCM", bins=100:2:400, color=:red, linewidth=2)
 	Makie.axislegend(ax; position=:lt, framevisible=false)
@@ -178,7 +184,7 @@ let fig = Makie.Figure()
 	ax = Makie.Axis(fig[1,3]; width=_sz, height=_sz, xlabel="Rfam CM bit score", ylabel="frequency", xgridvisible=false, ygridvisible=false)
 	Makie.hist!(ax, cm_score_hits; normalization=:pdf, label="MSA", bins=30:2:150, color=(:gray, 0.5))
 	Makie.stephist!(ax, cm_score_rfamgen_sampl; normalization=:pdf, label="RfamGen", bins=30:2:150, color=:brown, linewidth=2)
-	Makie.stephist!(ax, cm_score_rfamgen; normalization=:pdf, label="RfamGen (argmax)", bins=30:2:150, color=:brown, linewidth=2, linestyle=:dash)
+	#Makie.stephist!(ax, cm_score_rfamgen; normalization=:pdf, label="RfamGen (argmax)", bins=30:2:150, color=:brown, linewidth=2, linestyle=:dash)
 	Makie.stephist!(ax, cm_score_rbm; normalization=:pdf, label="RBM", bins=30:2:120, color=:blue, linewidth=2)
 	Makie.stephist!(ax, Rfam_cm_emitted_sequences_infernal_scores; normalization=:pdf, label="rCM", bins=-50:2:150, color=:red, linewidth=2)
 	Makie.xlims!(ax, -1, 120)
@@ -189,7 +195,7 @@ let fig = Makie.Figure()
 	Makie.Label(fig[1,3][1, 1, Makie.TopLeft()], "C)", fontsize = 16, font = :bold, padding = (0, 5, 5, 0), halign = :right)
 
 	Makie.resize_to_layout!(fig)
-	Makie.save("/DATA/cossio/SAM/2024/SamApp2024.jl/pluto/SI/Figures/fig-SI_RfamGen.pdf", fig)
+	Makie.save("$SamApp2024_jl_dirname/pluto/SI/Figures/fig-SI_RfamGen.pdf", fig)
 	fig
 end
 
@@ -197,7 +203,7 @@ end
 L"\log(P_{\mathrm{CMVAE}}(z)) + \mathrm{const.}"
 
 # ╔═╡ ce7a137e-7fe9-4cdf-a827-e6db6d93d069
-md"# Final figure using Denoised CM"
+md"# Figure using Denoised CM"
 
 # ╔═╡ Cell order:
 # ╠═e98903a9-5faf-4cc0-ab42-a7a7bd5ccfc9
@@ -219,6 +225,8 @@ md"# Final figure using Denoised CM"
 # ╠═061e8cb0-6c3a-4e1a-93d3-eeb400fca037
 # ╠═b638a0dc-a03a-482e-8479-08da23b40494
 # ╠═94c85a6b-8061-43cf-a92b-4e87cac1e147
+# ╠═17313d40-77c9-426a-a8d8-4946ec12e7a9
+# ╠═a53943fc-3019-49c2-8a6a-febc55afb0bd
 # ╠═9d2c22af-e34c-433e-8915-f7dd2f2214b6
 # ╠═ee4923e5-53c6-4410-a5c0-47e6c57ee4b6
 # ╠═504ae038-7b2f-4aa3-b0dc-97372b506daa
