@@ -223,7 +223,7 @@ let fig = Makie.Figure()
 	#Makie.hidexdecorations!(ax_react_1)
 	
 	Makie.barplot!(ax_diff, 1:108, _R_sam - _R_mg, color=ifelse.(_R_sam - _R_mg .< 0, :green, :gray))
-	#Makie.scatter!(ax_diff, _sites, -1.4one.(_sites), markersize=7, color=:black, marker=:utriangle)
+	Makie.scatter!(ax_diff, _sites, -1.4one.(_sites), markersize=7, color=:black, marker=:utriangle)
 	Makie.xlims!(ax_diff, 0, 109)
 	
 	Makie.hidespines!(ax_diff, :r, :t)
@@ -239,12 +239,15 @@ let fig = Makie.Figure()
 	Makie.xlims!(ax_diff,  0.5, 108.5)
 
 	Makie.resize_to_layout!(fig)
-	#Makie.save("/DATA/cossio/SAM/2024/SamApp2024.jl/pluto/Figures/Fig5new_SHAPE_example.pdf", fig)
+	Makie.save("Figures/Fig5new_SHAPE_example.pdf", fig)
 	fig
 end
 
 # ╔═╡ ea8e20bc-fd8e-43cd-8ef5-6a653f28f53f
 aptamers_df = SamApp2024.probed_aptamers_table_20221027()
+
+# ╔═╡ 9ecff5e8-4b91-4338-aaaa-1200684d3765
+pwd()
 
 # ╔═╡ ff713d18-cb3a-4707-b694-a7acc6f0d1d2
 pdb10_index_in_aptamers_df = only(findall(aptamers_df.name .== "SAMAP-PDB10"))
@@ -263,8 +266,8 @@ let fig = Makie.Figure()
 	n_ex = only(findall(shape_data_045.aptamer_names .== "APSAMN7"))
 	@show shape_data_045.aptamer_ids[n_ex]
 	
-	width = 800
-	height = 80
+	width = 700
+	height = 100
 	xticks = 5:5:108
 
 	_R_sam = shape_data_all_merged.shape_reactivities[:, n_ex, conds_SAM_all_merged[1]]
@@ -289,7 +292,7 @@ let fig = Makie.Figure()
 	#Makie.hidexdecorations!(ax_react_1)
 	
 	Makie.barplot!(ax_diff, 1:108, _R_sam - _R_mg, color=ifelse.(_R_sam - _R_mg .< 0, :green, :gray))
-	#Makie.scatter!(ax_diff, _sites, -1.4one.(_sites), markersize=7, color=:black, marker=:utriangle)
+	Makie.scatter!(ax_diff, _sites, -1.4one.(_sites), markersize=7, color=:black, marker=:utriangle)
 	Makie.xlims!(ax_diff, 0, 109)
 	
 	Makie.hidespines!(ax_diff, :r, :t)
@@ -305,7 +308,7 @@ let fig = Makie.Figure()
 	Makie.xlims!(ax_diff,  0.5, 108.5)
 
 	Makie.resize_to_layout!(fig)
-	#Makie.save("/DATA/cossio/SAM/2024/SamApp2024.jl/pluto/Figures/Fig5new_SHAPE_example2.pdf", fig)
+	Makie.save("Figures/Fig5new_SHAPE_example2.pdf", fig)
 	fig
 end
 
@@ -425,6 +428,7 @@ end
 # ╠═1e5a5d35-3b84-4c42-af1c-310375ba449a
 # ╠═23e51bbf-8db0-470f-ba50-d6999480d922
 # ╠═ea8e20bc-fd8e-43cd-8ef5-6a653f28f53f
+# ╠═9ecff5e8-4b91-4338-aaaa-1200684d3765
 # ╠═ff713d18-cb3a-4707-b694-a7acc6f0d1d2
 # ╠═9f491a8e-fee1-409c-b2bd-0fbc0be1270c
 # ╠═d12fb5cb-1315-4284-bb3b-57deb741cb87

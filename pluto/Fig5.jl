@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.45
+# v0.19.46
 
 using Markdown
 using InteractiveUtils
@@ -246,6 +246,7 @@ let fig = Makie.Figure()
 	Makie.band!(ax, _xs, (ΔR_sam_avg_inf - ΔR_sam_std_inf/2)[_xs], (ΔR_sam_avg_inf + ΔR_sam_std_inf/2)[_xs], markersize=5, color=(:red, 0.25))
 	Makie.lines!(ax, _xs, ΔR_sam_avg_inf[_xs], linewidth=1, color=:red)
 	Makie.scatter!(ax, _xs, ΔR_sam_avg_inf[_xs], markersize=5, color=:red, label="rCM")
+	Makie.scatter!(ax, SamApp2024.hallmark_sites_20230507, -2.0one.(SamApp2024.hallmark_sites_20230507), markersize=7, color=:black, marker=:utriangle)
 	Makie.axislegend(ax, position=(0.5, 0), framevisible=false, patchlabelgap=-3)
 	Makie.hidespines!(ax, :t, :r)
 	Makie.xlims!(1, 108)
@@ -337,7 +338,7 @@ let fig = Makie.Figure()
 	Makie.Label(fig[3,2][1,1,Makie.TopLeft()], "D)", font=:bold, padding=(0,0,10,10))
 
 	Makie.resize_to_layout!(fig)
-	Makie.save("/DATA/cossio/SAM/2024/SamApp2024.jl/pluto/SI/Figures/Bootstrap_Reactivity_Profiles.pdf", fig)
+	Makie.save("SI/Figures/Bootstrap_Reactivity_Profiles.pdf", fig)
 	fig
 end
 

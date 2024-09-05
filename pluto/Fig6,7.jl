@@ -436,7 +436,7 @@ let fig = Makie.Figure(; halign = :left)
 	Makie.linkyaxes!(ax_diff_1, ax_diff_2)
 	
 	Makie.resize_to_layout!(fig)
-	#Makie.save("Figures/SAM response Repl0 v2.pdf", fig)
+	Makie.save("Figures/SAM response Repl0 v2.pdf", fig)
 	fig
 end
 
