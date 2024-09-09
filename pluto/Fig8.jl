@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.45
+# v0.19.46
 
 using Markdown
 using InteractiveUtils
@@ -356,6 +356,7 @@ let fig = Makie.Figure()
 	    Makie.vspan!(ax_diff_2, x0, xf; color=(color, alpha))
 	end
 	Makie.barplot!(ax_diff_2, 1:108, _R_sam - _R_mg, color=ifelse.(_R_sam - _R_mg .< 0, :green, :gray))
+	Makie.scatter!(ax_diff_2, _sites, -1.4one.(_sites), markersize=7, color=:black, marker=:utriangle)
 	Makie.hidespines!(ax_diff_2, :r, :t)
 	#Makie.scatter!(ax_diff_2, _sites, -0.2one.(_sites), color=:blue, markersize=5)
 	
@@ -376,7 +377,7 @@ let fig = Makie.Figure()
 	Makie.xlims!(ax_diff_2,  0.5, 108.5)
 	
 	Makie.resize_to_layout!(fig)
-	#Makie.save("Figures/500 aptamers.pdf", fig)
+	Makie.save("Figures/500 aptamers.pdf", fig)
 	fig
 end
 
