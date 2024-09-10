@@ -199,6 +199,44 @@ let fig = Makie.Figure()
 	fig
 end
 
+# ╔═╡ 7d571a44-dac0-4f19-a1fe-a6af227f71d2
+let fig = Makie.Figure()
+	_sz = 300
+	
+	ax = Makie.Axis(fig[1,1]; width=_sz, height=_sz, xlabel="RBM score", ylabel="frequency", xgridvisible=false, ygridvisible=false)
+	Makie.hist!(ax, -RBMs.free_energy(rbm, SamApp2024.onehot(hits_sequences)); normalization=:pdf, label="MSA", bins=200:2:370, color=(:gray, 0.5))
+	Makie.stephist!(ax, -RBMs.free_energy(rbm, SamApp2024.onehot(rfamgen_seqs_aln_sampl)); normalization=:pdf, label="RfamGen", bins=200:2:400, color=:brown, linewidth=2)
+	#Makie.stephist!(ax, -RBMs.free_energy(rbm, SamApp2024.onehot(rfamgen_seqs_aln)); normalization=:pdf, label="RfamGen (argmax)", bins=200:2:400, color=:brown, linewidth=2, linestyle=:dash)
+	Makie.stephist!(ax, -RBMs.free_energy(rbm, SamApp2024.rbm2022samples()); normalization=:pdf, label="RBM", bins=200:2:370, color=:blue, linewidth=2)
+	Makie.stephist!(ax, -RBMs.free_energy(rbm, SamApp2024.onehot(Rfam_cm_emitted_sequences)); normalization=:pdf, label="rCM", bins=100:2:400, color=:red, linewidth=2)
+	Makie.axislegend(ax; position=:lt, framevisible=false)
+	Makie.xlims!(ax, 120, 370)
+	Makie.ylims!(ax, 0, 0.04)
+
+	ax = Makie.Axis(fig[1,2]; width=_sz, height=_sz, xlabel="RfamGen latent score", ylabel="frequency", xgridvisible=false, ygridvisible=false)
+	Makie.hist!(ax, rfamgen_P_latent_MSA; normalization=:pdf, label="MSA", color=(:gray, 0.5), bins=-70:1:0)
+	Makie.stephist!(ax, rfamgen_P_latent_rCM; normalization=:pdf, label="rCM", color=:red, linewidth=2, bins=-70:1:0)
+	Makie.stephist!(ax, rfamgen_P_latent_RBM; normalization=:pdf, label="RBM", color=:blue, linewidth=2, bins=-70:1:0)
+	Makie.stephist!(ax, -dropdims(sum(abs2, randn(16, length(rfamgen_P_latent_RBM)); dims=1); dims=1); normalization=:pdf, label="RfamGen", color=:brown, linewidth=2, bins=-70:1:0)
+
+	# ax = Makie.Axis(fig[1,3]; width=_sz, height=_sz, xlabel="Rfam CM bit score", ylabel="frequency", xgridvisible=false, ygridvisible=false)
+	# Makie.hist!(ax, cm_score_hits; normalization=:pdf, label="MSA", bins=30:2:150, color=(:gray, 0.5))
+	# Makie.stephist!(ax, cm_score_rfamgen_sampl; normalization=:pdf, label="RfamGen", bins=30:2:150, color=:brown, linewidth=2)
+	# #Makie.stephist!(ax, cm_score_rfamgen; normalization=:pdf, label="RfamGen (argmax)", bins=30:2:150, color=:brown, linewidth=2, linestyle=:dash)
+	# Makie.stephist!(ax, cm_score_rbm; normalization=:pdf, label="RBM", bins=30:2:120, color=:blue, linewidth=2)
+	# Makie.stephist!(ax, Rfam_cm_emitted_sequences_infernal_scores; normalization=:pdf, label="rCM", bins=-50:2:150, color=:red, linewidth=2)
+	# Makie.xlims!(ax, -1, 120)
+	# Makie.ylims!(ax, 0, 0.077)
+
+	Makie.Label(fig[1,1][1, 1, Makie.TopLeft()], "A)", fontsize = 16, font = :bold, padding = (0, 5, 5, 0), halign = :right)
+	Makie.Label(fig[1,2][1, 1, Makie.TopLeft()], "B)", fontsize = 16, font = :bold, padding = (0, 5, 5, 0), halign = :right)
+	#Makie.Label(fig[1,3][1, 1, Makie.TopLeft()], "C)", fontsize = 16, font = :bold, padding = (0, 5, 5, 0), halign = :right)
+
+	Makie.resize_to_layout!(fig)
+	Makie.save("$SamApp2024_jl_dirname/pluto/SI/Figures/fig-SI_RfamGen_noC.pdf", fig)
+	fig
+end
+
 # ╔═╡ 3768ddcd-57fb-4fc1-85fd-898c9b6193e1
 L"\log(P_{\mathrm{CMVAE}}(z)) + \mathrm{const.}"
 
@@ -254,5 +292,6 @@ md"# Figure using Denoised CM"
 # ╠═048284c6-3a38-4196-8da7-ba55dea5bee0
 # ╠═3a2cdb94-1c0a-4798-a14d-80beb09e7716
 # ╠═2b90f592-5a28-485e-84bf-232d900f1abc
+# ╠═7d571a44-dac0-4f19-a1fe-a6af227f71d2
 # ╠═3768ddcd-57fb-4fc1-85fd-898c9b6193e1
 # ╠═ce7a137e-7fe9-4cdf-a827-e6db6d93d069
