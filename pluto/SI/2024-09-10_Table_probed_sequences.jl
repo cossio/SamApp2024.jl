@@ -35,9 +35,7 @@ using Statistics: cor
 using Statistics: mean
 
 # ╔═╡ 0b31b947-6c71-40a8-afa9-cc23eabed235
-md"""
-# Imports
-"""
+md"# Imports"
 
 # ╔═╡ 995559e5-397c-4049-a024-fdabc0ee24a1
 import PlutoUI
@@ -158,9 +156,7 @@ shape_stats_500 = SamApp2024.shape_basepair_log_odds_v4(;
 );
 
 # ╔═╡ bc18fd34-0ea1-4034-8945-96dbb20b4b89
-md"""
-# Compute protection scores
-"""
+md"# Compute protection scores"
 
 # ╔═╡ 3a24b18e-7c8f-45e2-8e72-bb280e746571
 bps_reactivities_rep0 = shape_data_rep0.shape_reactivities[bps, nat_seqs, conds_sam_rep0];
@@ -227,75 +223,6 @@ function null_model_FN_shape_data(shape_data)
 	return shape_data_null
 end
 
-# ╔═╡ fee6e1ec-cf9e-4da9-a494-e5109d47272c
-shape_data_rep0_null_FP = null_model_FP_shape_data(shape_data_rep0)
-
-# ╔═╡ 16af0e8a-e645-412c-9031-504cffc62248
-shape_data_rep0_null_FN = null_model_FN_shape_data(shape_data_rep0)
-
-# ╔═╡ 8918bc49-46ac-49e3-8c05-e5fd3b2b1601
-shape_stats_rep0_null_FP = SamApp2024.shape_basepair_log_odds_v4(;
-    shape_data = shape_data_rep0_null_FP,
-    paired_reactivities = bps_reactivities_rep0,
-    unpaired_reactivities = nps_reactivities_rep0,
-    all_reactivities = all_reactivities_rep0,
-    only_hq_profile = true, p_thresh = 1e-3, nsamples = 1000
-);
-
-# ╔═╡ f65173e4-c3e7-4c3c-b57d-edc22c2168f7
-shape_stats_rep0_null_FN = SamApp2024.shape_basepair_log_odds_v4(;
-    shape_data = shape_data_rep0_null_FN,
-    paired_reactivities = bps_reactivities_rep0,
-    unpaired_reactivities = nps_reactivities_rep0,
-    all_reactivities = all_reactivities_rep0,
-    only_hq_profile = true, p_thresh = 1e-3, nsamples = 1000
-);
-
-# ╔═╡ c339bdad-cdf9-4c6a-9327-fa27e0a6e329
-x_mg_rep0_null_FP = nansum(shape_stats_rep0_null_FP.shape_log_odds[_sites, :,  conds_mg_rep0]; dim=(1,3))
-
-# ╔═╡ 95385789-1a41-4dc6-82c6-8e67cd709d90
-x_sam_rep0_null_FP = nansum(shape_stats_rep0_null_FP.shape_log_odds[_sites, :, conds_sam_rep0]; dim=(1,3))
-
-# ╔═╡ 56d0f361-1074-44f9-8cbe-7cfc472358f0
-_responds_sam_yes_rep0_null_FP = (x_mg_rep0_null_FP .< -_thresh) .& (x_sam_rep0_null_FP .> +_thresh);
-
-# ╔═╡ e501af70-116d-445c-8f02-ae0f1e921466
-_responds_sam_nop_rep0_null_FP = (x_mg_rep0_null_FP .> +_thresh) .| (x_sam_rep0_null_FP .< -_thresh);
-
-# ╔═╡ 50ab03e1-d2a9-4797-8730-7aea0e6cf41c
-_inconclusive_rep0_null_FP = ((!).(_responds_sam_yes_rep0_null_FP)) .& ((!).(_responds_sam_nop_rep0_null_FP));
-
-# ╔═╡ d48d5bbd-d8e1-46da-a3b7-3605144e8255
-sum(_responds_sam_yes_rep0_null_FP), sum(_responds_sam_nop_rep0_null_FP), sum(_inconclusive_rep0_null_FP)
-
-# ╔═╡ e172390d-c5b4-42ba-86a0-0069f79c4092
-x_mg_rep0_null_FN = nansum(shape_stats_rep0_null_FN.shape_log_odds[_sites, :,  conds_mg_rep0]; dim=(1,3))
-
-# ╔═╡ 184cc73d-b8ae-49d9-b31a-59c60a55df9c
-x_sam_rep0_null_FN = nansum(shape_stats_rep0_null_FN.shape_log_odds[_sites, :, conds_sam_rep0]; dim=(1,3))
-
-# ╔═╡ 9bb5efdf-388b-465e-af1b-2121b4cf53be
-_responds_sam_yes_rep0_null_FN = (x_mg_rep0_null_FN .< -_thresh) .& (x_sam_rep0_null_FN .> +_thresh);
-
-# ╔═╡ 2e79a3e9-0c6a-4b08-9f43-16960e0d800d
-_responds_sam_nop_rep0_null_FN = (x_mg_rep0_null_FN .> +_thresh) .| (x_sam_rep0_null_FN .< -_thresh);
-
-# ╔═╡ a2ddae11-e9b8-4571-84f6-1a77a238a4b0
-_responds_sam_nop_rep0_null_FN_preformed = x_mg_rep0_null_FN .> +_thresh;
-
-# ╔═╡ 30d3d53d-bbe1-4c48-91cb-f47becaffc36
-_responds_sam_nop_rep0_null_FN_notformed = x_sam_rep0_null_FN .< -_thresh;
-
-# ╔═╡ 61f04139-3138-4fe6-b27a-5e0f4f27780d
-_inconclusive_rep0_null_FN = ((!).(_responds_sam_yes_rep0_null_FN)) .& ((!).(_responds_sam_nop_rep0_null_FN));
-
-# ╔═╡ 89b67d6e-962c-4cab-ab27-8e69e3d99a29
-sum(_responds_sam_yes_rep0_null_FN), sum(_responds_sam_nop_rep0_null_FN), sum(_inconclusive_rep0_null_FN)
-
-# ╔═╡ bea806fc-20e2-4c59-95d3-1af3f6fb917a
-sum(_responds_sam_nop_rep0_null_FN_preformed), sum(_responds_sam_nop_rep0_null_FN_notformed)
-
 # ╔═╡ 0bc97164-25ec-46d9-80fd-14b42b652fc0
 md"# Make table"
 
@@ -357,24 +284,5 @@ md"# Make table"
 # ╠═5739e646-c62e-4577-b34d-bdea1a6c65e0
 # ╠═df0f1809-8209-4e12-a158-431f7acd0f91
 # ╠═08cb7fa3-421a-429f-bd8d-3fbcb09b6376
-# ╠═fee6e1ec-cf9e-4da9-a494-e5109d47272c
-# ╠═16af0e8a-e645-412c-9031-504cffc62248
-# ╠═8918bc49-46ac-49e3-8c05-e5fd3b2b1601
-# ╠═f65173e4-c3e7-4c3c-b57d-edc22c2168f7
-# ╠═c339bdad-cdf9-4c6a-9327-fa27e0a6e329
-# ╠═95385789-1a41-4dc6-82c6-8e67cd709d90
-# ╠═56d0f361-1074-44f9-8cbe-7cfc472358f0
-# ╠═e501af70-116d-445c-8f02-ae0f1e921466
-# ╠═50ab03e1-d2a9-4797-8730-7aea0e6cf41c
-# ╠═d48d5bbd-d8e1-46da-a3b7-3605144e8255
-# ╠═e172390d-c5b4-42ba-86a0-0069f79c4092
-# ╠═184cc73d-b8ae-49d9-b31a-59c60a55df9c
-# ╠═9bb5efdf-388b-465e-af1b-2121b4cf53be
-# ╠═2e79a3e9-0c6a-4b08-9f43-16960e0d800d
-# ╠═a2ddae11-e9b8-4571-84f6-1a77a238a4b0
-# ╠═30d3d53d-bbe1-4c48-91cb-f47becaffc36
-# ╠═61f04139-3138-4fe6-b27a-5e0f4f27780d
-# ╠═89b67d6e-962c-4cab-ab27-8e69e3d99a29
-# ╠═bea806fc-20e2-4c59-95d3-1af3f6fb917a
 # ╠═0bc97164-25ec-46d9-80fd-14b42b652fc0
 # ╠═0d091096-900e-4f3e-b4f4-252f99523c7d

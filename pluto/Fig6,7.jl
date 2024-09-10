@@ -440,6 +440,100 @@ let fig = Makie.Figure(; halign = :left)
 	fig
 end
 
+# ╔═╡ cb8c0927-cdda-4a9f-aad0-d6b8308ae933
+md"# Pairing energies"
+
+# ╔═╡ 935a3442-ed13-4239-962b-9c17dc86e792
+let fig = Makie.Figure(; halign = :left)
+
+	_sz = 200
+	
+	x_mg_p1 = nansum(shape_stats_rep0.shape_log_odds[p1_pos, :, conds_mg_rep0]; dim=(1,3))
+	x_sam_p1 = nansum(shape_stats_rep0.shape_log_odds[p1_pos, :, conds_sam_rep0]; dim=(1,3))
+	
+	# responsive to SAM
+	_resp_sam_P1 = (x_mg_p1 .< -_thresh) .& (x_sam_p1 .> _thresh)
+	_stuck_open_P1 = (x_mg_p1 .< -_thresh) .& (x_sam_p1 .< -_thresh)
+	_stuck_closed_P1 = (x_mg_p1 .> _thresh) .& (x_sam_p1 .> _thresh)
+	
+	_e_p1_bands = [-10, 0]
+	
+	ax_rbm_hist = Makie.Axis(fig[1,1]; halign=:left, width=75, height=_sz, yticks=-15:5:5, xticks=[-0.2, 0, 0.2], xgridvisible=false, ygridvisible=false, xtrimspine=true, ytrimspine=true)
+	Makie.hist!(ax_rbm_hist, Vienna_energies_P1_RBM_samples, color=:lightblue, normalization=:pdf, bins=-15:1:7, direction=:x, scale_to=-1)
+	Makie.hlines!(ax_rbm_hist, _e_p1_bands, color=:blue, linestyle=:dash)
+	Makie.hidespines!(ax_rbm_hist, :t, :r, :l, :b)
+	Makie.hidexdecorations!(ax_rbm_hist)
+	Makie.hideydecorations!(ax_rbm_hist)
+	
+	ax_mg = Makie.Axis(fig[1,2]; halign=:left, width=_sz, height=_sz, xlabel="Protect. score(P1)", ylabel="P1 pairing energy (kcal/mol)", xgridvisible=false, ygridvisible=false)
+	#Makie.scatter!(ax, nansum(shape_stats_rep0.shape_log_odds[p1_pos, :, conds_mg_rep0]; dim=(1,3)), Vienna_energies_P1, color=(:gray, 0.5), markersize=15)
+	plt1 = Makie.scatter!(ax_mg, nansum(shape_stats_rep0.shape_log_odds[p1_pos, _stuck_closed_P1, conds_mg_rep0]; dim=(1,3)), Vienna_energies_P1[_stuck_closed_P1], color=:black, markersize=15, label="P1 closed", marker='O')
+	plt2 = Makie.scatter!(ax_mg, nansum(shape_stats_rep0.shape_log_odds[p1_pos, _stuck_open_P1, conds_mg_rep0]; dim=(1,3)), Vienna_energies_P1[_stuck_open_P1], color=:gray, markersize=15, label="P1 open", marker='O')
+	plt3 = Makie.scatter!(ax_mg, nansum(shape_stats_rep0.shape_log_odds[p1_pos, _resp_sam_P1, conds_mg_rep0]; dim=(1,3)), Vienna_energies_P1[_resp_sam_P1], color=:steelblue, markersize=15, label="P1 switch", marker='●')
+	Makie.vlines!(ax_mg, [-_thresh, _thresh], linestyle=:dash, color=:orange)
+	Makie.hlines!(ax_mg, _e_p1_bands, color=:blue, linestyle=:dash)
+	Makie.Legend(fig[1,4], [plt1, plt2, plt3], ["P1 closed", "P1 open", "P1 switch"], framevisible=false, valign=:top)
+	
+	ax_sam = Makie.Axis(fig[1,3]; halign=:left, width=_sz, height=_sz, xlabel="Protect. score(P1)", ylabel="P1 pairing energy (kcal/mol)", xgridvisible=false, ygridvisible=false)
+	#Makie.scatter!(ax, nansum(shape_stats_rep0.shape_log_odds[p1_pos, :, conds_sam_rep0]; dim=(1,3)), Vienna_energies_P1, color=(:gray, 0.5),  markersize=15)
+	Makie.scatter!(ax_sam, nansum(shape_stats_rep0.shape_log_odds[p1_pos, _stuck_closed_P1, conds_sam_rep0]; dim=(1,3)), Vienna_energies_P1[_stuck_closed_P1], color=:black, markersize=15, marker='O')
+	Makie.scatter!(ax_sam, nansum(shape_stats_rep0.shape_log_odds[p1_pos, _stuck_open_P1, conds_sam_rep0]; dim=(1,3)), Vienna_energies_P1[_stuck_open_P1], color=:gray, markersize=15, marker='O')
+	Makie.scatter!(ax_sam, nansum(shape_stats_rep0.shape_log_odds[p1_pos, _resp_sam_P1, conds_sam_rep0]; dim=(1,3)), Vienna_energies_P1[_resp_sam_P1], color=:steelblue, markersize=15, marker='●')
+	# Makie.hlines!(ax, nanmean(Vienna_energies_P1[_stuck_open]), color=:red, linewidth=2)
+	# Makie.hlines!(ax, nanmean(Vienna_energies_P1[_stuck_closed]), color=:green, linewidth=2)
+	# Makie.hlines!(ax, nanmean(Vienna_energies_P1[_resp_sam]), color=:blue, linewidth=2)
+	#nanmean(Vienna_energies_P1[_resp_sam]), nanmean(Vienna_energies_P1[_stuck_closed])
+	Makie.vlines!(ax_sam, [-_thresh, _thresh], linestyle=:dash, color=:orange)
+	Makie.hlines!(ax_sam, _e_p1_bands, color=:blue, linestyle=:dash)
+	Makie.hideydecorations!(ax_sam)
+	
+	Makie.linkyaxes!(ax_rbm_hist, ax_mg, ax_sam)
+	
+	
+	x_mg_pk = nansum(shape_stats_rep0.shape_log_odds[pk_pos, :, conds_mg_rep0]; dim=(1,3))
+	x_sam_pk = nansum(shape_stats_rep0.shape_log_odds[pk_pos, :, conds_sam_rep0]; dim=(1,3))
+	
+	# responsive to SAM
+	_resp_sam_Pk = (x_mg_pk .< -_thresh) .& (x_sam_pk .> _thresh)
+	_stuck_open_Pk = (x_mg_pk .< -_thresh) .& (x_sam_pk .< -_thresh)
+	_stuck_closed_Pk = (x_mg_pk .> _thresh) .& (x_sam_pk .> _thresh)
+	
+	_e_pk_bands = [-8, -3]
+	
+	
+	ax_rbm_hist = Makie.Axis(fig[2,1]; halign=:left, width=75, height=_sz, yticks=-15:5:5, xticks=[-0.2, 0, 0.2], xgridvisible=false, ygridvisible=false, xtrimspine=true, ytrimspine=true)
+	Makie.hist!(ax_rbm_hist, Vienna_energies_P1_RBM_samples, color=:lightblue, normalization=:pdf, bins=-15:1:7, direction=:x, scale_to=-1)
+	Makie.hlines!(ax_rbm_hist, _e_pk_bands, color=:blue, linestyle=:dash)
+	Makie.hidespines!(ax_rbm_hist, :t, :b, :r, :l)
+	Makie.hidexdecorations!(ax_rbm_hist)
+	Makie.hideydecorations!(ax_rbm_hist)
+	
+	ax_mg = Makie.Axis(fig[2,2]; halign=:left, width=_sz, height=_sz, xlabel="Protect. score(Pk)", ylabel="Pk pairing energy (kcal/mol)", xgridvisible=false, ygridvisible=false)
+	plt1 = Makie.scatter!(ax_mg, nansum(shape_stats_rep0.shape_log_odds[pk_pos, _stuck_closed_Pk, conds_mg_rep0]; dim=(1,3)), Vienna_energies_Pk_RNAeval[_stuck_closed_Pk], color=:black, markersize=15, label="Pk closed", marker='O')
+	plt2 = Makie.scatter!(ax_mg, nansum(shape_stats_rep0.shape_log_odds[pk_pos, _stuck_open_Pk, conds_mg_rep0]; dim=(1,3)), Vienna_energies_Pk_RNAeval[_stuck_open_Pk], color=:gray, markersize=15, label="Pk open", marker='O')
+	plt3 = Makie.scatter!(ax_mg, nansum(shape_stats_rep0.shape_log_odds[pk_pos, _resp_sam_Pk, conds_mg_rep0]; dim=(1,3)), Vienna_energies_Pk_RNAeval[_resp_sam_Pk], color=:steelblue, markersize=15, label="Pk switch", marker='●')
+	Makie.vlines!(ax_mg, [-_thresh, _thresh], linestyle=:dash, color=:orange)
+	Makie.hlines!(ax_mg, _e_pk_bands, color=:blue, linestyle=:dash)
+	Makie.Legend(fig[2,4], [plt1, plt2, plt3], ["Pk closed", "Pk open", "Pk switch"], framevisible=false, valign=:top)
+	
+	ax_sam = Makie.Axis(fig[2,3]; halign=:left, width=_sz, height=_sz, xlabel="Protect. score(Pk)", ylabel="Pk pairing energy (kcal/mol)", xgridvisible=false, ygridvisible=false)
+	Makie.scatter!(ax_sam, nansum(shape_stats_rep0.shape_log_odds[pk_pos, _stuck_closed_Pk, conds_sam_rep0]; dim=(1,3)), Vienna_energies_Pk_RNAeval[_stuck_closed_Pk], color=:black, markersize=15, marker='O')
+	Makie.scatter!(ax_sam, nansum(shape_stats_rep0.shape_log_odds[pk_pos, _stuck_open_Pk, conds_sam_rep0]; dim=(1,3)), Vienna_energies_Pk_RNAeval[_stuck_open_Pk], color=:gray, markersize=15, marker='O')
+	Makie.scatter!(ax_sam, nansum(shape_stats_rep0.shape_log_odds[pk_pos, _resp_sam_Pk, conds_sam_rep0]; dim=(1,3)), Vienna_energies_Pk_RNAeval[_resp_sam_Pk], color=:steelblue, markersize=15, marker='●')
+	Makie.vlines!(ax_sam, [-_thresh, _thresh], linestyle=:dash, color=:orange)
+	Makie.hlines!(ax_sam, _e_pk_bands, color=:blue, linestyle=:dash)
+	Makie.hideydecorations!(ax_sam)
+	
+	Makie.ylims!(ax_mg, -10, 5)
+	Makie.ylims!(ax_sam, -10, 5)
+	Makie.linkyaxes!(ax_rbm_hist, ax_mg, ax_sam)
+	
+	
+	Makie.resize_to_layout!(fig)
+	#Makie.save("Figures/SAM response Repl0 -- Vienna.pdf", fig)
+	fig
+end
+
 # ╔═╡ 9255fa38-9004-43c9-8817-5657e6cfb2d5
 md"# Read depths"
 
@@ -751,6 +845,8 @@ end
 # ╠═c87fa471-dbb6-4802-8bd0-aae1eafd7fc0
 # ╠═4c4144ca-9f36-44f0-b697-7411df2fac6a
 # ╠═9fcca185-180f-4478-8fa2-d0cf37e1937b
+# ╠═cb8c0927-cdda-4a9f-aad0-d6b8308ae933
+# ╠═935a3442-ed13-4239-962b-9c17dc86e792
 # ╠═9255fa38-9004-43c9-8817-5657e6cfb2d5
 # ╠═6b38d182-a901-4b20-bfdf-9441e4586e7b
 # ╠═2cc26b9a-c18b-4321-ad79-a00f8085b525
