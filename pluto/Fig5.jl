@@ -32,9 +32,7 @@ using Statistics: cor
 using Statistics: mean
 
 # ╔═╡ d443b9aa-7449-4447-983c-18263e61be12
-md"""
-# Imports
-"""
+md"# Imports"
 
 # ╔═╡ 59e3b0b4-c955-4985-bc79-bbc9220539a6
 import PlutoUI

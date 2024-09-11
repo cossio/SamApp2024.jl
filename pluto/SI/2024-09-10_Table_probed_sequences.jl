@@ -212,6 +212,7 @@ _responsive_sam_500 = ifelse.(_responds_sam_yes_500, "Responsive", ifelse.(_resp
 df = DataFrame(;
     aligned_sequences = [shape_data_rep0.aligned_sequences; shape_data_500.aligned_sequences],
     aptamer_origin = [shape_data_rep0.aptamer_origin; shape_data_500.aptamer_origin],
+	experiment = [fill("Experiment_1", length(shape_data_rep0.aligned_sequences)); fill("Experiment_2", length(shape_data_500.aligned_sequences))],
     responsive = [_responsive_sam_rep0; _responsive_sam_500],
 	RBM_score = [-aptamer_rbm_energies_rep0; -aptamer_rbm_energies_500],
 	Protect_Score_Hallmark_Mg = [x_mg_rep0; x_mg_500],
