@@ -534,6 +534,18 @@ let fig = Makie.Figure(; halign = :left)
 	fig
 end
 
+# ╔═╡ fbbd6109-ac4e-4676-97b1-e9fef5a3b729
+length(Vienna_energies_P1)
+
+# ╔═╡ 52bd54f9-0df6-4c26-849a-64928693fd9a
+Vienna_energies_P1[rbm_seqs]
+
+# ╔═╡ 8ff5340c-3ade-4c03-9a72-1c324aa0e882
+Vienna_energies_P1[(!ismissing).(Vienna_energies_P1) .&& (Vienna_energies_P1 .> 0)]
+
+# ╔═╡ 36cf3060-1bfd-4e2e-8009-a9d5bdaf19cb
+shape_data_045.aptamer_origin[(!ismissing).(Vienna_energies_P1) .&& (Vienna_energies_P1 .> 0)]
+
 # ╔═╡ 9255fa38-9004-43c9-8817-5657e6cfb2d5
 md"# Read depths"
 
@@ -847,6 +859,10 @@ end
 # ╠═9fcca185-180f-4478-8fa2-d0cf37e1937b
 # ╠═cb8c0927-cdda-4a9f-aad0-d6b8308ae933
 # ╠═935a3442-ed13-4239-962b-9c17dc86e792
+# ╠═fbbd6109-ac4e-4676-97b1-e9fef5a3b729
+# ╠═52bd54f9-0df6-4c26-849a-64928693fd9a
+# ╠═8ff5340c-3ade-4c03-9a72-1c324aa0e882
+# ╠═36cf3060-1bfd-4e2e-8009-a9d5bdaf19cb
 # ╠═9255fa38-9004-43c9-8817-5657e6cfb2d5
 # ╠═6b38d182-a901-4b20-bfdf-9441e4586e7b
 # ╠═2cc26b9a-c18b-4321-ad79-a00f8085b525
