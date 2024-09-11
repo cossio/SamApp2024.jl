@@ -10,29 +10,14 @@ import Pkg, Revise; Pkg.activate(Base.current_project())
 # ╔═╡ 42d180ab-1092-45ca-ac7f-174dc493f779
 using BioSequences: LongRNA
 
-# ╔═╡ c4232a5e-be0d-414c-adc7-e07acce8f779
-using Distributions: Gamma
-
 # ╔═╡ 5ec543b4-a285-49f6-bbda-bb71180e6601
 using Makie: @L_str
-
-# ╔═╡ 6bda50c6-7d04-4d3e-86a1-ec4de656c246
-using NaNStatistics: nanmean
-
-# ╔═╡ db91eaa3-317c-4bef-890b-1b1fa47f2935
-using NaNStatistics: nanstd
 
 # ╔═╡ e063dbe6-e7e6-459f-95c1-17696aa0388a
 using NaNStatistics: nansum
 
 # ╔═╡ b231f8f3-bad4-4763-8c7d-e335b40a34b6
 using RestrictedBoltzmannMachines: free_energy
-
-# ╔═╡ 9e8ea7ad-43fa-4ac4-b602-04a6b44cfc07
-using Statistics: cor
-
-# ╔═╡ 20eb3376-f702-43ec-92df-1634cf7a98fd
-using Statistics: mean
 
 # ╔═╡ eeca4e4a-7dff-49a1-bb87-8514a19043d2
 using DataFrames: DataFrame
@@ -43,20 +28,11 @@ md"# Imports"
 # ╔═╡ 995559e5-397c-4049-a024-fdabc0ee24a1
 import PlutoUI
 
-# ╔═╡ dfe55eab-b72b-43fc-99a8-c22f74f96f9b
-import CairoMakie
-
-# ╔═╡ 5e8f32d4-5283-41e7-b6ac-4dff426bd2ae
-import Makie
-
 # ╔═╡ a796fa03-f142-4ae2-824e-dd97fd2e746f
 import RestrictedBoltzmannMachines as RBMs
 
 # ╔═╡ 44002f4c-7bf9-4562-b79b-0d281dba401c
 import SamApp2024
-
-# ╔═╡ 6c5308c4-d360-4f54-802b-e9abbaded7b9
-import StatsBase
 
 # ╔═╡ b56b53a7-fe6d-4194-8a39-9b5121ed856d
 import CSV
@@ -229,21 +205,13 @@ CSV.write("Data/2024-09-11_Suppl_Table.csv", df)
 # ╠═0b31b947-6c71-40a8-afa9-cc23eabed235
 # ╠═910ed40a-a45d-4abe-9719-9f09dff09e6b
 # ╠═995559e5-397c-4049-a024-fdabc0ee24a1
-# ╠═dfe55eab-b72b-43fc-99a8-c22f74f96f9b
-# ╠═5e8f32d4-5283-41e7-b6ac-4dff426bd2ae
 # ╠═a796fa03-f142-4ae2-824e-dd97fd2e746f
 # ╠═44002f4c-7bf9-4562-b79b-0d281dba401c
-# ╠═6c5308c4-d360-4f54-802b-e9abbaded7b9
 # ╠═b56b53a7-fe6d-4194-8a39-9b5121ed856d
 # ╠═42d180ab-1092-45ca-ac7f-174dc493f779
-# ╠═c4232a5e-be0d-414c-adc7-e07acce8f779
 # ╠═5ec543b4-a285-49f6-bbda-bb71180e6601
-# ╠═6bda50c6-7d04-4d3e-86a1-ec4de656c246
-# ╠═db91eaa3-317c-4bef-890b-1b1fa47f2935
 # ╠═e063dbe6-e7e6-459f-95c1-17696aa0388a
 # ╠═b231f8f3-bad4-4763-8c7d-e335b40a34b6
-# ╠═9e8ea7ad-43fa-4ac4-b602-04a6b44cfc07
-# ╠═20eb3376-f702-43ec-92df-1634cf7a98fd
 # ╠═eeca4e4a-7dff-49a1-bb87-8514a19043d2
 # ╠═653db4db-12d2-4481-abe4-81af83fd1d10
 # ╠═f90147bf-7dde-4b7f-84b4-3ca7eea9fdd6
