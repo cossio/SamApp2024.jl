@@ -56,9 +56,7 @@ import StatsBase
 PlutoUI.TableOfContents()
 
 # ╔═╡ 4206fb3f-99c4-4e4b-bbc9-a97891a2f321
-md"""
-# Load data
-"""
+md"# Load data"
 
 # ╔═╡ dcf0701e-3fcc-4199-8285-803305ee38b2
 # load SHAPE data

@@ -166,6 +166,40 @@ Denoised_cm_emitted_sequences_match_only = [join(c for c = seq if isuppercase(c)
 # ╔═╡ 30f86d0a-d875-45de-b75a-a4f8d29b0b17
 dCM_samples_afa = save_aligned_fasta(SamApp2024.onehot(LongRNA{4}.(Denoised_cm_emitted_sequences_match_only)))
 
+# ╔═╡ f4034804-28f8-4b0c-b703-68f14862987b
+md"# Unknotted CM samples"
+
+# ╔═╡ ee6b4a1c-fd4b-4cd5-acf5-0d41578819cf
+Unknotted_cm = SamApp2024.rfam_RF00162_unknotted_cm()
+
+# ╔═╡ c9011e3f-a80a-4adc-a618-8b63f36b9423
+Unknotted_cm_emitted_sequences_afa = Infernal.cmemit(Unknotted_cm.cmout; N=5000, aligned=true, outformat="AFA");
+
+# ╔═╡ 3aa3c1eb-2400-4594-9191-783054b7d038
+Unknotted_cm_emitted_sequences = FASTX.sequence.(FASTX.FASTA.Reader(open(Unknotted_cm_emitted_sequences_afa.out)));
+
+# ╔═╡ cc5b3ebf-b8ea-4fd8-8445-43edcd8454f5
+Unknotted_cm_emitted_sequences_match_only = [join(c for c = seq if isuppercase(c) || c == '-') for seq = Unknotted_cm_emitted_sequences]
+
+# ╔═╡ 041e9eb7-a82f-4ea8-ac4e-ec3fb53f5f0b
+@assert all(length.(Denoised_cm_emitted_sequences_match_only) .== 108)
+
+# ╔═╡ bbd36a37-f2a4-47d6-a056-053dd4a74b20
+Unknotted_perm = SamApp2024.rfam_RF00162_unknotted_permutation()
+
+# ╔═╡ 4eab3d09-0f8d-4860-b573-a0c70b25e3c1
+Unknotted_invperm = invperm(Unknotted_perm)
+
+# ╔═╡ 281ccb29-dc8f-47c4-a614-d2a5f9304361
+# Permute back to correct column locations
+Unknotted_cm_emitted_sequences_match_only_invperm = [seq[Unknotted_invperm] for seq in Unknotted_cm_emitted_sequences_match_only];
+
+# ╔═╡ a46223d2-0d38-411a-8720-e437eccf2578
+uCM_samples_afa = save_aligned_fasta(SamApp2024.onehot(LongRNA{4}.(Unknotted_cm_emitted_sequences_match_only_invperm)))
+
+# ╔═╡ 35534f43-2988-4de6-813b-6ff438fb6fdb
+Infernal.esl_reformat("STOCKHOLM", uCM_samples_afa; informat="AFA")
+
 # ╔═╡ Cell order:
 # ╠═a716a269-d78e-4dc6-9101-91d098254ed9
 # ╠═99970519-3d0b-4a0f-9882-3cf521b4d3b4
@@ -211,3 +245,14 @@ dCM_samples_afa = save_aligned_fasta(SamApp2024.onehot(LongRNA{4}.(Denoised_cm_e
 # ╠═3e7b9557-6573-485a-a9ae-47073b32bdbe
 # ╠═7ad10b49-e12c-4c9f-b864-71fc9196b8e5
 # ╠═30f86d0a-d875-45de-b75a-a4f8d29b0b17
+# ╠═f4034804-28f8-4b0c-b703-68f14862987b
+# ╠═ee6b4a1c-fd4b-4cd5-acf5-0d41578819cf
+# ╠═c9011e3f-a80a-4adc-a618-8b63f36b9423
+# ╠═3aa3c1eb-2400-4594-9191-783054b7d038
+# ╠═cc5b3ebf-b8ea-4fd8-8445-43edcd8454f5
+# ╠═041e9eb7-a82f-4ea8-ac4e-ec3fb53f5f0b
+# ╠═bbd36a37-f2a4-47d6-a056-053dd4a74b20
+# ╠═4eab3d09-0f8d-4860-b573-a0c70b25e3c1
+# ╠═281ccb29-dc8f-47c4-a614-d2a5f9304361
+# ╠═a46223d2-0d38-411a-8720-e437eccf2578
+# ╠═35534f43-2988-4de6-813b-6ff438fb6fdb

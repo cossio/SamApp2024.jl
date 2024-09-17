@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.45
+# v0.19.46
 
 using Markdown
 using InteractiveUtils
@@ -35,9 +35,7 @@ using Statistics: mean
 using NaNStatistics: nansum
 
 # ╔═╡ 9500714b-7e97-4a4c-8751-a57d51b6f2f7
-md"""
-# Imports
-"""
+md"# Imports"
 
 # ╔═╡ f6c287bf-5bf4-4fec-8c8a-12773c86071d
 import PlutoUI
@@ -61,9 +59,7 @@ import StatsBase
 PlutoUI.TableOfContents()
 
 # ╔═╡ 80600fef-ebe3-4e2d-8f72-0c2b00b26649
-md"""
-# Load data
-"""
+md"# Load data"
 
 # ╔═╡ 781ad678-4bc3-4aec-960b-4e9fcdd11b41
 # load SHAPE data
@@ -120,9 +116,7 @@ seed_seqs = findall(shape_data_045.aptamer_origin .== "RF00162_seed70")
 nat_seqs = full_seqs ∪ seed_seqs;
 
 # ╔═╡ 53727ce8-c6d4-48ff-ac81-c3bef1c7e93a
-md"""
-# Compute protection scores
-"""
+md"# Compute protection scores"
 
 # ╔═╡ 862e0bab-7beb-494d-a2c6-b080b19dfddf
 bps_reactivities_rep0 = shape_data_rep0.shape_reactivities[bps, nat_seqs, conds_sam_rep0];
@@ -143,9 +137,7 @@ shape_stats_rep0 = SamApp2024.shape_basepair_log_odds_v4(;
 );
 
 # ╔═╡ 3afc091b-a202-4290-847c-f699d54b2857
-md"""
-# Paired and unpaired histogram datasets
-"""
+md"# Paired and unpaired histogram datasets"
 
 # ╔═╡ 19eb0e8d-cfee-485b-9823-08e415ab4aba
 shape_log_odds_bp_mg = filter(isfinite, shape_stats_rep0.shape_log_odds[bps, nat_seqs, conds_mg_rep0])
@@ -166,9 +158,7 @@ bps_reactivities_rep0_flat = filter(isfinite, shape_data_rep0.shape_reactivities
 nps_reactivities_rep0_flat = filter(isfinite, shape_data_rep0.shape_reactivities[nps, nat_seqs, conds_sam_rep0]);
 
 # ╔═╡ c287fa5f-dd02-4af6-b297-810bdbb96588
-md"""
-# Plots
-"""
+md"# Plots"
 
 # ╔═╡ 52bf9835-1dff-47a1-9a85-e7605dced135
 let fig = Makie.Figure()
@@ -223,9 +213,7 @@ let fig = Makie.Figure()
 end
 
 # ╔═╡ 57e48547-f1fe-454f-bf9c-7ace090c238e
-md"""
-# Final figure
-"""
+md"# Final figure"
 
 # ╔═╡ 3fc412a9-0395-4375-8a15-d1add4333a8d
 let fig = Makie.Figure()
@@ -298,7 +286,7 @@ let fig = Makie.Figure()
 	Makie.Label(fig[2,2][1, 1, Makie.TopLeft()], "D)", fontsize = 18, font = :bold, padding = (0, 5, 5, 0), halign = :right)
 
 	Makie.resize_to_layout!(fig)
-	Makie.save("/DATA/cossio/SAM/2024/SamApp2024.jl/pluto/SI/Figures/SI_prot_score_additivity_separation.pdf", fig)
+	#Makie.save("/DATA/cossio/SAM/2024/SamApp2024.jl/pluto/SI/Figures/SI_prot_score_additivity_separation.pdf", fig)
 	fig
 end
 
@@ -378,6 +366,41 @@ let fig = Makie.Figure()
 	fig
 end
 
+# ╔═╡ 8b134e12-b006-4745-b698-b9c13e5b7e8b
+md"# Intro figure"
+
+# ╔═╡ 10218acd-1cf4-4e90-a506-7712d719e641
+let fig = Makie.Figure()
+	for (col, i) = enumerate((length(SamApp2024.hallmark_sites_20230507),))
+		
+		data_bp = dropdims(mean(rand(shape_log_odds_bp_sam, i, 10000); dims=1); dims=1)
+		data_np = dropdims(mean(rand(shape_log_odds_np_sam, i, 10000); dims=1); dims=1)
+		
+		ax = Makie.Axis(fig[1, col], width=150, height=150, xlabel="Total protection score", ylabel="Frequency", xgridvisible=false, ygridvisible=false)
+		Makie.hist!(ax, data_bp, normalization=:pdf, bins=-5:0.01:10, color=(:teal, 0.5))
+		Makie.hist!(ax, data_np, normalization=:pdf, bins=-5:0.01:10, color=(:orange, 0.5))
+		Makie.stephist!(ax, data_bp, normalization=:pdf, bins=-5:0.05:10, color=:teal, linewidth=2, label="paired")
+		Makie.stephist!(ax, data_np, normalization=:pdf, bins=-5:0.05:10, color=:orange, linewidth=2, label="unpaired")
+		# Makie.stephist!(ax,
+		# 	[dropdims(sum(rand(shape_log_odds_bp_sam, 8, 10000); dims=1); dims=1); dropdims(sum(rand(shape_log_odds_np_sam, 8, 10000); dims=1); dims=1)],
+		# 	normalization=:pdf, bins=-11:0.05:5, color=:black, gap=-0.01
+		# )
+		Makie.xlims!(ax, -1, 0.5)
+		Makie.ylims!(ax, 0, 4.3)
+		#Makie.axislegend(ax; position=:lt, framevisible=false)
+		Makie.hidespines!(ax, :t, :r)
+	end
+	Makie.resize_to_layout!(fig)
+	Makie.save("Figures/abstract_protection_scores_histograms.pdf", fig)
+	fig
+end
+
+# ╔═╡ 2c4a66b1-2292-406f-89e4-ac3a30389a21
+pwd()
+
+# ╔═╡ a391baaa-2d79-454c-a95e-6c23aadcea4f
+length(SamApp2024.hallmark_sites_20230507)
+
 # ╔═╡ Cell order:
 # ╠═9500714b-7e97-4a4c-8751-a57d51b6f2f7
 # ╠═c8af275e-a111-47f3-bd5f-0a9eb02eb2f4
@@ -433,3 +456,7 @@ end
 # ╠═57e48547-f1fe-454f-bf9c-7ace090c238e
 # ╠═3fc412a9-0395-4375-8a15-d1add4333a8d
 # ╠═5649d967-70f1-4883-9205-1b5421e9c484
+# ╠═8b134e12-b006-4745-b698-b9c13e5b7e8b
+# ╠═10218acd-1cf4-4e90-a506-7712d719e641
+# ╠═2c4a66b1-2292-406f-89e4-ac3a30389a21
+# ╠═a391baaa-2d79-454c-a95e-6c23aadcea4f
