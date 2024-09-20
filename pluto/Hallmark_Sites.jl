@@ -204,7 +204,8 @@ let fig = Makie.Figure()
 	
 	S_mg_err = nanstd(shape_stats_rep0.shape_log_odds[:, nat_seqs, conds_mg_rep0]; dim=(2,3))
 	S_sam_err = nanstd(shape_stats_rep0.shape_log_odds[:, nat_seqs, conds_sam_rep0]; dim=(2,3))
-	
+
+	Makie.hlines!(ax, 0.0; linestyle=:dash, color=(:red, 0.5))
 	Makie.stairs!(ax, 1:108, S_mg, width=0.5, step=:center, color=:gray)
 	Makie.stairs!(ax, 1:108, S_sam, width=0.5, step=:center, color=:purple)
 	Makie.errorbars!(ax, 1:108, S_mg, S_mg_err/2, color=(:gray, 0.5), linewidth=1)
@@ -246,7 +247,7 @@ let fig = Makie.Figure()
 	#Makie.scatter!(ax, _sites, -1.4one.(_sites), markersize=10, color=:green, marker=:utriangle)
 	
 	Makie.resize_to_layout!(fig)
-	Makie.save("Figures/Hallmark_sites.pdf", fig) 
+	#Makie.save("Figures/Hallmark_sites.pdf", fig) 
 	fig
 end
 
