@@ -23,10 +23,7 @@ using DataFrames: DataFrame
 using LinearAlgebra: eigen
 
 # ╔═╡ 7f08a116-eae3-4fd0-b395-d13038997465
-using NaNStatistics: nanmean
-
-# ╔═╡ ae52d76d-3f52-440b-8240-6e2054300110
-using NaNStatistics: nansum
+using NaNStatistics: nanmean, nanstd, nansum
 
 # ╔═╡ e162b72f-d324-4725-abc4-c8ab73770cf1
 using RestrictedBoltzmannMachines: free_energy
@@ -387,9 +384,13 @@ md"# Examples"
 # ╔═╡ 6cb429f0-55ca-4d6e-9e3f-5e508d3d1a30
 shape_data.aptamer_criteria
 
+# ╔═╡ 5da79bac-66c8-499e-a241-87912c700199
+findall(_responds_sam_yes .& (vec(minimum(aptamer_natural_distances; dims=2)) .> 0.3 * 108))
+
 # ╔═╡ 31cb84b5-4bb7-486f-b818-6979072dac6b
 let fig = Makie.Figure()
-	n_ex = 116
+	#n_ex = 116
+	n_ex = 207
 	_width = 700
 	_height = 100
 	
@@ -467,8 +468,6 @@ begin
 	    )
 	)
 	
-	
-	
 	_p4_len = 2
 	println("RBM (P4) | (total=$(sum((aptamer_p4_length .< _p4_len) .& (shape_data.aptamer_origin .== "rbm"))): ", successes_tuple_str(
 	        sum(_responds_sam_yes[(aptamer_p4_length .< _p4_len) .& (shape_data.aptamer_origin .== "rbm")]),
@@ -510,6 +509,58 @@ begin
 	)
 end
 
+# ╔═╡ b7040dbf-3ec8-4715-a325-0d8ec129c23e
+md"# Read depths"
+
+# ╔═╡ 72c7577f-5168-48d9-a64c-42a020306ab7
+let fig = Makie.Figure()
+	width = 550
+	height = 100
+	xticks = 5:10:108
+	yticks = (0:20000:60000, ["0", "20000", "40000", "60000"])
+
+	depth_M_avg = nanmean(shape_data.shape_M_depth; dim=(2,3))
+	depth_U_avg = nanmean(shape_data.shape_U_depth; dim=(2,3))
+	depth_D_avg = nanmean(shape_data.shape_D_depth; dim=(2,3))
+	
+	depth_M_err = nanstd(shape_data.shape_M_depth; dim=(2,3))
+	depth_U_err = nanstd(shape_data.shape_U_depth; dim=(2,3))
+	depth_D_err = nanstd(shape_data.shape_D_depth; dim=(2,3))
+		
+	ax_M = Makie.Axis(fig[1,1]; width, height, xticks, yticks, ylabel="Read depth (M)", xgridvisible=false, ygridvisible=false, ytrimspine=true)
+	ax_U = Makie.Axis(fig[2,1]; width, height, xticks, yticks, ylabel="Read depth (U)", xgridvisible=false, ygridvisible=false, ytrimspine=true)
+	ax_D = Makie.Axis(fig[3,1]; width, height, xticks, yticks, ylabel="Read depth (D)", xgridvisible=false, ygridvisible=false, ytrimspine=true)
+	for (x0, xf, color, alpha) = struct_bands
+	    Makie.vspan!(ax_M, x0, xf; color=(color, alpha))
+	    Makie.vspan!(ax_U, x0, xf; color=(color, alpha))
+	    Makie.vspan!(ax_D, x0, xf; color=(color, alpha))
+	end
+
+	Makie.band!(ax_M, 1:108, depth_M_avg - depth_M_err, depth_M_avg + depth_M_err; color=(:gray, 0.3))
+	Makie.band!(ax_U, 1:108, depth_U_avg - depth_U_err, depth_U_avg + depth_U_err; color=(:gray, 0.3))
+	Makie.band!(ax_D, 1:108, depth_D_avg - depth_D_err, depth_D_avg + depth_D_err; color=(:gray, 0.3))
+	
+	Makie.stairs!(ax_M, 1:108, depth_M_avg, color=:black, step=:center)
+	Makie.stairs!(ax_U, 1:108, depth_U_avg, color=:black, step=:center)
+	Makie.stairs!(ax_D, 1:108, depth_D_avg, color=:black, step=:center)
+
+	for ax = (ax_M, ax_U, ax_D)
+		Makie.xlims!(ax, 0.5, 108.5)
+		Makie.ylims!(ax, -5000, 70000)
+	end
+	#Makie.ylims!(ax_M, -1, 4)
+	#Makie.hidespines!(ax_M, :t, :r, :b)
+	#Makie.hidexdecorations!(ax_M)
+
+	Makie.Label(fig[1,1][1, 1, Makie.TopLeft()], "A)", fontsize = 14, font = :bold, padding = (0, 5, 5, 0), halign = :right)
+	Makie.Label(fig[2,1][1, 1, Makie.TopLeft()], "B)", fontsize = 14, font = :bold, padding = (0, 5, 5, 0), halign = :right)
+	Makie.Label(fig[3,1][1, 1, Makie.TopLeft()], "C)", fontsize = 14, font = :bold, padding = (0, 5, 5, 0), halign = :right)
+
+	Makie.resize_to_layout!(fig)
+	Makie.save("SI/Figures/read_depths_500.pdf", fig)
+	fig
+end
+
 # ╔═╡ Cell order:
 # ╠═ca2287c5-2509-4870-a335-605c7ec1022d
 # ╠═b3c73892-1482-11ef-1248-f70b8e38afbd
@@ -528,7 +579,6 @@ end
 # ╠═f2391009-c7cf-4ea2-a7ca-cd9f72605d32
 # ╠═4d57ef03-6516-4e43-908b-d31f045ec59b
 # ╠═7f08a116-eae3-4fd0-b395-d13038997465
-# ╠═ae52d76d-3f52-440b-8240-6e2054300110
 # ╠═e162b72f-d324-4725-abc4-c8ab73770cf1
 # ╠═e908abe1-dd9e-4f5d-bb81-941d6edd08d9
 # ╠═d806c591-00b9-49ba-a755-e3923ae41670
@@ -586,8 +636,11 @@ end
 # ╠═36eb9427-db56-4265-9621-0a91efe99a93
 # ╠═292a1bb8-09b2-422c-9513-c09a27f04997
 # ╠═6cb429f0-55ca-4d6e-9e3f-5e508d3d1a30
+# ╠═5da79bac-66c8-499e-a241-87912c700199
 # ╠═31cb84b5-4bb7-486f-b818-6979072dac6b
 # ╠═07f14049-8db8-4f11-a1c5-4698c8f2e613
 # ╠═ca68f4e5-7aaa-4394-b285-8fe165917003
 # ╠═9f396f93-7a66-460c-a89e-1064391bf502
 # ╠═4c642ee1-f536-49e3-a609-cd910c41e94b
+# ╠═b7040dbf-3ec8-4715-a325-0d8ec129c23e
+# ╠═72c7577f-5168-48d9-a64c-42a020306ab7

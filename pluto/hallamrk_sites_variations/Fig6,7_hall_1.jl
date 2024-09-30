@@ -175,9 +175,6 @@ shape_stats_rep0 = SamApp2024.shape_basepair_log_odds_v4(;
 # ╔═╡ ac0f6b9c-abdc-4aa3-bf00-29f63330d219
 _thresh = log(5)
 
-# ╔═╡ 3922c5e8-6d40-4cf7-ae2a-3bcb5ae48d73
-
-
 # ╔═╡ ddb024ef-0aa8-44c9-a847-9fa9bfd19f34
 #_sites = SamApp2024.hallmark_sites_20230507;
 _sites = [
@@ -827,7 +824,6 @@ end
 # ╠═cb886986-01e2-494b-8d5d-0ceacaa6d886
 # ╠═92975e4a-13a1-42b2-8219-a1266b7189a1
 # ╠═ac0f6b9c-abdc-4aa3-bf00-29f63330d219
-# ╠═3922c5e8-6d40-4cf7-ae2a-3bcb5ae48d73
 # ╠═ddb024ef-0aa8-44c9-a847-9fa9bfd19f34
 # ╠═acf8bb76-bf87-4cf8-b280-e0e13c65fdff
 # ╠═1a364c8f-49e3-4c33-b892-8f35106c4afa
