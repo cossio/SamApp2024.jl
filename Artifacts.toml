@@ -93,3 +93,11 @@ lazy = true
     [[2022-08-12-SAMAP_with_cristalized_Rep3_5000depth.download]]
     sha256 = "23f5079b1d39464d95badca816ec5b669673f806b8e43d734dd922940d5b479f"
     url = "https://gist.github.com/cossio/ae2f070f636524658f1d68935415c35f/raw/e3564ba084aca4391f4196a4320388b74b0c1c34.tar.gz"
+
+[SAMAP-demux-repl123-2023-09]
+git-tree-sha1 = "31f8353891f0642bc612d02ef2586a02cca4099f"
+lazy = true
+
+    [[SAMAP-demux-repl123-2023-09.download]]
+    sha256 = "0370f57e17090db4c3c69b22997dafe7dadeacb873c992983feee46180fd0f4f"
+    url = "https://gist.github.com/cossio/b93397a2ad9255dd21face2e043b7a89/raw/31f8353891f0642bc612d02ef2586a02cca4099f.tar.gz"
