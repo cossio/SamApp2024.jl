@@ -173,6 +173,9 @@ all_reactivities_rep0 = shape_data_rep0.shape_reactivities[:, nat_seqs, conds_sa
 # ╔═╡ a9b44f72-eec6-4a23-a308-a4fafeac34e8
 _sites = 3:107
 
+# ╔═╡ 4794241c-83a7-418b-a703-78a4aa7833bf
+length(nat_seqs), length(_rbmlo)
+
 # ╔═╡ 0276201f-b846-4573-b28d-e7e756ba0a50
 md"""
 # Figures
@@ -259,6 +262,9 @@ let fig = Makie.Figure()
 	fig
 end
 
+# ╔═╡ 9e14322a-31af-4377-947d-1f2b877e899e
+ΔR_sam_avg_seed
+
 # ╔═╡ 94019df5-2de3-4d18-aa73-4d6b1537b835
 md"""
 # Significance of correlation difference by bootstrapping
@@ -334,7 +340,7 @@ let fig = Makie.Figure()
 	Makie.Label(fig[3,2][1,1,Makie.TopLeft()], "D)", font=:bold, padding=(0,0,10,10))
 
 	Makie.resize_to_layout!(fig)
-	Makie.save("SI/Figures/Bootstrap_Reactivity_Profiles.pdf", fig)
+	#Makie.save("SI/Figures/Bootstrap_Reactivity_Profiles.pdf", fig)
 	fig
 end
 
@@ -402,8 +408,10 @@ end
 # ╠═b0c3959c-fb33-4caf-bd16-96885a0cd302
 # ╠═fdb72e46-1410-488a-89b7-815c288277af
 # ╠═a9b44f72-eec6-4a23-a308-a4fafeac34e8
+# ╠═4794241c-83a7-418b-a703-78a4aa7833bf
 # ╠═0276201f-b846-4573-b28d-e7e756ba0a50
 # ╠═5ef6ad69-e574-4643-912b-db489114995e
+# ╠═9e14322a-31af-4377-947d-1f2b877e899e
 # ╠═94019df5-2de3-4d18-aa73-4d6b1537b835
 # ╠═1eced2e8-6c9c-4482-8c5d-6f0212ca1bde
 # ╠═946c2fb9-ed2d-40bd-8942-38c21d6d38e5
