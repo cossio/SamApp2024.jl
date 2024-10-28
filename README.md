@@ -72,6 +72,8 @@ It is also possible to execute the Jupyter notebooks in Google Colab, see https:
 
 For an alternative implementation of Restricted Boltzmann machines in Python, see https://github.com/jertubiana/PGM. In particular, we have prepared a repository at https://github.com/cossio/SamApp2024Py, showing how to use this Python package to train an RBM on RNA sequences from the RF00162 family.
 
+Lastly, the following repository: https://github.com/2024-RNA-Chapter/2024-01-09-SAM-RBM-example, contains a self-contained example of training an RBM on an RNA family from Rfam. Two notebooks are included: one for training on CPU and another on GPU.
+
 # Issues
 
 If you encounter any problems, or need help setting up this package, please [open an issue](https://github.com/cossio/SamApp2024.jl/issues/new/choose) in this repository.
