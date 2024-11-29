@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.0
+# v0.20.3
 
 using Markdown
 using InteractiveUtils
@@ -199,7 +199,7 @@ df = DataFrame(;
 md"# Export table"
 
 # ╔═╡ 15e163fe-8765-487e-8883-0348b0ecb455
-CSV.write("Data/2024-09-11_Suppl_Table.csv", df)
+#CSV.write("Data/2024-09-11_Suppl_Table.csv", df)
 
 # ╔═╡ Cell order:
 # ╠═0b31b947-6c71-40a8-afa9-cc23eabed235

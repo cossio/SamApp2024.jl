@@ -101,3 +101,19 @@ lazy = true
     [[SAMAP-demux-repl123-2023-09.download]]
     sha256 = "0370f57e17090db4c3c69b22997dafe7dadeacb873c992983feee46180fd0f4f"
     url = "https://gist.github.com/cossio/b93397a2ad9255dd21face2e043b7a89/raw/31f8353891f0642bc612d02ef2586a02cca4099f.tar.gz"
+
+[Sequencing_Groups_2024-11-27]
+git-tree-sha1 = "75c70f2e879de46ab880220d25df5a7b42ebb95f"
+lazy = true
+
+    [[Sequencing_Groups_2024-11-27.download]]
+    sha256 = "8aba3db0798431582995f4994b9409085c96888bcc3b52381f803b9e83fba953"
+    url = "https://gist.github.com/cossio/3a0c74fef8eec8e8a63f575b28d8a9c8/raw/75c70f2e879de46ab880220d25df5a7b42ebb95f.tar.gz"
+
+[Sequencing_Groups_2024-11-27_clean]
+git-tree-sha1 = "db7367affd5c4e22664c3717f1a5eda7d71b9fd6"
+lazy = true
+
+    [[Sequencing_Groups_2024-11-27_clean.download]]
+    sha256 = "e879c5a515fba2b501cd723ce7bb90fd98e4f5661e7337241ae41ed47a8dae39"
+    url = "https://gist.github.com/cossio/de1f92612b1c34b13fa38af9fccbc3ab/raw/db7367affd5c4e22664c3717f1a5eda7d71b9fd6.tar.gz"

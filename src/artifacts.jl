@@ -98,3 +98,12 @@ function shape_crystalized_20240730_dir()
     base_dir = artifact"2022-08-12-SAMAP_with_cristalized_Rep3_5000depth"
     return joinpath(base_dir, "2022-08-12-SAMAP_with_cristalized_Rep3_5000depth")
 end
+
+function artifact_dir_sequencing_groups_2024_11_27()
+    artifact"Sequencing_Groups_2024-11-27_clean"
+end
+
+function artifact_load_sequencing_groups_2024_11_27()
+    files = readdir(artifact_dir_sequencing_groups_2024_11_27())
+    return Dict(f[begin:end-10] => CSV.read(joinpath(artifact_dir_sequencing_groups_2024_11_27(), f), DataFrame) for f = files)
+end

@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.45
+# v0.20.3
 
 using Markdown
 using InteractiveUtils
@@ -307,7 +307,7 @@ let fig = Makie.Figure()
 	Makie.Label(fig[2,4][1, 1, Makie.TopLeft()], "H)", fontsize = 16, font = :bold, padding = (0, 5, 5, 0), halign = :right)
 
 	Makie.resize_to_layout!(fig)
-	Makie.save("/DATA/cossio/SAM/2024/SamApp2024.jl/pluto/SI/Figures/fig-rbm_generation.pdf", fig)
+	#Makie.save("/DATA/cossio/SAM/2024/SamApp2024.jl/pluto/SI/Figures/fig-rbm_generation.pdf", fig)
 	fig
 end
 
