@@ -385,6 +385,37 @@ end
 # ╔═╡ 72d66520-8b99-4f49-b42d-24f6681a656e
 CSV.write(tempname(), df_groups)
 
+# ╔═╡ 31b5c866-fb43-42c6-a020-3fc027cf9e4f
+df[df.sequencing_group .== "GP4-Synthetic-Set1-primer4", :]
+
+# ╔═╡ 891a377f-a6bc-46f2-afdb-32d587e06cad
+df[df.sequencing_group .== "GP5-Synthetic-Set1-primer5", :]
+
+# ╔═╡ 6162ba9b-038c-4e7e-9c30-8045c32dede5
+md"# Determine groups of the example aptamers in main figures"
+
+# ╔═╡ 67acffd5-6850-4d61-9745-6595c471aba4
+# Examples from Fig.7
+df[df.aptamer_names .== shape_data_045.aptamer_names[299], :]
+
+# ╔═╡ 94b1b7f0-c636-46bd-ae67-fbdeebcf5c11
+# Examples from Fig.7
+df[df.aptamer_names .== shape_data_045.aptamer_names[207], :]
+
+# ╔═╡ c9e418b6-00f2-4e76-a47b-67bc42b93467
+# Example from Fig.9 (no P4)
+df[df.aligned_sequences .=== string(shape_data_500.aligned_sequences[116]), :]
+
+# ╔═╡ fc6019fd-13e3-453b-8ab5-161522b09a71
+# Example from Fig.9 (distant)
+df[df.aligned_sequences .=== string(shape_data_500.aligned_sequences[284]), :]
+
+# ╔═╡ c62aa2db-f222-4e74-b1cb-9be741b60bc8
+string(shape_data_500.aligned_sequences[284])
+
+# ╔═╡ a2dee926-4434-4983-b70b-a449e512ad00
+only(df.aligned_sequences[df.aligned_sequences .=== string(shape_data_500.aligned_sequences[284])])
+
 # ╔═╡ Cell order:
 # ╠═1c6856dd-20cb-449f-abcb-545316b28ab5
 # ╠═953d7355-78c1-4309-9f5f-d0c02abffc51
@@ -484,3 +515,12 @@ CSV.write(tempname(), df_groups)
 # ╠═f9e141d1-4c6c-4dab-b49c-6eba71efaade
 # ╠═abfae16d-d438-40d1-aef1-10cd407cbc70
 # ╠═72d66520-8b99-4f49-b42d-24f6681a656e
+# ╠═31b5c866-fb43-42c6-a020-3fc027cf9e4f
+# ╠═891a377f-a6bc-46f2-afdb-32d587e06cad
+# ╠═6162ba9b-038c-4e7e-9c30-8045c32dede5
+# ╠═67acffd5-6850-4d61-9745-6595c471aba4
+# ╠═94b1b7f0-c636-46bd-ae67-fbdeebcf5c11
+# ╠═c9e418b6-00f2-4e76-a47b-67bc42b93467
+# ╠═fc6019fd-13e3-453b-8ab5-161522b09a71
+# ╠═c62aa2db-f222-4e74-b1cb-9be741b60bc8
+# ╠═a2dee926-4434-4983-b70b-a449e512ad00
