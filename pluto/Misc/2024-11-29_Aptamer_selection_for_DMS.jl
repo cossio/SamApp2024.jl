@@ -394,6 +394,10 @@ df[df.sequencing_group .== "GP5-Synthetic-Set1-primer5", :]
 # ╔═╡ 6162ba9b-038c-4e7e-9c30-8045c32dede5
 md"# Determine groups of the example aptamers in main figures"
 
+# ╔═╡ 7cdd22de-8c5f-4f11-953a-fc5c12701b5a
+# Second example from Fig.5 (Deltaproteobacteria bacterium)
+df[df.aptamer_names .== "APSAMN7", :]
+
 # ╔═╡ 67acffd5-6850-4d61-9745-6595c471aba4
 # Examples from Fig.7
 df[df.aptamer_names .== shape_data_045.aptamer_names[299], :]
@@ -401,6 +405,9 @@ df[df.aptamer_names .== shape_data_045.aptamer_names[299], :]
 # ╔═╡ 94b1b7f0-c636-46bd-ae67-fbdeebcf5c11
 # Examples from Fig.7
 df[df.aptamer_names .== shape_data_045.aptamer_names[207], :]
+
+# ╔═╡ 737d32e6-4889-4704-bd0a-2a19d8e3780a
+df[df.aptamer_names .== shape_data_045.aptamer_names[299], :].aligned_sequences
 
 # ╔═╡ c9e418b6-00f2-4e76-a47b-67bc42b93467
 # Example from Fig.9 (no P4)
@@ -518,8 +525,10 @@ only(df.aligned_sequences[df.aligned_sequences .=== string(shape_data_500.aligne
 # ╠═31b5c866-fb43-42c6-a020-3fc027cf9e4f
 # ╠═891a377f-a6bc-46f2-afdb-32d587e06cad
 # ╠═6162ba9b-038c-4e7e-9c30-8045c32dede5
+# ╠═7cdd22de-8c5f-4f11-953a-fc5c12701b5a
 # ╠═67acffd5-6850-4d61-9745-6595c471aba4
 # ╠═94b1b7f0-c636-46bd-ae67-fbdeebcf5c11
+# ╠═737d32e6-4889-4704-bd0a-2a19d8e3780a
 # ╠═c9e418b6-00f2-4e76-a47b-67bc42b93467
 # ╠═fc6019fd-13e3-453b-8ab5-161522b09a71
 # ╠═c62aa2db-f222-4e74-b1cb-9be741b60bc8

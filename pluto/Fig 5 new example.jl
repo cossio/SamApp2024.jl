@@ -239,7 +239,7 @@ let fig = Makie.Figure()
 	Makie.xlims!(ax_diff,  0.5, 108.5)
 
 	Makie.resize_to_layout!(fig)
-	Makie.save("Figures/Fig5new_SHAPE_example.pdf", fig)
+	#Makie.save("Figures/Fig5new_SHAPE_example.pdf", fig)
 	fig
 end
 
@@ -260,6 +260,12 @@ length("GUUCUUAUCAAGAGAAGCAGAGGGACUGGCCCGACGAAGCUUCAGCAACCGGUGUAAUGGCGAAAGCCAUGA
 
 # ╔═╡ 4826b171-a3b5-4411-8357-bf2fc13c2f01
 md"# Example 2"
+
+# ╔═╡ 99def13a-3700-45c6-9127-64754f234957
+conds_SAM_all_merged
+
+# ╔═╡ e7ef002b-2567-434d-8e0f-b707ccd389d3
+shape_data_all_merged.conditions
 
 # ╔═╡ af800276-6e2f-4a14-b6f4-d565b0de6f45
 let fig = Makie.Figure()
@@ -308,7 +314,112 @@ let fig = Makie.Figure()
 	Makie.xlims!(ax_diff,  0.5, 108.5)
 
 	Makie.resize_to_layout!(fig)
-	Makie.save("Figures/Fig5new_SHAPE_example2.pdf", fig)
+	#Makie.save("Figures/Fig5new_SHAPE_example2.pdf", fig)
+	fig
+end
+
+# ╔═╡ f88073e3-144f-459a-8910-7ad5a0c2340d
+let fig = Makie.Figure()
+	n_ex = only(findall(shape_data_045.aptamer_names .== "APSAMN7"))
+	@show shape_data_045.aptamer_ids[n_ex]
+	
+	width = 700
+	height = 100
+	xticks = 5:5:108
+
+	_R_sam = shape_data_all_merged.shape_reactivities[:, n_ex, conds_SAM_all_merged[2]]
+	_R_mg = shape_data_all_merged.shape_reactivities[:, n_ex, only(conds_Mg_all_merged)]
+	
+	ax_react = Makie.Axis(
+		fig[1,1]; valign=:bottom, width, height, xticks, ylabel="react.", xgridvisible=false, ygridvisible=false, yticks=0:2:8, xtrimspine=true, ytrimspine=true
+	)
+	ax_diff = Makie.Axis(
+		fig[2,1]; valign=:bottom, width, height, xticks, xlabel="site", ylabel="Δreact.", xgridvisible=false, ygridvisible=false, yticks=-1:1, xtrimspine=true, ytrimspine=true
+	)
+
+	for (x0, xf, color, alpha) = struct_bands
+	    Makie.vspan!(ax_react, x0, xf; color=(color, alpha))
+		Makie.vspan!(ax_diff, x0, xf; color=(color, alpha))
+	end
+	
+	Makie.stairs!(ax_react, 1:108, _R_mg; step=:center, color=:gray, label="no SAM")
+	Makie.stairs!(ax_react, 1:108, _R_sam; step=:center, color=:purple, label="with SAM")
+	#Makie.axislegend(ax_react, position=(0.0, -13), framevisible=false)
+	#Makie.hidespines!(ax_react_1, :t, :r, :b)
+	#Makie.hidexdecorations!(ax_react_1)
+	
+	Makie.barplot!(ax_diff, 1:108, _R_sam - _R_mg, color=ifelse.(_R_sam - _R_mg .< 0, :green, :gray))
+	Makie.scatter!(ax_diff, _sites, -1.4one.(_sites), markersize=7, color=:black, marker=:utriangle)
+	Makie.xlims!(ax_diff, 0, 109)
+	
+	Makie.hidespines!(ax_diff, :r, :t)
+	Makie.hidespines!(ax_react, :r, :t, :b)
+	Makie.hidexdecorations!(ax_react)
+	#Makie.scatter!(ax_diff_1, _sites, -0.2one.(_sites), color=:blue, markersize=5)
+
+	Makie.linkxaxes!(ax_react, ax_diff)
+	Makie.ylims!(ax_diff, -1.5, 1)
+	Makie.ylims!(ax_react, -0.5, 6)
+	
+	Makie.xlims!(ax_react, 0.5, 108.5)
+	Makie.xlims!(ax_diff,  0.5, 108.5)
+
+	Makie.resize_to_layout!(fig)
+	#Makie.save("Figures/Fig5new_SHAPE_example2.pdf", fig)
+	fig
+end
+
+# ╔═╡ 1b7a906e-f240-4c53-b7f0-719ce088908f
+conds_SAM_all_merged
+
+# ╔═╡ bbd8df1d-ce78-45cc-90a9-2eb1ba112f7b
+let fig = Makie.Figure()
+	n_ex = only(findall(shape_data_045.aptamer_names .== "APSAMN7"))
+	@show shape_data_045.aptamer_ids[n_ex]
+	
+	width = 700
+	height = 100
+	xticks = 5:5:108
+
+	_R_sam = shape_data_rep0.shape_reactivities[:, n_ex, conds_sam_rep0[1]]
+	_R_mg = shape_data_rep0.shape_reactivities[:, n_ex, only(conds_mg_rep0)]
+	
+	ax_react = Makie.Axis(
+		fig[1,1]; valign=:bottom, width, height, xticks, ylabel="react.", xgridvisible=false, ygridvisible=false, yticks=0:2:8, xtrimspine=true, ytrimspine=true
+	)
+	ax_diff = Makie.Axis(
+		fig[2,1]; valign=:bottom, width, height, xticks, xlabel="site", ylabel="Δreact.", xgridvisible=false, ygridvisible=false, yticks=-1:1, xtrimspine=true, ytrimspine=true
+	)
+
+	for (x0, xf, color, alpha) = struct_bands
+	    Makie.vspan!(ax_react, x0, xf; color=(color, alpha))
+		Makie.vspan!(ax_diff, x0, xf; color=(color, alpha))
+	end
+	
+	Makie.stairs!(ax_react, 1:108, _R_mg; step=:center, color=:gray, label="no SAM")
+	Makie.stairs!(ax_react, 1:108, _R_sam; step=:center, color=:purple, label="with SAM")
+	#Makie.axislegend(ax_react, position=(0.0, -13), framevisible=false)
+	#Makie.hidespines!(ax_react_1, :t, :r, :b)
+	#Makie.hidexdecorations!(ax_react_1)
+	
+	Makie.barplot!(ax_diff, 1:108, _R_sam - _R_mg, color=ifelse.(_R_sam - _R_mg .< 0, :green, :gray))
+	Makie.scatter!(ax_diff, _sites, -1.4one.(_sites), markersize=7, color=:black, marker=:utriangle)
+	Makie.xlims!(ax_diff, 0, 109)
+	
+	Makie.hidespines!(ax_diff, :r, :t)
+	Makie.hidespines!(ax_react, :r, :t, :b)
+	Makie.hidexdecorations!(ax_react)
+	#Makie.scatter!(ax_diff_1, _sites, -0.2one.(_sites), color=:blue, markersize=5)
+
+	Makie.linkxaxes!(ax_react, ax_diff)
+	Makie.ylims!(ax_diff, -1.5, 1)
+	Makie.ylims!(ax_react, -0.5, 6)
+	
+	Makie.xlims!(ax_react, 0.5, 108.5)
+	Makie.xlims!(ax_diff,  0.5, 108.5)
+
+	Makie.resize_to_layout!(fig)
+	#Makie.save("Figures/Fig5new_SHAPE_example2.pdf", fig)
 	fig
 end
 
@@ -433,7 +544,12 @@ end
 # ╠═9f491a8e-fee1-409c-b2bd-0fbc0be1270c
 # ╠═d12fb5cb-1315-4284-bb3b-57deb741cb87
 # ╠═4826b171-a3b5-4411-8357-bf2fc13c2f01
+# ╠═99def13a-3700-45c6-9127-64754f234957
+# ╠═e7ef002b-2567-434d-8e0f-b707ccd389d3
 # ╠═af800276-6e2f-4a14-b6f4-d565b0de6f45
+# ╠═f88073e3-144f-459a-8910-7ad5a0c2340d
+# ╠═1b7a906e-f240-4c53-b7f0-719ce088908f
+# ╠═bbd8df1d-ce78-45cc-90a9-2eb1ba112f7b
 # ╠═cbd07af7-0688-467b-bf06-6e51f0cd9693
 # ╠═41102bd6-a2dc-46c6-9510-50f35ade2c12
 # ╠═f028cfab-f18a-43d3-86f6-809833b13d81
