@@ -259,9 +259,6 @@ df = DataFrame(;
 # ╔═╡ bc4e3ac7-2464-4947-afb5-b081ea561953
 RF00162_to_probed_distances = [ismissing(s2) ? missing : SamApp2024.hamming(s1, LongRNA{4}(s2)) for s1 = SamApp2024.rfam_RF00162_hits(), s2 = df.aligned_sequences]
 
-# ╔═╡ a2cbfb77-3eee-4a20-aea1-e713ebdeff3e
-unique(join(skipmissing(df.aligned_sequences)))
-
 # ╔═╡ f1d5d25d-aa49-4255-9b99-413356541622
 md"# Add columns insteresting for DMS"
 
@@ -498,7 +495,6 @@ only(df.aligned_sequences[df.aligned_sequences .=== string(shape_data_500.aligne
 # ╠═7e76da0f-91ca-4c5b-bf1d-ca10a2a6c5a8
 # ╠═bfe80af1-a0ad-4702-9571-869aec104c28
 # ╠═f6bb72e2-267f-45e6-b2f9-905bda307b06
-# ╠═a2cbfb77-3eee-4a20-aea1-e713ebdeff3e
 # ╠═f1d5d25d-aa49-4255-9b99-413356541622
 # ╠═e65e14dc-0779-4317-82cb-3b405a1676f9
 # ╠═1cfc835b-679a-4966-9088-275ef43a0159
