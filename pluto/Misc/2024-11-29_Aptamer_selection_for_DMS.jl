@@ -35,7 +35,7 @@ using LinearAlgebra: eigen
 using Makie: @L_str
 
 # ╔═╡ 53a19766-1d66-43ee-b6df-3ef581746a78
-using NaNStatistics: nansum
+using NaNStatistics: nansum, nanmean
 
 # ╔═╡ 8c65263e-1e8e-40d8-b824-915b98a5ce57
 using Random: bitrand
@@ -48,6 +48,9 @@ using Statistics: mean
 
 # ╔═╡ 2486a3e8-6e80-4d84-a1b3-e8952f3f7faa
 using StatsBase: countmap
+
+# ╔═╡ 5e9f596c-13f9-4e03-a08b-5903c4b28d15
+using StatsBase: corspearman
 
 # ╔═╡ 1c6856dd-20cb-449f-abcb-545316b28ab5
 md"# Imports"
@@ -379,6 +382,35 @@ begin
 	df_groups
 end
 
+# ╔═╡ f68ed2e0-f4f5-423f-8ac5-24c24e312004
+df_groups
+
+# ╔═╡ 8d003cc1-dbb8-4ae8-97d4-b74174c63b14
+let fig = Makie.Figure()
+	ax = Makie.Axis(fig[1,1]; width=200, height=200, xlabel="Read depth (M)", ylabel="Response rate")
+	Makie.scatter!(ax, df_groups.M_read_depths, df_groups.response_rate)
+	#Makie.ylims!(ax, 0.05, 0.5)
+	Makie.resize_to_layout!(fig)
+	fig
+end
+
+# ╔═╡ 53f5d185-ade0-4a4c-a77f-3dd08aecb7ac
+cor(log.(df_groups.M_read_depths), df_groups.response_rate)
+
+# ╔═╡ 8ea8987c-5b69-495e-af4f-e71f86a648da
+names_500 = ["APSAM-S2-" * lpad(n - 1, 3, "0") for n = 1:500][shape_data_500.aptamer_origin .!= "Infrared"]
+
+# ╔═╡ 3ff21fe5-49a0-4fc4-ad25-ca0fee168e88
+read_depths = merge(
+	Dict(gr => nanmean(shape_data_500.shape_M_depth[:, indexin(seq_groups_dfs[gr].name, names_500), :])
+		for gr = ["GP6-Synthetic-Set2-primer1", "GP7-Synthetic-Set2-primer2", "GP8-Synthetic-Set2-primer3", "GP9-Synthetic-Set2-primer5"]),
+	Dict(gr => nanmean(shape_data_rep0.shape_M_depth[:, indexin(seq_groups_dfs[gr].name, shape_data_045.aptamer_names), :])
+		for gr = ["GP1-Natural-primer1", "GP2-Natural-primer2", "GP3-Natural-primer3", "GP4-Synthetic-Set1-primer4", "GP5-Synthetic-Set1-primer5"])
+)
+
+# ╔═╡ dcfdcae5-110a-4e39-93f4-273833a4a850
+df_groups.M_read_depths = [read_depths[gr] for gr = df_groups.group_name]
+
 # ╔═╡ 72d66520-8b99-4f49-b42d-24f6681a656e
 CSV.write(tempname(), df_groups)
 
@@ -450,6 +482,7 @@ only(df.aligned_sequences[df.aligned_sequences .=== string(shape_data_500.aligne
 # ╠═75f00c6e-2859-4b9e-8e6e-cb102f2fd071
 # ╠═5d47b2ae-c30a-4d8e-8742-00fabad57f3c
 # ╠═2486a3e8-6e80-4d84-a1b3-e8952f3f7faa
+# ╠═5e9f596c-13f9-4e03-a08b-5903c4b28d15
 # ╠═571ede6a-ad6b-4710-a17d-9c3c7951d719
 # ╠═a768ec77-2f9f-4e18-b488-b0cb756a4b00
 # ╠═735efa70-2f53-45e0-a301-2ea716ea242a
@@ -516,7 +549,13 @@ only(df.aligned_sequences[df.aligned_sequences .=== string(shape_data_500.aligne
 # ╠═6756bc38-4381-4d65-8af4-eddeaeb8cdc8
 # ╠═dd49243c-3bbb-40fa-ac72-308c4ddebb57
 # ╠═f9e141d1-4c6c-4dab-b49c-6eba71efaade
+# ╠═3ff21fe5-49a0-4fc4-ad25-ca0fee168e88
 # ╠═abfae16d-d438-40d1-aef1-10cd407cbc70
+# ╠═dcfdcae5-110a-4e39-93f4-273833a4a850
+# ╠═f68ed2e0-f4f5-423f-8ac5-24c24e312004
+# ╠═8d003cc1-dbb8-4ae8-97d4-b74174c63b14
+# ╠═53f5d185-ade0-4a4c-a77f-3dd08aecb7ac
+# ╠═8ea8987c-5b69-495e-af4f-e71f86a648da
 # ╠═72d66520-8b99-4f49-b42d-24f6681a656e
 # ╠═31b5c866-fb43-42c6-a020-3fc027cf9e4f
 # ╠═891a377f-a6bc-46f2-afdb-32d587e06cad
