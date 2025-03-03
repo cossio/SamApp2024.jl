@@ -388,8 +388,14 @@ df_groups
 # ╔═╡ 8d003cc1-dbb8-4ae8-97d4-b74174c63b14
 let fig = Makie.Figure()
 	ax = Makie.Axis(fig[1,1]; width=200, height=200, xlabel="Read depth (M)", ylabel="Response rate")
-	Makie.scatter!(ax, df_groups.M_read_depths, df_groups.response_rate)
+	Makie.scatter!(ax, df_groups.M_read_depths[[1,6]], df_groups.response_rate[[1,6]]; color=:orange, label="Primer 1", markersize=15)
+	Makie.scatter!(ax, df_groups.M_read_depths[[2,7]], df_groups.response_rate[[2,7]]; color=:purple, label="Primer 2", markersize=15)
+	Makie.scatter!(ax, df_groups.M_read_depths[[3,8]], df_groups.response_rate[[3,8]]; color=:red, label="Primer 3", markersize=15)
+	Makie.scatter!(ax, df_groups.M_read_depths[[4]], df_groups.response_rate[[4]]; color=:blue, label="Primer 4", markersize=15)
+	Makie.scatter!(ax, df_groups.M_read_depths[[5,9]], df_groups.response_rate[[5,9]]; color=:teal, label="Primer 5", markersize=15)
 	#Makie.ylims!(ax, 0.05, 0.5)
+	#Makie.xlims!(ax, 0, 5e4)
+	fig[1,2] = Makie.Legend(fig, ax, "Primers", framevisible = false)
 	Makie.resize_to_layout!(fig)
 	fig
 end
