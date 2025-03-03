@@ -36,7 +36,7 @@ RFAM_DIR = "[path to local Rfam directory]"
 RFAM_VERSION = "14.7"
 ```
 
-where `[path to local Rfam directory]` should be replaced with the path to some local directory of your choosing, where the package will place data downloaded from Rfam.
+where `[path to local Rfam directory]` should be replaced with the path to some local directory in your system, where the package will place data downloaded from Rfam.
 
 Lastly, import the package within a Julia session by running:
 

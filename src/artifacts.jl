@@ -107,3 +107,7 @@ function artifact_load_sequencing_groups_2024_11_27()
     files = readdir(artifact_dir_sequencing_groups_2024_11_27())
     return Dict(f[begin:end-10] => CSV.read(joinpath(artifact_dir_sequencing_groups_2024_11_27(), f), DataFrame) for f = files)
 end
+
+function artifact_dir_dms_data_2025_03_03()
+    return artifact"2025-03-03_DMS_data"
+end
