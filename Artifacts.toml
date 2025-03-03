@@ -117,3 +117,11 @@ lazy = true
     [[Sequencing_Groups_2024-11-27_clean.download]]
     sha256 = "e879c5a515fba2b501cd723ce7bb90fd98e4f5661e7337241ae41ed47a8dae39"
     url = "https://gist.github.com/cossio/de1f92612b1c34b13fa38af9fccbc3ab/raw/db7367affd5c4e22664c3717f1a5eda7d71b9fd6.tar.gz"
+
+[2025-03-03_DMS_data]
+git-tree-sha1 = "cd97c3eff9d45294cd54b2377480cd4e5cf71604"
+lazy = true
+
+    [[2025-03-03_DMS_data.download]]
+    sha256 = "1e56fb6326ab359506ec5c912caf340f65549eac6d4f86f0d35dfb3311001835"
+    url = "https://gist.github.com/jfdcd/0a21d96ea4ea14bab2a9dea763ee1b46/raw/cd97c3eff9d45294cd54b2377480cd4e5cf71604.tar.gz"
