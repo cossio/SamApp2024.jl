@@ -9,7 +9,7 @@ out in 2022.
 =#
 
 #=
-MORE COMMENT I WROTE
+MORE COMMENTS
 
 Our first goal is to map positions in the probed sequences to the alignemd (match) positions of our model.
 These sequences have been already aligned, but the SHAPE data files have lost the information about this alignment.

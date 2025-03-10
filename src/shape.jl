@@ -295,6 +295,82 @@ function load_shapemapper_data_pierre_demux_20230920(; demux::Bool=true)
 end
 
 
+function aligned_sequences_20230920()
+    synthetic_df = CSV.read(pierre20221107post(:synthetic), DataFrame)
+    aptamers_df = probed_aptamers_table_20221027()
+
+    aptamer_names = [
+        ["APSAMN$n" for n in 1:206]; # natural
+        ["APSAMS$n" for n in 1:100]  # synthetic
+    ]
+
+    aptamer_origin = [
+        ["RF00162_full30" for _ in 1:55];   # all hits of the alignment
+        ["RF00162_seed70" for _ in 56:206]; # seed sequences in the alignment
+        ["RF00162_syn_" * synthetic_df.origin[n] for n in 1:100] # synthetic (rbm or infernal)
+    ]
+    @assert length(aptamer_names) == length(aptamer_origin)
+
+    wuss_full = stockholm_ss(Infernal.esl_afetch(Rfam.seed(), "RF00162").out)
+
+    aptamer_ids = aptamers_df.id[indexin(aptamer_names, aptamers_df.name)]
+
+    # fetch Rfam seed sequences
+    RF00162_seed_afa = Infernal.esl_reformat(
+        "AFA", Infernal.esl_afetch(Rfam.seed(), "RF00162").out; informat="STOCKHOLM"
+    )
+    RF00162_seed_ids = FASTX.identifier.(FASTX.FASTA.Reader(open(RF00162_seed_afa.out)))
+    RF00162_seed_seqs_full = LongRNA{4}.(FASTX.sequence.(FASTX.FASTA.Reader(open(RF00162_seed_afa.out))))
+    RF00162_seed_match_cols = findall(≠('.'), wuss_full)
+    RF00162_seed_seqs = [LongRNA{4}(seq[RF00162_seed_match_cols]) for seq in RF00162_seed_seqs_full]
+
+    # fetch Rfam hits sequences -- already trimmed (no inserts) aligned fasta
+    RF00162_hits_afa = Infernal.cmalign(
+        Infernal.cmfetch(Rfam.cm(), "RF00162").out,
+        Rfam.fasta_file("RF00162");
+        matchonly=true, outformat="AFA"
+    )
+    RF00162_hits_ids = FASTX.identifier.(FASTX.FASTA.Reader(open(RF00162_hits_afa.out)))
+    RF00162_hits_seqs = LongRNA{4}.(FASTX.sequence.(FASTX.FASTA.Reader(open(RF00162_hits_afa.out))))
+
+    @assert all(length.(RF00162_seed_seqs) .== 108)
+    @assert all(length.(RF00162_hits_seqs) .== 108)
+    @assert length(RF00162_seed_match_cols) == 108
+
+    aligned_sequences = Vector{Union{Missing,String}}(undef, length(aptamer_names))
+
+    # seed sequences (no missmatches, so no need for isnothing check)
+    aligned_sequences[aptamer_origin .== "RF00162_seed70"] .= string.(
+        RF00162_seed_seqs[indexin(aptamer_ids[aptamer_origin .== "RF00162_seed70"], RF00162_seed_ids)]
+    )
+
+    # hits (there are 5 missmatches, therefore we need the `isnothing` check)
+    aligned_sequences[aptamer_origin .== "RF00162_full30"] .= [
+        isnothing(i) ? missing : string(RF00162_hits_seqs[i]) for i in indexin(aptamer_ids[aptamer_origin .== "RF00162_full30"], RF00162_hits_ids)
+    ]
+
+    # file containing our synthetic sequences probed in 2022 (aligned!)
+    __synth_df = probed_artificial_sequences_2022_df()
+
+    # synthetic sequences
+    for (i, j) in zip(1:100, indexin(__synth_df.Name, aptamer_names))
+        if isnothing(j)
+            aligned_sequences[j] = missing
+        else
+            @assert aptamer_origin[j] ∈ ("RF00162_syn_inf", "RF00162_syn_rbm")
+            @assert aptamer_origin[j] == "RF00162_syn_" * __synth_df.origin[i]
+            aligned_sequences[j] = __synth_df.sequence[i]
+        end
+    end
+
+    @assert all(ismissing.(aligned_sequences) .|| (length.(aligned_sequences) .== 108))
+    @assert allunique(aptamer_names)
+    @assert allunique(aptamer_ids)
+
+    return aligned_sequences
+end
+
+
 
 # Compute Protection scores (log-odd ratios)
 function shape_basepair_log_odds_v4(;
