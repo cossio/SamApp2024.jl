@@ -82,7 +82,6 @@ function load_dms_data_20250303()
                 end
             elseif name ∈ shape_data_500_names
                 index_in_500 = only(findall(==(name), shape_data_500_names))
-                @show index_in_500 name
 
                 if index_in_500 ≤ 450 # our sequence
                     @assert uppercase(join(profile_df.Sequence)) == df_seqs_500.sequence[index_in_500]
