@@ -79,6 +79,12 @@ md"# Load data"
 # ╔═╡ aae7a9e7-cf14-4c09-a6fb-93d6e1e19b3d
 dms_data = SamApp2024.load_dms_data_20250303()
 
+# ╔═╡ c69fbd19-69f4-4290-9a92-7bd5d57f79ea
+dms_data.shape_M
+
+# ╔═╡ b8f66f9e-724c-402f-a663-19b7656daabf
+
+
 # ╔═╡ Cell order:
 # ╠═d42dae48-fdc2-11ef-191c-b7b143d538a5
 # ╠═f08d8cfc-711e-47c7-a5a9-f70e3c0cb1ac
@@ -105,3 +111,5 @@ dms_data = SamApp2024.load_dms_data_20250303()
 # ╠═6155ff9f-af5f-4c1a-8e6e-965f11efd285
 # ╠═e0367f59-2f02-4a09-8018-e71317695f3b
 # ╠═aae7a9e7-cf14-4c09-a6fb-93d6e1e19b3d
+# ╠═c69fbd19-69f4-4290-9a92-7bd5d57f79ea
+# ╠═b8f66f9e-724c-402f-a663-19b7656daabf

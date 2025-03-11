@@ -38,13 +38,15 @@ function load_dms_data_20250303()
     shape_raw_reactivities_err = fill(NaN, sequence_length, number_of_sequences, length(conditions))
 
     aptamer_names = String[]
+    aligned_sequence = String[]
 
     for (c, cond) = enumerate(conditions)
         n = 0
-        for name = dms_df.name
+        for (name, alnseq) = zip(dms_df.name, dms_df.aligned_sequence)
             if name ∈ shape_data_2023_names || name ∈ shape_data_500_names
                 if name ∉ aptamer_names
                     push!(aptamer_names, name)
+                    push!(aligned_sequence, alnseq)
                 end
 
                 n += 1
@@ -121,7 +123,7 @@ function load_dms_data_20250303()
         shape_M, shape_M_depth, shape_M_stderr,
         shape_U, shape_U_depth, shape_U_stderr,
         shape_D, shape_D_depth, shape_D_stderr,
-        conditions, aptamer_names
+        conditions, aptamer_names, aligned_sequence
     )
 end
 
