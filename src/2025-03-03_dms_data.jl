@@ -37,26 +37,16 @@ function load_dms_data_20250303()
     shape_raw_reactivities = fill(NaN, sequence_length, number_of_sequences, length(conditions))
     shape_raw_reactivities_err = fill(NaN, sequence_length, number_of_sequences, length(conditions))
 
-    aptamer_names = String[]
-    aligned_sequence = String[]
+    aptamer_names = [name for name = dms_df.name if name ∈ shape_data_2023_names || name ∈ shape_data_500_names]
+    aligned_sequence = [dms_df.aligned_sequence[i] for i = eachindex(dms_df.name) if isassigned(dms_df.aligned_sequence, i) && (dms_df.name[i] ∈ shape_data_2023_names || dms_df.name[i] ∈ shape_data_500_names)]
+    @assert length(aptamer_names) == length(aligned_sequence) == number_of_sequences
 
     for (c, cond) = enumerate(conditions)
-        n = 0
-        for (name, alnseq) = zip(dms_df.name, dms_df.aligned_sequence)
-            if name ∈ shape_data_2023_names || name ∈ shape_data_500_names
-                if name ∉ aptamer_names
-                    push!(aptamer_names, name)
-                    push!(aligned_sequence, alnseq)
-                end
+        for (n, name) = enumerate(aptamer_names)
+            @assert name ∈ shape_data_2023_names || name ∈ shape_data_500_names
 
-                n += 1
-                @assert 1 ≤ n ≤ number_of_sequences
-
-                profile_file = joinpath(dms_dir, cond, "$(cond)_$(name)_profile.txt")
-                profile_df = CSV.read(profile_file, DataFrame)
-            else
-                continue
-            end
+            profile_file = joinpath(dms_dir, cond, "$(cond)_$(name)_profile.txt")
+            profile_df = CSV.read(profile_file, DataFrame)
 
             if name ∈ shape_data_2023_names
                 index_in_2023 = only(findall(==(name), shape_data_2023_names))
@@ -80,6 +70,12 @@ function load_dms_data_20250303()
                         shape_M_depth[i, n, c] = profile_df.Modified_effective_depth[mapped_position]
                         shape_U_depth[i, n, c] = profile_df.Untreated_effective_depth[mapped_position]
                         shape_D_depth[i, n, c] = profile_df.Denatured_effective_depth[mapped_position]
+
+                        shape_reactivities[i, n, c] = profile_df.HQ_profile[mapped_position]
+                        shape_reactivities_err[i, n, c] = profile_df.HQ_stderr[mapped_position]
+
+                        shape_raw_reactivities[i, n, c] = profile_df.Reactivity_profile[mapped_position]
+                        shape_raw_reactivities_err[i, n, c] = profile_df.Std_err[mapped_position]
                     end
                 end
             elseif name ∈ shape_data_500_names
@@ -108,6 +104,12 @@ function load_dms_data_20250303()
                     shape_M_depth[i, n, c] = profile_df.Modified_effective_depth[j]
                     shape_U_depth[i, n, c] = profile_df.Untreated_effective_depth[j]
                     shape_D_depth[i, n, c] = profile_df.Denatured_effective_depth[j]
+
+                    shape_reactivities[i, n, c] = profile_df.HQ_profile[j]
+                    shape_reactivities_err[i, n, c] = profile_df.HQ_stderr[j]
+
+                    shape_raw_reactivities[i, n, c] = profile_df.Reactivity_profile[j]
+                    shape_raw_reactivities_err[i, n, c] = profile_df.Std_err[j]
                 end
             else
                 error("This should not happen")
@@ -123,6 +125,8 @@ function load_dms_data_20250303()
         shape_M, shape_M_depth, shape_M_stderr,
         shape_U, shape_U_depth, shape_U_stderr,
         shape_D, shape_D_depth, shape_D_stderr,
+        shape_reactivities, shape_reactivities_err,
+        shape_raw_reactivities, shape_raw_reactivities_err,
         conditions, aptamer_names, aligned_sequence
     )
 end

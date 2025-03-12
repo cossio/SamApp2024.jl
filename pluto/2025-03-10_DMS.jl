@@ -79,11 +79,38 @@ md"# Load data"
 # ╔═╡ aae7a9e7-cf14-4c09-a6fb-93d6e1e19b3d
 dms_data = SamApp2024.load_dms_data_20250303()
 
+# ╔═╡ 025f0c01-0e0d-4a50-b9cd-becd304a7a42
+dms_data.shape_reactivities
+
+# ╔═╡ ab94de1b-6147-4fd5-bed0-715795f6b7f5
+bps_reactivities = dms_data.shape_reactivities[bps, :, conds_sam];
+
 # ╔═╡ c69fbd19-69f4-4290-9a92-7bd5d57f79ea
-dms_data.shape_M
+dms_stats = SamApp2024.shape_basepair_log_odds_v4(;
+    shape_data = dms_data,
+    paired_reactivities = [,
+    unpaired_reactivities = nps_reactivities_rep0,
+    all_reactivities = all_reactivities_rep0,
+    only_hq_profile = true, p_thresh = 1e-3, nsamples = 1000
+);
 
 # ╔═╡ b8f66f9e-724c-402f-a663-19b7656daabf
+shape_stats_rep0 = SamApp2024.shape_basepair_log_odds_v4(;
+    shape_data = shape_data_rep0,
+    paired_reactivities = bps_reactivities_rep0,
+    unpaired_reactivities = nps_reactivities_rep0,
+    all_reactivities = all_reactivities_rep0,
+    only_hq_profile = true, p_thresh = 1e-3, nsamples = 1000
+);
 
+# ╔═╡ 6909dea9-2f9a-4df7-a1ab-c93a3865a380
+shape_stats = SamApp2024.shape_basepair_log_odds_v4(;
+    shape_data = shape_data,
+    paired_reactivities = bps_reactivities,
+    unpaired_reactivities = nps_reactivities,
+    all_reactivities = all_reactivities,
+    only_hq_profile = true, p_thresh = 1e-2, nsamples=5000
+);
 
 # ╔═╡ Cell order:
 # ╠═d42dae48-fdc2-11ef-191c-b7b143d538a5
@@ -111,5 +138,8 @@ dms_data.shape_M
 # ╠═6155ff9f-af5f-4c1a-8e6e-965f11efd285
 # ╠═e0367f59-2f02-4a09-8018-e71317695f3b
 # ╠═aae7a9e7-cf14-4c09-a6fb-93d6e1e19b3d
+# ╠═025f0c01-0e0d-4a50-b9cd-becd304a7a42
+# ╠═ab94de1b-6147-4fd5-bed0-715795f6b7f5
 # ╠═c69fbd19-69f4-4290-9a92-7bd5d57f79ea
 # ╠═b8f66f9e-724c-402f-a663-19b7656daabf
+# ╠═6909dea9-2f9a-4df7-a1ab-c93a3865a380

@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.3
+# v0.20.4
 
 using Markdown
 using InteractiveUtils
@@ -794,20 +794,9 @@ let fig = Makie.Figure(; halign = :left)
 	fig
 end
 
-# ╔═╡ 11b9e4bf-1531-459c-9d36-6d73526a96fb
-# ╠═╡ disabled = true
+# ╔═╡ e0223248-586e-48a1-9799-d3918f672e92
 #=╠═╡
-_responds_sam_nop_rep0 = (x_mg_rep0 .> +_thresh) .| (x_sam_rep0 .< -_thresh);
-  ╠═╡ =#
-
-# ╔═╡ cb29b45f-d7b1-4507-9531-5d439e4accbb
-#=╠═╡
-_responds_sam_yes_rep0 = (x_mg_rep0 .< -_thresh) .& (x_sam_rep0 .> +_thresh);
-  ╠═╡ =#
-
-# ╔═╡ b8006eb5-b99f-4535-81ef-dfe669d0d332
-#=╠═╡
-_conclusive_rep0 = _responds_sam_yes_rep0 .| _responds_sam_nop_rep0;
+_inconclusive_rep0 = ((!).(_responds_sam_yes_rep0)) .& ((!).(_responds_sam_nop_rep0));
   ╠═╡ =#
 
 # ╔═╡ 8f4dbcc1-3f77-43f0-b4bb-bb027bf20569
@@ -821,10 +810,21 @@ _conclusive_rep0 = _responds_sam_yes_rep0 .| _responds_sam_nop_rep0;
 _responds_sam_nop_rep0 = (x_mg_rep0 .> +_thresh) .| (x_sam_rep0 .< -_thresh);
   ╠═╡ =#
 
+# ╔═╡ b8006eb5-b99f-4535-81ef-dfe669d0d332
+#=╠═╡
+_conclusive_rep0 = _responds_sam_yes_rep0 .| _responds_sam_nop_rep0;
+  ╠═╡ =#
+
 # ╔═╡ 4825347b-2117-4b48-9f72-3bc24be76d07
 # ╠═╡ disabled = true
 #=╠═╡
 _inconclusive_rep0 = ((!).(_responds_sam_yes_rep0)) .& ((!).(_responds_sam_nop_rep0));
+  ╠═╡ =#
+
+# ╔═╡ 11b9e4bf-1531-459c-9d36-6d73526a96fb
+# ╠═╡ disabled = true
+#=╠═╡
+_responds_sam_nop_rep0 = (x_mg_rep0 .> +_thresh) .| (x_sam_rep0 .< -_thresh);
   ╠═╡ =#
 
 # ╔═╡ 4337d37f-15ba-4ead-b4d4-250c1c13f70c
@@ -833,9 +833,9 @@ _inconclusive_rep0 = ((!).(_responds_sam_yes_rep0)) .& ((!).(_responds_sam_nop_r
 _responds_sam_yes_rep0 = (x_mg_rep0 .< -_thresh) .& (x_sam_rep0 .> +_thresh);
   ╠═╡ =#
 
-# ╔═╡ e0223248-586e-48a1-9799-d3918f672e92
+# ╔═╡ cb29b45f-d7b1-4507-9531-5d439e4accbb
 #=╠═╡
-_inconclusive_rep0 = ((!).(_responds_sam_yes_rep0)) .& ((!).(_responds_sam_nop_rep0));
+_responds_sam_yes_rep0 = (x_mg_rep0 .< -_thresh) .& (x_sam_rep0 .> +_thresh);
   ╠═╡ =#
 
 # ╔═╡ Cell order:
