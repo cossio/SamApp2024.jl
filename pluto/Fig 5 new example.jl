@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.6
 
 using Markdown
 using InteractiveUtils
@@ -208,7 +208,8 @@ let fig = Makie.Figure()
 		fig[1,1]; valign=:bottom, width, height, xticks, ylabel="react.", xgridvisible=false, ygridvisible=false, yticks=0:2:8, xtrimspine=true, ytrimspine=true
 	)
 	ax_diff = Makie.Axis(
-		fig[2,1]; valign=:bottom, width, height, xticks, xlabel="site", ylabel="Δreact.", xgridvisible=false, ygridvisible=false, yticks=-1:1, xtrimspine=true, ytrimspine=true
+		fig[2,1]; valign=:bottom, width, height, xticks, xlabel="site", ylabel="Δreact.", xgridvisible=false, ygridvisible=false, 
+		yticks=[-2,-1,0], xtrimspine=true, ytrimspine=true
 	)
 
 	for (x0, xf, color, alpha) = struct_bands
@@ -223,7 +224,7 @@ let fig = Makie.Figure()
 	#Makie.hidexdecorations!(ax_react_1)
 	
 	Makie.barplot!(ax_diff, 1:108, _R_sam - _R_mg, color=ifelse.(_R_sam - _R_mg .< 0, :green, :gray))
-	Makie.scatter!(ax_diff, _sites, -1.4one.(_sites), markersize=7, color=:black, marker=:utriangle)
+	Makie.scatter!(ax_diff, _sites, -1.9one.(_sites), markersize=7, color=:black, marker=:utriangle)
 	Makie.xlims!(ax_diff, 0, 109)
 	
 	Makie.hidespines!(ax_diff, :r, :t)
@@ -232,14 +233,14 @@ let fig = Makie.Figure()
 	#Makie.scatter!(ax_diff_1, _sites, -0.2one.(_sites), color=:blue, markersize=5)
 
 	Makie.linkxaxes!(ax_react, ax_diff)
-	Makie.ylims!(ax_diff, -1.5, 1)
+	Makie.ylims!(ax_diff, -2, 0.5)
 	Makie.ylims!(ax_react, -0.5, 6)
 	
 	Makie.xlims!(ax_react, 0.5, 108.5)
 	Makie.xlims!(ax_diff,  0.5, 108.5)
 
 	Makie.resize_to_layout!(fig)
-	#Makie.save("Figures/Fig5new_SHAPE_example.pdf", fig)
+	Makie.save("Figures/Fig5new_SHAPE_example.pdf", fig)
 	fig
 end
 
@@ -283,7 +284,8 @@ let fig = Makie.Figure()
 		fig[1,1]; valign=:bottom, width, height, xticks, ylabel="react.", xgridvisible=false, ygridvisible=false, yticks=0:2:8, xtrimspine=true, ytrimspine=true
 	)
 	ax_diff = Makie.Axis(
-		fig[2,1]; valign=:bottom, width, height, xticks, xlabel="site", ylabel="Δreact.", xgridvisible=false, ygridvisible=false, yticks=-1:1, xtrimspine=true, ytrimspine=true
+		fig[2,1]; valign=:bottom, width, height, xticks, xlabel="site", ylabel="Δreact.", xgridvisible=false, ygridvisible=false,
+		yticks=[-4,-2,0], xtrimspine=true, ytrimspine=true
 	)
 
 	for (x0, xf, color, alpha) = struct_bands
@@ -298,7 +300,7 @@ let fig = Makie.Figure()
 	#Makie.hidexdecorations!(ax_react_1)
 	
 	Makie.barplot!(ax_diff, 1:108, _R_sam - _R_mg, color=ifelse.(_R_sam - _R_mg .< 0, :green, :gray))
-	Makie.scatter!(ax_diff, _sites, -1.4one.(_sites), markersize=7, color=:black, marker=:utriangle)
+	Makie.scatter!(ax_diff, _sites, -3.8one.(_sites), markersize=7, color=:black, marker=:utriangle)
 	Makie.xlims!(ax_diff, 0, 109)
 	
 	Makie.hidespines!(ax_diff, :r, :t)
@@ -307,14 +309,14 @@ let fig = Makie.Figure()
 	#Makie.scatter!(ax_diff_1, _sites, -0.2one.(_sites), color=:blue, markersize=5)
 
 	Makie.linkxaxes!(ax_react, ax_diff)
-	Makie.ylims!(ax_diff, -1.5, 1)
+	Makie.ylims!(ax_diff, -4, 0.7)
 	Makie.ylims!(ax_react, -0.5, 6)
 	
 	Makie.xlims!(ax_react, 0.5, 108.5)
 	Makie.xlims!(ax_diff,  0.5, 108.5)
 
 	Makie.resize_to_layout!(fig)
-	#Makie.save("Figures/Fig5new_SHAPE_example2.pdf", fig)
+	Makie.save("Figures/Fig5new_SHAPE_example2.pdf", fig)
 	fig
 end
 

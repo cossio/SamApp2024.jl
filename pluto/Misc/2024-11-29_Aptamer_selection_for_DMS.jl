@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.3
+# v0.20.5
 
 using Markdown
 using InteractiveUtils
@@ -15,12 +15,6 @@ using DataFrames: DataFrame
 
 # ╔═╡ 80e407e4-f584-4253-b685-28e92b5c9119
 using Distributions: Gamma
-
-# ╔═╡ 783aa843-5c38-4f39-a9aa-46655a42a8f3
-using Distributions: logpdf
-
-# ╔═╡ 1eff0581-0c85-4b59-bab4-e2d6e5d460b6
-using Distributions: pdf
 
 # ╔═╡ a06fb6da-12ce-40ee-888c-a214914c303f
 using Distributions: Poisson
@@ -303,8 +297,20 @@ df.C_count_in_extended_hallamark = [ismissing(seq) ? missing : count(==('C'), se
 # ╔═╡ ccfc9d80-dcfc-4c4e-882c-58ecee3cb2b9
 df.seq_lenth = [ismissing(seq) ? missing : length(replace(seq, '-' => "")) for seq = df.aligned_sequences]
 
+# ╔═╡ cb41329c-7f84-4fa5-9e59-9baa30c64b3b
+
+
 # ╔═╡ 01fe2bac-fb10-4d85-9a22-3fd1a267024d
 seq_groups_dfs = SamApp2024.artifact_load_sequencing_groups_2024_11_27()
+
+# ╔═╡ 92869ab8-681d-4ca9-9186-cab52eac0a93
+println.(keys(seq_groups_dfs))
+
+# ╔═╡ a5f171ca-c3dc-4d6b-a283-879cb5659cf0
+seq_groups_dfs["GP2-Natural-primer2"].sequence
+
+# ╔═╡ c87e5fa7-5166-4dd7-87bd-65c4ae11b037
+[only(unique(v.primer_name)) for v = values(seq_groups_dfs)]
 
 # ╔═╡ 12dac916-1ae9-4b50-b154-d833e7588e34
 sort(collect(keys(seq_groups_dfs)))
@@ -477,8 +483,6 @@ only(df.aligned_sequences[df.aligned_sequences .=== string(shape_data_500.aligne
 # ╠═bb8a6eeb-32a3-46dc-982a-d826253291e3
 # ╠═54d6f1c4-bb92-457c-94ec-e67dd06fd5d0
 # ╠═80e407e4-f584-4253-b685-28e92b5c9119
-# ╠═783aa843-5c38-4f39-a9aa-46655a42a8f3
-# ╠═1eff0581-0c85-4b59-bab4-e2d6e5d460b6
 # ╠═a06fb6da-12ce-40ee-888c-a214914c303f
 # ╠═29da1d84-e6bc-4890-9a02-9c49e6505681
 # ╠═d144cfc6-42c0-4e61-a80c-654715407b99
@@ -545,8 +549,12 @@ only(df.aligned_sequences[df.aligned_sequences .=== string(shape_data_500.aligne
 # ╠═0709a2f7-1540-4438-a652-6b9a081c66a1
 # ╠═7285e625-08f0-4142-b40f-f1d9063535e3
 # ╠═ccfc9d80-dcfc-4c4e-882c-58ecee3cb2b9
+# ╠═cb41329c-7f84-4fa5-9e59-9baa30c64b3b
 # ╠═01fe2bac-fb10-4d85-9a22-3fd1a267024d
-# ╠═12dac916-1ae9-4b50-b154-d833e7588e34
+# ╠═92869ab8-681d-4ca9-9186-cab52eac0a93
+# ╠═a5f171ca-c3dc-4d6b-a283-879cb5659cf0
+# ╠═c87e5fa7-5166-4dd7-87bd-65c4ae11b037
+# ╟─12dac916-1ae9-4b50-b154-d833e7588e34
 # ╠═ab83d317-1cb9-4649-aea0-4a891361fe70
 # ╠═51bae40e-9128-4675-b021-cda716620d05
 # ╠═0840f95e-092f-4d89-a697-0cfc38e810cf

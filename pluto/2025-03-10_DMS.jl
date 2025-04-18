@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.5
 
 using Markdown
 using InteractiveUtils
@@ -94,6 +94,17 @@ dms_data_primers = dms_df.primer[[only(findall(dms_df.name .== name)) for name =
 # ╔═╡ 4875da0e-9898-4498-8b29-cb60282e2cc2
 unique(dms_data_primers)
 
+# ╔═╡ f1f436b9-33a4-4181-86ca-71119456b084
+
+
+# ╔═╡ 50c9a9c5-0253-4cc5-aaa5-d58472e8920c
+for p = unique(dms_data_primers)
+	println(p, "\t", count(!ismissing(dms_df.aligned_sequence) .&& dms_df.primer .== p))
+end
+
+# ╔═╡ 5f64c1d1-b429-4946-a122-a02fcb7ff1f6
+dms_df.aligned_sequence
+
 # ╔═╡ 2b18233e-d2ae-485e-9ad7-17e20a26fee7
 num_sites, num_seqs, num_conds = size(dms_data.shape_reactivities)
 
@@ -154,6 +165,17 @@ x_sam_dms = [
 		end
 	end for n=1:400
 ];
+
+# ╔═╡ 02133d97-7e8a-4d8b-b212-c9ea18fcb9e9
+dms_AC_count = [
+	begin
+		if ismissing(dms_data.aligned_sequence[n])
+			NaN
+		else
+			length([i for i = _sites if dms_data.aligned_sequence[n][i] ∈ ('A', 'C')])
+		end
+	end for n=1:400
+]
 
 # ╔═╡ 7959344a-1e02-45ef-9ef3-71e892e5379c
 _thresh_dms = log(5)
@@ -529,6 +551,9 @@ count(_responds_sam_inconcl_dms[findall(!isnothing, _dms_500_indices)] .&& _resp
 # ╠═aae7a9e7-cf14-4c09-a6fb-93d6e1e19b3d
 # ╠═e00ec7b5-4f06-4200-9bd0-9e486e4322bc
 # ╠═4875da0e-9898-4498-8b29-cb60282e2cc2
+# ╠═f1f436b9-33a4-4181-86ca-71119456b084
+# ╠═50c9a9c5-0253-4cc5-aaa5-d58472e8920c
+# ╠═5f64c1d1-b429-4946-a122-a02fcb7ff1f6
 # ╠═2b18233e-d2ae-485e-9ad7-17e20a26fee7
 # ╠═59a5fee0-59f1-49da-9940-8827c5a23b99
 # ╠═025f0c01-0e0d-4a50-b9cd-becd304a7a42
@@ -538,6 +563,7 @@ count(_responds_sam_inconcl_dms[findall(!isnothing, _dms_500_indices)] .&& _resp
 # ╠═d7ba4366-918e-4b62-8756-691d07f10bf8
 # ╠═8fe64552-4504-4d55-ab9e-275cdbc51293
 # ╠═fe8dbdeb-5c0b-41a4-b32e-ef742fde4146
+# ╠═02133d97-7e8a-4d8b-b212-c9ea18fcb9e9
 # ╠═7959344a-1e02-45ef-9ef3-71e892e5379c
 # ╠═c5ffed2c-c1f3-41a8-82c1-a5842fba5ce4
 # ╠═010c18f0-8aea-4c91-b4d1-300117449683
