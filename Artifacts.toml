@@ -125,3 +125,11 @@ lazy = true
     [[2025-03-03_DMS_data.download]]
     sha256 = "1e56fb6326ab359506ec5c912caf340f65549eac6d4f86f0d35dfb3311001835"
     url = "https://gist.github.com/jfdcd/0a21d96ea4ea14bab2a9dea763ee1b46/raw/cd97c3eff9d45294cd54b2377480cd4e5cf71604.tar.gz"
+
+[2025-04-28_aligned_full_riboswitch_sequences]
+git-tree-sha1 = "3924162b46a416d4a9f48678d90b80301dce1073"
+lazy = true
+
+    [[2025-04-28_aligned_full_riboswitch_sequences.download]]
+    sha256 = "254a0710bd6bf7160b0366559a032c24d81fd60a4da1b405349d31ddd327fac9"
+    url = "https://gist.github.com/jfdcd/cf9a0c44e1b1509b44cdfd9e4b432496/raw/3924162b46a416d4a9f48678d90b80301dce1073.tar.gz"
