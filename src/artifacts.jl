@@ -111,3 +111,28 @@ end
 function artifact_dir_dms_data_2025_03_03()
     return artifact"2025-03-03_DMS_data"
 end
+
+function artifact_dir_20250428_aligned_full_riboswitch_sequences()
+    return artifact"2025-04-28_aligned_full_riboswitch_sequences"
+end
+
+function artifact_path_20250428_aligned_full_riboswitch_sequences()
+    joinpath(artifact_dir_20250428_aligned_full_riboswitch_sequences(), "aligned_all_seqs_maxd_70_overlap0.stk")
+end
+
+function artifact_load_20250428_aligned_full_riboswitch_sequences()
+    path = artifact_path_20250428_aligned_full_riboswitch_sequences()
+    sequences = String[]
+    for line = eachline(path)
+        if isempty(line) || startswith(line, '#') || startswith(line, "//")
+			continue
+		else
+			words = split(line)
+			@assert length(words) == 2
+
+			sequence = last(words)
+			push!(sequences, sequence)
+		end
+    end
+    return sequences
+end
