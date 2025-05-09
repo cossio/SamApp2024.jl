@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.8
 
 using Markdown
 using InteractiveUtils
@@ -569,12 +569,9 @@ md"# Counts"
 md"# Pairing energies, for inconclusives"
 
 # ╔═╡ 32d66706-b17d-4c58-8464-1128348ce06a
-#=╠═╡
 findall(_responds_sam_yes_rep0) ∩ rbm_seqs
-  ╠═╡ =#
 
 # ╔═╡ 9fcca185-180f-4478-8fa2-d0cf37e1937b
-#=╠═╡
 let fig = Makie.Figure(; halign = :left)
 	ax = Makie.Axis(fig[1,1][1,1]; halign=:left, width=200, height=200, xlabel="Protect. score(hallmark sites)", ylabel="RBM score", title="no SAM", xgridvisible=false, ygridvisible=false)
 	#Makie.scatter!(ax, x_mg_rep0, -aptamer_rbm_energies, markersize=10, color=(:silver, 0.3), label="All probed")
@@ -679,10 +676,8 @@ let fig = Makie.Figure(; halign = :left)
 	Makie.save("Figures/SAM response Repl0 v2.pdf", fig)
 	fig
 end
-  ╠═╡ =#
 
 # ╔═╡ dd25496f-e430-42df-a0b4-143bcb26f9f3
-#=╠═╡
 begin
 	println("Replicate 0")
 
@@ -750,12 +745,9 @@ begin
 	    )
 	)
 end
-  ╠═╡ =#
 
 # ╔═╡ db615f71-8858-47da-be2f-8196f7070e6d
-#=╠═╡
 sum(_responds_sam_yes_rep0), sum(_responds_sam_nop_rep0), sum(_inconclusive_rep0)
-  ╠═╡ =#
 
 # ╔═╡ e84e8b68-bc2a-412b-b487-3b5163131ca5
 let fig = Makie.Figure(; halign = :left)
@@ -794,32 +786,17 @@ let fig = Makie.Figure(; halign = :left)
 	fig
 end
 
-# ╔═╡ e0223248-586e-48a1-9799-d3918f672e92
-#=╠═╡
-_inconclusive_rep0 = ((!).(_responds_sam_yes_rep0)) .& ((!).(_responds_sam_nop_rep0));
-  ╠═╡ =#
-
 # ╔═╡ 8f4dbcc1-3f77-43f0-b4bb-bb027bf20569
 # ╠═╡ disabled = true
 #=╠═╡
 _conclusive_rep0 = _responds_sam_yes_rep0 .| _responds_sam_nop_rep0;
   ╠═╡ =#
 
-# ╔═╡ 0e703742-3cb5-4701-97b9-6134d2ca30b6
-#=╠═╡
-_responds_sam_nop_rep0 = (x_mg_rep0 .> +_thresh) .| (x_sam_rep0 .< -_thresh);
-  ╠═╡ =#
-
-# ╔═╡ b8006eb5-b99f-4535-81ef-dfe669d0d332
-#=╠═╡
-_conclusive_rep0 = _responds_sam_yes_rep0 .| _responds_sam_nop_rep0;
-  ╠═╡ =#
-
-# ╔═╡ 4825347b-2117-4b48-9f72-3bc24be76d07
-# ╠═╡ disabled = true
-#=╠═╡
+# ╔═╡ e0223248-586e-48a1-9799-d3918f672e92
 _inconclusive_rep0 = ((!).(_responds_sam_yes_rep0)) .& ((!).(_responds_sam_nop_rep0));
-  ╠═╡ =#
+
+# ╔═╡ cb29b45f-d7b1-4507-9531-5d439e4accbb
+_responds_sam_yes_rep0 = (x_mg_rep0 .< -_thresh) .& (x_sam_rep0 .> +_thresh);
 
 # ╔═╡ 11b9e4bf-1531-459c-9d36-6d73526a96fb
 # ╠═╡ disabled = true
@@ -833,9 +810,16 @@ _responds_sam_nop_rep0 = (x_mg_rep0 .> +_thresh) .| (x_sam_rep0 .< -_thresh);
 _responds_sam_yes_rep0 = (x_mg_rep0 .< -_thresh) .& (x_sam_rep0 .> +_thresh);
   ╠═╡ =#
 
-# ╔═╡ cb29b45f-d7b1-4507-9531-5d439e4accbb
+# ╔═╡ b8006eb5-b99f-4535-81ef-dfe669d0d332
+_conclusive_rep0 = _responds_sam_yes_rep0 .| _responds_sam_nop_rep0;
+
+# ╔═╡ 0e703742-3cb5-4701-97b9-6134d2ca30b6
+_responds_sam_nop_rep0 = (x_mg_rep0 .> +_thresh) .| (x_sam_rep0 .< -_thresh);
+
+# ╔═╡ 4825347b-2117-4b48-9f72-3bc24be76d07
+# ╠═╡ disabled = true
 #=╠═╡
-_responds_sam_yes_rep0 = (x_mg_rep0 .< -_thresh) .& (x_sam_rep0 .> +_thresh);
+_inconclusive_rep0 = ((!).(_responds_sam_yes_rep0)) .& ((!).(_responds_sam_nop_rep0));
   ╠═╡ =#
 
 # ╔═╡ Cell order:

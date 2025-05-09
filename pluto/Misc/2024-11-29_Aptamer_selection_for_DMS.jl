@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.5
+# v0.20.8
 
 using Markdown
 using InteractiveUtils
@@ -241,26 +241,14 @@ _responsive_sam_rep0 = ifelse.(_responds_sam_yes_rep0, "Responsive", ifelse.(_re
 # ╔═╡ bfe80af1-a0ad-4702-9571-869aec104c28
 _responsive_sam_500 = ifelse.(_responds_sam_yes_500, "Responsive", ifelse.(_responds_sam_nop_500, "Non-responsive", "Inconclusive"))
 
-# ╔═╡ f6bb72e2-267f-45e6-b2f9-905bda307b06
-df = DataFrame(;
-	aptamer_names = [shape_data_rep0.aptamer_names; ["APSAM-S2-" * lpad(n - 1, 3, "0") for n = 1:500][shape_data_500.aptamer_origin .!= "Infrared"]],
-    aligned_sequences = [[ismissing(seq) ? missing : string(seq) for seq = shape_data_rep0.aligned_sequences]; string.(shape_data_500.aligned_sequences[shape_data_500.aptamer_origin .!= "Infrared"])],
-    aptamer_origin = [shape_data_rep0.aptamer_origin; shape_data_500.aptamer_origin[shape_data_500.aptamer_origin .!= "Infrared"]],
-	experiment = [fill("Experiment_1", length(shape_data_rep0.aligned_sequences)); fill("Experiment_2", length(shape_data_500.aligned_sequences))[shape_data_500.aptamer_origin .!= "Infrared"]],
-    responsive = [_responsive_sam_rep0; _responsive_sam_500[shape_data_500.aptamer_origin .!= "Infrared"]],
-	RBM_score = [-aptamer_rbm_energies_rep0; -aptamer_rbm_energies_500[shape_data_500.aptamer_origin .!= "Infrared"]],
-	Protect_Score_Hallmark_Mg = [x_mg_rep0; x_mg_500[shape_data_500.aptamer_origin .!= "Infrared"]],
-	Protect_Score_Hallmark_SAM = [x_sam_rep0; x_sam_500[shape_data_500.aptamer_origin .!= "Infrared"]]
-)
+# ╔═╡ b5b6abab-40b0-430e-a012-59af58325a4d
+ss = SamApp2024.RF00162_sites_annotated_secondary_structure()
 
-# ╔═╡ bc4e3ac7-2464-4947-afb5-b081ea561953
-RF00162_to_probed_distances = [ismissing(s2) ? missing : SamApp2024.hamming(s1, LongRNA{4}(s2)) for s1 = SamApp2024.rfam_RF00162_hits(), s2 = df.aligned_sequences]
+# ╔═╡ 400df1dd-979a-45f4-9884-a6d9c012bd32
+seq_groups_dfs = SamApp2024.artifact_load_sequencing_groups_2024_11_27()
 
 # ╔═╡ f1d5d25d-aa49-4255-9b99-413356541622
-md"# Add columns insteresting for DMS"
-
-# ╔═╡ e65e14dc-0779-4317-82cb-3b405a1676f9
-ss = SamApp2024.RF00162_sites_annotated_secondary_structure()
+md"# Add columns interesting for DMS"
 
 # ╔═╡ 1cfc835b-679a-4966-9088-275ef43a0159
 Extended_Hallmark_sites = [
@@ -273,58 +261,56 @@ Extended_Hallmark_sites = [
     24; 76; 100; # Base-triple
 ];
 
-# ╔═╡ 1acc88d4-9b91-4de4-9dff-aa832ea818f6
-SamApp2024.hallmark_sites_20230507 ⊆ Extended_Hallmark_sites
-
-# ╔═╡ 2c1f9a8d-613a-44aa-b90c-34305a6140fa
-df.P4_length = [ismissing(seq) ? missing : length(replace(seq[ss.p4], '-' => "")) for seq = df.aligned_sequences]
-
-# ╔═╡ 352d2ce8-53ba-4684-8064-06a2b6cf9ef3
-df.min_dist_to_natural = dropdims(minimum(RF00162_to_probed_distances; dims=1); dims=1)
-
-# ╔═╡ 6454fe46-d476-45b0-bb0d-62c5497b2a67
-df.A_count = [ismissing(seq) ? missing : count(==('A'), seq) for seq = df.aligned_sequences]
-
-# ╔═╡ 6a07d1cd-b017-438a-aa8c-a0c6b6279ee7
-df.C_count = [ismissing(seq) ? missing : count(==('C'), seq) for seq = df.aligned_sequences]
-
-# ╔═╡ 0709a2f7-1540-4438-a652-6b9a081c66a1
-df.A_count_in_extended_hallamark = [ismissing(seq) ? missing : count(==('A'), seq[Extended_Hallmark_sites]) for seq = df.aligned_sequences]
-
-# ╔═╡ 7285e625-08f0-4142-b40f-f1d9063535e3
-df.C_count_in_extended_hallamark = [ismissing(seq) ? missing : count(==('C'), seq[Extended_Hallmark_sites]) for seq = df.aligned_sequences]
-
-# ╔═╡ ccfc9d80-dcfc-4c4e-882c-58ecee3cb2b9
-df.seq_lenth = [ismissing(seq) ? missing : length(replace(seq, '-' => "")) for seq = df.aligned_sequences]
-
-# ╔═╡ cb41329c-7f84-4fa5-9e59-9baa30c64b3b
-
-
-# ╔═╡ 01fe2bac-fb10-4d85-9a22-3fd1a267024d
-seq_groups_dfs = SamApp2024.artifact_load_sequencing_groups_2024_11_27()
-
-# ╔═╡ 92869ab8-681d-4ca9-9186-cab52eac0a93
-println.(keys(seq_groups_dfs))
-
-# ╔═╡ a5f171ca-c3dc-4d6b-a283-879cb5659cf0
-seq_groups_dfs["GP2-Natural-primer2"].sequence
-
-# ╔═╡ c87e5fa7-5166-4dd7-87bd-65c4ae11b037
-[only(unique(v.primer_name)) for v = values(seq_groups_dfs)]
-
-# ╔═╡ 12dac916-1ae9-4b50-b154-d833e7588e34
-sort(collect(keys(seq_groups_dfs)))
-
-# ╔═╡ ab83d317-1cb9-4649-aea0-4a891361fe70
-for df = values(seq_groups_dfs)
-	df.rna_seq = [replace(seq, 'T' => 'U') for seq = df.sequence] 
-end
-
 # ╔═╡ 51bae40e-9128-4675-b021-cda716620d05
 sort([seq_groups_dfs["GP6-Synthetic-Set2-primer1"].name; seq_groups_dfs["GP7-Synthetic-Set2-primer2"].name; seq_groups_dfs["GP8-Synthetic-Set2-primer3"].name; seq_groups_dfs["GP9-Synthetic-Set2-primer5"].name]) == ["APSAM-S2-" * lpad(n - 1, 3, "0") for n = 1:450]
 
 # ╔═╡ 0840f95e-092f-4d89-a697-0cfc38e810cf
 allunique([seq_groups_dfs["GP6-Synthetic-Set2-primer1"].sequence; seq_groups_dfs["GP7-Synthetic-Set2-primer2"].sequence; seq_groups_dfs["GP8-Synthetic-Set2-primer3"].sequence; seq_groups_dfs["GP9-Synthetic-Set2-primer5"].sequence])
+
+# ╔═╡ dd49243c-3bbb-40fa-ac72-308c4ddebb57
+group_names = sort(collect(keys(seq_groups_dfs)))
+
+# ╔═╡ f6bb72e2-267f-45e6-b2f9-905bda307b06
+begin
+	df = DataFrame(;
+		aptamer_names = [shape_data_rep0.aptamer_names; ["APSAM-S2-" * lpad(n - 1, 3, "0") for n = 1:500][shape_data_500.aptamer_origin .!= "Infrared"]],
+	    aligned_sequences = [[ismissing(seq) ? missing : string(seq) for seq = shape_data_rep0.aligned_sequences]; string.(shape_data_500.aligned_sequences[shape_data_500.aptamer_origin .!= "Infrared"])],
+	    aptamer_origin = [shape_data_rep0.aptamer_origin; shape_data_500.aptamer_origin[shape_data_500.aptamer_origin .!= "Infrared"]],
+		experiment = [fill("Experiment_1", length(shape_data_rep0.aligned_sequences)); fill("Experiment_2", length(shape_data_500.aligned_sequences))[shape_data_500.aptamer_origin .!= "Infrared"]],
+	    responsive = [_responsive_sam_rep0; _responsive_sam_500[shape_data_500.aptamer_origin .!= "Infrared"]],
+		RBM_score = [-aptamer_rbm_energies_rep0; -aptamer_rbm_energies_500[shape_data_500.aptamer_origin .!= "Infrared"]],
+		Protect_Score_Hallmark_Mg = [x_mg_rep0; x_mg_500[shape_data_500.aptamer_origin .!= "Infrared"]],
+		Protect_Score_Hallmark_SAM = [x_sam_rep0; x_sam_500[shape_data_500.aptamer_origin .!= "Infrared"]]
+	)
+
+	RF00162_to_probed_distances = [ismissing(s2) ? missing : SamApp2024.hamming(s1, LongRNA{4}(s2)) for s1 = SamApp2024.rfam_RF00162_hits(), s2 = df.aligned_sequences]
+	
+	df.P4_length = [ismissing(seq) ? missing : length(replace(seq[ss.p4], '-' => "")) for seq = df.aligned_sequences]
+	df.min_dist_to_natural = dropdims(minimum(RF00162_to_probed_distances; dims=1); dims=1)
+	df.A_count = [ismissing(seq) ? missing : count(==('A'), seq) for seq = df.aligned_sequences]
+	df.C_count = [ismissing(seq) ? missing : count(==('C'), seq) for seq = df.aligned_sequences]
+	df.A_count_in_extended_hallamark = [ismissing(seq) ? missing : count(==('A'), seq[Extended_Hallmark_sites]) for seq = df.aligned_sequences]
+	df.C_count_in_extended_hallamark = [ismissing(seq) ? missing : count(==('C'), seq[Extended_Hallmark_sites]) for seq = df.aligned_sequences]
+	df.seq_lenth = [ismissing(seq) ? missing : length(replace(seq, '-' => "")) for seq = df.aligned_sequences]
+
+	df.sequencing_group = [group_names[only(findall([n ∈ seq_groups_dfs[k].name for k = group_names]))] for n = df.aptamer_names]
+
+	@assert count(df.experiment .== "Experiment_1") == length(shape_data_045.aligned_sequences) == 306
+	for (seq1, seq2) = zip(df.aligned_sequences[df.experiment .== "Experiment_1"], shape_data_045.aligned_sequences)
+		@assert ismissing(seq1) && ismissing(seq2) || seq1 == seq2
+	end
+	@assert df.experiment == [fill("Experiment_1", 306); fill("Experiment_2", 450)]
+	
+	for df = values(seq_groups_dfs)
+		df.rna_seq = [replace(seq, 'T' => 'U') for seq = df.sequence] 
+	end
+
+	#df.read_depth_M = [nanmean(shape_data_rep0.shape_M_depth; dim=(1,3)); nanmean(shape_data_500.shape_M_depth[:, 1:450, :]; dim=(1,3))]
+	df.read_depth_M = [
+		[shape_data_rep0.shape_M_depth[:, n, :] for n = axes(shape_data_rep0.shape_M_depth, 2)];
+		[shape_data_500.shape_M_depth[:, n, :] for n = 1:450]
+	]
+end
 
 # ╔═╡ 9a8605cc-99a1-4fcc-9e8d-dd8a61fd26ca
 [replace(string(seq), '-' => "") for seq = df.aligned_sequences[df.experiment .== "Experiment_2"]][
@@ -357,57 +343,122 @@ sort(df.aptamer_names[df.experiment .== "Experiment_2"]) == sort([
 	seq_groups_dfs["GP9-Synthetic-Set2-primer5"].name
 ])
 
-# ╔═╡ dd49243c-3bbb-40fa-ac72-308c4ddebb57
-group_names = sort(collect(keys(seq_groups_dfs)))
+# ╔═╡ d80fdd97-e1c5-48aa-94c1-ed8dcf1b2b59
+indexin(seq_groups_dfs["GP3-Natural-primer3"].name, shape_data_045.aptamer_names)
 
-# ╔═╡ f9e141d1-4c6c-4dab-b49c-6eba71efaade
-df.sequencing_group = [group_names[only(findall([n ∈ seq_groups_dfs[k].name for k = group_names]))] for n = df.aptamer_names]
+# ╔═╡ 79421a94-979a-48fc-939c-079202bf115c
+seq_groups_dfs["GP3-Natural-primer3"].name
 
-# ╔═╡ abfae16d-d438-40d1-aef1-10cd407cbc70
-begin
-	df_groups = DataFrame()
-	for g = group_names
-		group_name = g
-		total_sequences = length(df.responsive[df.sequencing_group .== g, :])
-		A_rate = sum(skipmissing(df.A_count[df.sequencing_group .== g, :])) / sum(skipmissing(df.seq_lenth[df.sequencing_group .== g]))
-		C_rate = sum(skipmissing(df.C_count[df.sequencing_group .== g, :])) / sum(skipmissing(df.seq_lenth[df.sequencing_group .== g]))
-		A_hallmark_ex_rate = sum(skipmissing(df.A_count_in_extended_hallamark[df.sequencing_group .== g, :])) / (total_sequences * length(Extended_Hallmark_sites))
-		C_hallmark_ex_rate = sum(skipmissing(df.C_count_in_extended_hallamark[df.sequencing_group .== g, :])) / (total_sequences * length(Extended_Hallmark_sites))
-		responsives = sum(df.responsive[df.sequencing_group .== g, :] .== "Responsive")
-		RBM_score_avg = mean(skipmissing(df.RBM_score[df.sequencing_group .== g]))
-		RBM_score_min = minimum(skipmissing(df.RBM_score[df.sequencing_group .== g]))
-		P4_len_avg = mean(skipmissing(df.P4_length[df.sequencing_group .== g]))
-		P4_len_min = minimum(skipmissing(df.P4_length[df.sequencing_group .== g]))
-		noP4_count = count(skipmissing(df.P4_length[df.sequencing_group .== g]) .≤ 1)
-		min_dist_to_nat_avg = mean(skipmissing(df.min_dist_to_natural[df.sequencing_group .== g]))
-		min_dist_to_nat_max = maximum(skipmissing(df.min_dist_to_natural[df.sequencing_group .== g]))
-		response_rate = responsives ./ total_sequences
-		push!(df_groups, (; group_name, total_sequences, responsives, response_rate, A_rate, C_rate, A_hallmark_ex_rate, C_hallmark_ex_rate, RBM_score_avg, RBM_score_min, P4_len_avg, P4_len_min, noP4_count, min_dist_to_nat_avg, min_dist_to_nat_max))
-	end
-	#show(df_groups; allcols=true)
-	df_groups
-end
+# ╔═╡ 528d061b-3147-47a0-be06-a8e673edc1d8
+df.aptamer_names[df.sequencing_group .== "GP3-Natural-primer3"] == seq_groups_dfs["GP3-Natural-primer3"].name
 
-# ╔═╡ f68ed2e0-f4f5-423f-8ac5-24c24e312004
-df_groups
+# ╔═╡ 50f29fb4-00f6-4ead-970c-04f7aad653aa
+seq_groups_dfs["GP1-Natural-primer1"].name
 
-# ╔═╡ 8d003cc1-dbb8-4ae8-97d4-b74174c63b14
+# ╔═╡ fec7d3da-3b86-43a5-886d-4e621155901d
+
+
+# ╔═╡ 18582db7-f6a2-4892-9a9e-b31d31c05dbd
+nanmean(shape_data_rep0.shape_M_depth[:, df.sequencing_group[1:306] .== "GP3-Natural-primer3", :])
+
+# ╔═╡ 09a381b2-4564-4499-887b-14b7bdbaef00
+nanmean(shape_data_rep0.shape_M_depth[:, indexin(seq_groups_dfs["GP3-Natural-primer3"].name, shape_data_045.aptamer_names), :])
+
+# ╔═╡ afa683f5-4bc3-4bfd-8e73-ba3e4c911368
 let fig = Makie.Figure()
-	ax = Makie.Axis(fig[1,1]; width=200, height=200, xlabel="Read depth (M)", ylabel="Response rate")
-	Makie.scatter!(ax, df_groups.M_read_depths[[1,6]], df_groups.response_rate[[1,6]]; color=:orange, label="Primer 1", markersize=15)
-	Makie.scatter!(ax, df_groups.M_read_depths[[2,7]], df_groups.response_rate[[2,7]]; color=:purple, label="Primer 2", markersize=15)
-	Makie.scatter!(ax, df_groups.M_read_depths[[3,8]], df_groups.response_rate[[3,8]]; color=:red, label="Primer 3", markersize=15)
-	Makie.scatter!(ax, df_groups.M_read_depths[[4]], df_groups.response_rate[[4]]; color=:blue, label="Primer 4", markersize=15)
-	Makie.scatter!(ax, df_groups.M_read_depths[[5,9]], df_groups.response_rate[[5,9]]; color=:teal, label="Primer 5", markersize=15)
-	#Makie.ylims!(ax, 0.05, 0.5)
-	#Makie.xlims!(ax, 0, 5e4)
+	primer_colors = (:orange, :purple, :red, :blue, :teal)
+	
+	ax = Makie.Axis(fig[1,1]; width=230, height=230, xlabel="Read depth (M)", ylabel="Inconclusive rate")
+	for (gr_n, gr) = enumerate(sort(unique(df.sequencing_group)))
+		primer = parse(Int, last(gr))
+		read_depth = nanmean(mapreduce(vec, vcat, df.read_depth_M[df.sequencing_group .== gr]))
+		inconclusive_rate = mean(df.responsive[df.sequencing_group .== gr] .== "Inconclusive")
+		if gr_n ≤ 5
+			Makie.scatter!(ax, read_depth, inconclusive_rate; color=primer_colors[primer], label="Primer $primer", markersize=15)
+		elseif gr_n < 9 # skip last one which has a single sequence
+			Makie.scatter!(ax, read_depth, inconclusive_rate; color=primer_colors[primer], markersize=15)
+		end
+	end
+	Makie.xlims!(ax, 0, 3.3e4)
+	Makie.ylims!(ax, -0.05, 0.65)
+
 	fig[1,2] = Makie.Legend(fig, ax, "Primers", framevisible = false)
+
+	for (col, (origin, title)) = enumerate(zip([["RF00162_full30", "RF00162_seed70"], ["RF00162_syn_rbm", "rbm"], ["RF00162_syn_inf", "infernal"]], ["Naturals", "RBM", "CM"]))
+		ax = Makie.Axis(fig[1,3][1,col]; width=100, height=100, xlabel="Read depth (M)", ylabel="Resp. rate", title, xticks=[1e4, 3e4])
+		for (gr_n, gr) = enumerate(sort(unique(df.sequencing_group)))
+			_flag = (df.sequencing_group .== gr) .&& (df.aptamer_origin .∈ Ref(origin))
+			if any(_flag)
+				primer = parse(Int, last(gr))
+				read_depth = nanmean(mapreduce(vec, vcat, df.read_depth_M[_flag]))
+				resp_rate = mean(df.responsive[_flag] .== "Responsive")
+				if gr_n ≤ 5
+					Makie.scatter!(ax, read_depth, resp_rate; color=primer_colors[primer], label="Primer $primer", markersize=15)
+				elseif gr_n < 9 # skip last one which has a single sequence
+					Makie.scatter!(ax, read_depth, resp_rate; color=primer_colors[primer], markersize=15)
+				end
+			end
+		end
+		Makie.xlims!(ax, 0, 3.3e4)
+		Makie.ylims!(ax, -0.05, 0.75)
+
+		ax = Makie.Axis(fig[1,3][2,col]; width=100, height=100, xlabel="Read depth (M)", ylabel="Resp./(1-Inc.)", xticks=[1e4, 3e4])
+		for (gr_n, gr) = enumerate(sort(unique(df.sequencing_group)))
+			_flag = (df.sequencing_group .== gr) .&& (df.aptamer_origin .∈ Ref(origin))
+			if any(_flag)
+				primer = parse(Int, last(gr))
+				read_depth = nanmean(mapreduce(vec, vcat, df.read_depth_M[_flag]))
+				resp_rate = mean(df.responsive[_flag] .== "Responsive")
+				inconclusive_rate = mean(df.responsive[df.sequencing_group .== gr] .== "Inconclusive")
+				if gr_n ≤ 5
+					Makie.scatter!(ax, read_depth, resp_rate / (1 - inconclusive_rate); color=primer_colors[primer], label="Primer $primer", markersize=15)
+				elseif gr_n < 9 # skip last one which has a single sequence
+					Makie.scatter!(ax, read_depth, resp_rate / (1 - inconclusive_rate); color=primer_colors[primer], markersize=15)
+				end
+			end
+		end
+		Makie.xlims!(ax, 0, 3.3e4)
+		Makie.ylims!(ax, -0.05, 0.75)
+
+	end
+
+
+
+	# Makie.scatter!(ax, df_groups.M_read_depths[[2,7]], df_groups.inconclusive_rate[[2,7]]; color=:purple, label="Primer 2", markersize=15)
+	# Makie.scatter!(ax, df_groups.M_read_depths[[3,8]], df_groups.inconclusive_rate[[3,8]]; color=:red, label="Primer 3", markersize=15)
+	# Makie.scatter!(ax, df_groups.M_read_depths[[4]], df_groups.inconclusive_rate[[4]]; color=:blue, label="Primer 4", markersize=15)
+	# Makie.scatter!(ax, df_groups.M_read_depths[[5]], df_groups.inconclusive_rate[[5]]; color=:teal, label="Primer 5", markersize=15)
+	# Makie.xlims!(ax, 0, 3.3e4)
+	# Makie.ylims!(ax, -0.05, 0.65)
+
+	# ax = Makie.Axis(fig[1,3]; width=200, height=200, xlabel="Read depth (M)", ylabel="Response rate", title="Natural")
+	# Makie.scatter!(ax, df_groups.M_read_depths[[1]], df_groups.response_rate[[1]]; color=:orange, label="Primer 1", markersize=15)
+	# Makie.scatter!(ax, df_groups.M_read_depths[[2]], df_groups.response_rate[[2]]; color=:purple, label="Primer 2", markersize=15)
+	# Makie.scatter!(ax, df_groups.M_read_depths[[3]], df_groups.response_rate[[3]]; color=:red, label="Primer 3", markersize=15)
+	# Makie.xlims!(ax, 0, 3.3e4)
+	# Makie.ylims!(ax, -0.05, 0.65)
+
+	# ax = Makie.Axis(fig[1,4]; width=200, height=200, xlabel="Read depth (M)", ylabel="Response rate", title="Artificial")
+	# Makie.scatter!(ax, df_groups.M_read_depths[[6]], df_groups.response_rate[[6]]; color=:orange, label="Primer 1", markersize=15)
+	# Makie.scatter!(ax, df_groups.M_read_depths[[7]], df_groups.response_rate[[7]]; color=:purple, label="Primer 2", markersize=15)
+	# Makie.scatter!(ax, df_groups.M_read_depths[[8]], df_groups.response_rate[[8]]; color=:red, label="Primer 3", markersize=15)
+	# Makie.scatter!(ax, df_groups.M_read_depths[[4]], df_groups.response_rate[[4]]; color=:blue, label="Primer 4", markersize=15)
+	# Makie.scatter!(ax, df_groups.M_read_depths[[5]], df_groups.response_rate[[5]]; color=:teal, label="Primer 5", markersize=15)
+	# Makie.xlims!(ax, 0, 3.3e4)
+	# Makie.ylims!(ax, -0.05, 0.65)
+
 	Makie.resize_to_layout!(fig)
 	fig
 end
 
-# ╔═╡ 53f5d185-ade0-4a4c-a77f-3dd08aecb7ac
-cor(log.(df_groups.M_read_depths), df_groups.response_rate)
+# ╔═╡ f9314f91-6986-495f-8797-3a6b5588e4ad
+unique(df.responsive)
+
+# ╔═╡ 7452003d-b3f3-4e79-ad2d-638f53b0f91c
+unique(df.aptamer_origin)
+
+# ╔═╡ afdba201-d750-42b5-9ba2-6bd1946d3a21
+sort(unique(df.sequencing_group))
 
 # ╔═╡ 8ea8987c-5b69-495e-af4f-e71f86a648da
 names_500 = ["APSAM-S2-" * lpad(n - 1, 3, "0") for n = 1:500][shape_data_500.aptamer_origin .!= "Infrared"]
@@ -420,8 +471,206 @@ read_depths = merge(
 		for gr = ["GP1-Natural-primer1", "GP2-Natural-primer2", "GP3-Natural-primer3", "GP4-Synthetic-Set1-primer4", "GP5-Synthetic-Set1-primer5"])
 )
 
-# ╔═╡ dcfdcae5-110a-4e39-93f4-273833a4a850
-df_groups.M_read_depths = [read_depths[gr] for gr = df_groups.group_name]
+# ╔═╡ abfae16d-d438-40d1-aef1-10cd407cbc70
+begin
+	df_groups = DataFrame()
+	for g = group_names
+		group_name = g
+		total_sequences = length(df.responsive[df.sequencing_group .== g, :])
+		A_rate = sum(skipmissing(df.A_count[df.sequencing_group .== g, :])) / sum(skipmissing(df.seq_lenth[df.sequencing_group .== g]))
+		C_rate = sum(skipmissing(df.C_count[df.sequencing_group .== g, :])) / sum(skipmissing(df.seq_lenth[df.sequencing_group .== g]))
+		A_hallmark_ex_rate = sum(skipmissing(df.A_count_in_extended_hallamark[df.sequencing_group .== g, :])) / (total_sequences * length(Extended_Hallmark_sites))
+		C_hallmark_ex_rate = sum(skipmissing(df.C_count_in_extended_hallamark[df.sequencing_group .== g, :])) / (total_sequences * length(Extended_Hallmark_sites))
+		responsives = sum(df.responsive[df.sequencing_group .== g, :] .== "Responsive")
+		inconclusives = sum(df.responsive[df.sequencing_group .== g, :] .== "Inconclusive")
+		RBM_score_avg = mean(skipmissing(df.RBM_score[df.sequencing_group .== g]))
+		RBM_score_min = minimum(skipmissing(df.RBM_score[df.sequencing_group .== g]))
+		P4_len_avg = mean(skipmissing(df.P4_length[df.sequencing_group .== g]))
+		P4_len_min = minimum(skipmissing(df.P4_length[df.sequencing_group .== g]))
+		noP4_count = count(skipmissing(df.P4_length[df.sequencing_group .== g]) .≤ 1)
+		min_dist_to_nat_avg = mean(skipmissing(df.min_dist_to_natural[df.sequencing_group .== g]))
+		min_dist_to_nat_max = maximum(skipmissing(df.min_dist_to_natural[df.sequencing_group .== g]))
+		response_rate = responsives ./ total_sequences
+		inconclusive_rate = inconclusives ./ total_sequences
+		push!(
+			df_groups,
+			(;
+			 group_name, total_sequences, responsives, inconclusives, response_rate, inconclusive_rate, A_rate, C_rate, A_hallmark_ex_rate, C_hallmark_ex_rate, RBM_score_avg, RBM_score_min, P4_len_avg, 	P4_len_min, noP4_count, min_dist_to_nat_avg, min_dist_to_nat_max
+			)
+		)
+	end
+
+	df_groups.M_read_depths = [read_depths[gr] for gr = df_groups.group_name]
+	#show(df_groups; allcols=true)
+	df_groups
+end
+
+# ╔═╡ c0ee24d7-6560-496b-9c16-181d8577a422
+let fig = Makie.Figure()
+	ax = Makie.Axis(fig[1,1]; width=230, height=230, xlabel="Read depth (M)", ylabel="Inconclusive rate")
+
+	Makie.scatter!(ax, df_groups.M_read_depths[[1,6]], df_groups.inconclusive_rate[[1,6]]; color=:orange, label="Primer 1", markersize=15)
+	Makie.scatter!(ax, df_groups.M_read_depths[[2,7]], df_groups.inconclusive_rate[[2,7]]; color=:purple, label="Primer 2", markersize=15)
+	Makie.scatter!(ax, df_groups.M_read_depths[[3,8]], df_groups.inconclusive_rate[[3,8]]; color=:red, label="Primer 3", markersize=15)
+	Makie.scatter!(ax, df_groups.M_read_depths[[4]], df_groups.inconclusive_rate[[4]]; color=:blue, label="Primer 4", markersize=15)
+	Makie.scatter!(ax, df_groups.M_read_depths[[5]], df_groups.inconclusive_rate[[5]]; color=:teal, label="Primer 5", markersize=15)
+	Makie.xlims!(ax, 0, 3.3e4)
+	Makie.ylims!(ax, -0.05, 0.65)
+		
+	ax = Makie.Axis(fig[1,3]; width=200, height=200, xlabel="Read depth (M)", ylabel="Response rate", title="Natural")
+	Makie.scatter!(ax, df_groups.M_read_depths[[1]], df_groups.response_rate[[1]]; color=:orange, label="Primer 1", markersize=15)
+	Makie.scatter!(ax, df_groups.M_read_depths[[2]], df_groups.response_rate[[2]]; color=:purple, label="Primer 2", markersize=15)
+	Makie.scatter!(ax, df_groups.M_read_depths[[3]], df_groups.response_rate[[3]]; color=:red, label="Primer 3", markersize=15)
+	Makie.xlims!(ax, 0, 3.3e4)
+	Makie.ylims!(ax, -0.05, 0.65)
+
+	ax = Makie.Axis(fig[1,4]; width=200, height=200, xlabel="Read depth (M)", ylabel="Response rate", title="Artificial")
+	Makie.scatter!(ax, df_groups.M_read_depths[[6]], df_groups.response_rate[[6]]; color=:orange, label="Primer 1", markersize=15)
+	Makie.scatter!(ax, df_groups.M_read_depths[[7]], df_groups.response_rate[[7]]; color=:purple, label="Primer 2", markersize=15)
+	Makie.scatter!(ax, df_groups.M_read_depths[[8]], df_groups.response_rate[[8]]; color=:red, label="Primer 3", markersize=15)
+	Makie.scatter!(ax, df_groups.M_read_depths[[4]], df_groups.response_rate[[4]]; color=:blue, label="Primer 4", markersize=15)
+	Makie.scatter!(ax, df_groups.M_read_depths[[5]], df_groups.response_rate[[5]]; color=:teal, label="Primer 5", markersize=15)
+	Makie.xlims!(ax, 0, 3.3e4)
+	Makie.ylims!(ax, -0.05, 0.65)
+
+	fig[1,2] = Makie.Legend(fig, ax, "Primers", framevisible = false)
+	Makie.resize_to_layout!(fig)
+	fig
+end
+
+# ╔═╡ 8d003cc1-dbb8-4ae8-97d4-b74174c63b14
+let fig = Makie.Figure()
+	ax = Makie.Axis(fig[1,1]; width=200, height=200, xlabel="Read depth (M)", ylabel="Response rate")
+	Makie.scatter!(ax, df_groups.M_read_depths[[1,6]], df_groups.response_rate[[1,6]]; color=:orange, label="Primer 1", markersize=15)
+	Makie.scatter!(ax, df_groups.M_read_depths[[2,7]], df_groups.response_rate[[2,7]]; color=:purple, label="Primer 2", markersize=15)
+	Makie.scatter!(ax, df_groups.M_read_depths[[3,8]], df_groups.response_rate[[3,8]]; color=:red, label="Primer 3", markersize=15)
+	Makie.scatter!(ax, df_groups.M_read_depths[[4]], df_groups.response_rate[[4]]; color=:blue, label="Primer 4", markersize=15)
+	Makie.scatter!(ax, df_groups.M_read_depths[[5]], df_groups.response_rate[[5]]; color=:teal, label="Primer 5", markersize=15)
+	Makie.xlims!(ax, 0, 3.2e4)
+	Makie.ylims!(ax, -0.05, 0.65)
+	
+	ax = Makie.Axis(fig[1,2]; width=200, height=200, xlabel="Read depth (M)", ylabel="Inconclusive rate")
+	Makie.scatter!(ax, df_groups.M_read_depths[[1,6]], df_groups.inconclusive_rate[[1,6]]; color=:orange, label="Primer 1", markersize=15)
+	Makie.scatter!(ax, df_groups.M_read_depths[[2,7]], df_groups.inconclusive_rate[[2,7]]; color=:purple, label="Primer 2", markersize=15)
+	Makie.scatter!(ax, df_groups.M_read_depths[[3,8]], df_groups.inconclusive_rate[[3,8]]; color=:red, label="Primer 3", markersize=15)
+	Makie.scatter!(ax, df_groups.M_read_depths[[4]], df_groups.inconclusive_rate[[4]]; color=:blue, label="Primer 4", markersize=15)
+	Makie.scatter!(ax, df_groups.M_read_depths[[5]], df_groups.inconclusive_rate[[5]]; color=:teal, label="Primer 5", markersize=15)
+	Makie.xlims!(ax, 0, 3.2e4)
+	Makie.ylims!(ax, -0.05, 0.65)
+	
+	ax = Makie.Axis(fig[1,3]; width=200, height=200, xlabel="Read depth (M)", ylabel="Response rate")
+	Makie.scatter!(ax, df_groups.M_read_depths[[1]], df_groups.response_rate[[1]]; color=:orange, label="Primer 1", markersize=15)
+	Makie.scatter!(ax, df_groups.M_read_depths[[2]], df_groups.response_rate[[2]]; color=:purple, label="Primer 2", markersize=15)
+	Makie.scatter!(ax, df_groups.M_read_depths[[3]], df_groups.response_rate[[3]]; color=:red, label="Primer 3", markersize=15)
+	Makie.xlims!(ax, 0, 3.2e4)
+	Makie.ylims!(ax, -0.05, 0.65)
+	
+	ax = Makie.Axis(fig[1,4]; width=200, height=200, xlabel="Read depth (M)", ylabel="Inconclusive rate")
+	Makie.scatter!(ax, df_groups.M_read_depths[[1]], df_groups.inconclusive_rate[[1]]; color=:orange, label="Primer 1", markersize=15)
+	Makie.scatter!(ax, df_groups.M_read_depths[[2]], df_groups.inconclusive_rate[[2]]; color=:purple, label="Primer 2", markersize=15)
+	Makie.scatter!(ax, df_groups.M_read_depths[[3]], df_groups.inconclusive_rate[[3]]; color=:red, label="Primer 3", markersize=15)
+	Makie.xlims!(ax, 0, 3.2e4)
+	Makie.ylims!(ax, -0.05, 0.65)
+	
+	fig[1,5] = Makie.Legend(fig, ax, "Primers", framevisible = false)
+	Makie.resize_to_layout!(fig)
+	fig
+end
+
+# ╔═╡ 399072a0-2b27-4175-9cc8-479950d69215
+let fig = Makie.Figure()
+	
+	renorm_response = df_groups.response_rate ./ (1 .- df_groups.inconclusive_rate)
+	
+	ax = Makie.Axis(fig[1,1]; width=200, height=200, xlabel="Read depth (M)", ylabel="Response rate / (1 - Incl. rate)")
+	Makie.scatter!(ax, df_groups.M_read_depths[[1,6]], renorm_response[[1,6]]; color=:orange, label="Primer 1", markersize=15)
+	Makie.scatter!(ax, df_groups.M_read_depths[[2,7]], renorm_response[[2,7]]; color=:purple, label="Primer 2", markersize=15)
+	Makie.scatter!(ax, df_groups.M_read_depths[[3,8]], renorm_response[[3,8]]; color=:red, label="Primer 3", markersize=15)
+	Makie.scatter!(ax, df_groups.M_read_depths[[4]], renorm_response[[4]]; color=:blue, label="Primer 4", markersize=15)
+	Makie.scatter!(ax, df_groups.M_read_depths[[5]], renorm_response[[5]]; color=:teal, label="Primer 5", markersize=15)
+	Makie.xlims!(ax, 0, 3.2e4)
+	Makie.ylims!(ax, -0.05, 0.65)
+
+	ax = Makie.Axis(fig[1,2]; width=200, height=200, xlabel="RBM score (avg.)", ylabel="Response rate / (1 - Incl. rate)")
+	Makie.scatter!(ax, df_groups.RBM_score_avg[[1,6]], renorm_response[[1,6]]; color=:orange, label="Primer 1", markersize=15)
+	Makie.scatter!(ax, df_groups.RBM_score_avg[[2,7]], renorm_response[[2,7]]; color=:purple, label="Primer 2", markersize=15)
+	Makie.scatter!(ax, df_groups.RBM_score_avg[[3,8]], renorm_response[[3,8]]; color=:red, label="Primer 3", markersize=15)
+	Makie.scatter!(ax, df_groups.RBM_score_avg[[4]], renorm_response[[4]]; color=:blue, label="Primer 4", markersize=15)
+	Makie.scatter!(ax, df_groups.RBM_score_avg[[5]], renorm_response[[5]]; color=:teal, label="Primer 5", markersize=15)
+	#Makie.xlims!(ax, 0, 3.2e4)
+	Makie.ylims!(ax, -0.05, 0.65)
+
+	ax = Makie.Axis(fig[1,3]; width=200, height=200, xlabel="RBM score (avg.)", ylabel="Response rate")
+	Makie.scatter!(ax, df_groups.RBM_score_avg[[1,6]], df_groups.response_rate[[1,6]]; color=:orange, label="Primer 1", markersize=15)
+	Makie.scatter!(ax, df_groups.RBM_score_avg[[2,7]], df_groups.response_rate[[2,7]]; color=:purple, label="Primer 2", markersize=15)
+	Makie.scatter!(ax, df_groups.RBM_score_avg[[3,8]], df_groups.response_rate[[3,8]]; color=:red, label="Primer 3", markersize=15)
+	Makie.scatter!(ax, df_groups.RBM_score_avg[[4]], df_groups.response_rate[[4]]; color=:blue, label="Primer 4", markersize=15)
+	Makie.scatter!(ax, df_groups.RBM_score_avg[[5]], df_groups.response_rate[[5]]; color=:teal, label="Primer 5", markersize=15)
+	#Makie.xlims!(ax, 0, 3.2e4)
+	Makie.ylims!(ax, -0.05, 0.65)
+
+	fig[1,5] = Makie.Legend(fig, ax, "Primers", framevisible = false)
+	Makie.resize_to_layout!(fig)
+	fig
+end
+
+# ╔═╡ 824b1bf2-872e-40c8-9eb9-49adcc8cb9a9
+df_groups.RBM_score_avg
+
+# ╔═╡ bcb90e0e-4797-4160-9fb8-6d433bae5aaa
+let fig = Makie.Figure() # natural only
+	ax = Makie.Axis(fig[1,1]; width=200, height=200, xlabel="Read depth (M)", ylabel="Response rate")
+	Makie.scatter!(ax, df_groups.M_read_depths[[1]], df_groups.response_rate[[1]]; color=:orange, label="Primer 1", markersize=15)
+	Makie.scatter!(ax, df_groups.M_read_depths[[2]], df_groups.response_rate[[2]]; color=:purple, label="Primer 2", markersize=15)
+	Makie.scatter!(ax, df_groups.M_read_depths[[3]], df_groups.response_rate[[3]]; color=:red, label="Primer 3", markersize=15)
+	Makie.xlims!(ax, 0, 3e4)
+	Makie.ylims!(ax, -0.05, 0.65)
+	
+	ax = Makie.Axis(fig[1,2]; width=200, height=200, xlabel="Read depth (M)", ylabel="Inconclusive rate")
+	Makie.scatter!(ax, df_groups.M_read_depths[[1]], df_groups.inconclusive_rate[[1]]; color=:orange, label="Primer 1", markersize=15)
+	Makie.scatter!(ax, df_groups.M_read_depths[[2]], df_groups.inconclusive_rate[[2]]; color=:purple, label="Primer 2", markersize=15)
+	Makie.scatter!(ax, df_groups.M_read_depths[[3]], df_groups.inconclusive_rate[[3]]; color=:red, label="Primer 3", markersize=15)
+	Makie.xlims!(ax, 0, 3e4)
+	Makie.ylims!(ax, -0.05, 0.65)
+	
+	fig[1,3] = Makie.Legend(fig, ax, "Primers", framevisible = false)
+	Makie.resize_to_layout!(fig)
+	fig
+end
+
+# ╔═╡ e142d322-2825-4dae-898b-76b0613be0d9
+let fig = Makie.Figure() # synhtetic only
+	ax = Makie.Axis(fig[1,1]; width=200, height=200, xlabel="Read depth (M)", ylabel="Response rate")
+	Makie.scatter!(ax, df_groups.M_read_depths[[6]], df_groups.response_rate[[6]]; color=:orange, label="Primer 1", markersize=15)
+	Makie.scatter!(ax, df_groups.M_read_depths[[7]], df_groups.response_rate[[7]]; color=:purple, label="Primer 2", markersize=15)
+	Makie.scatter!(ax, df_groups.M_read_depths[[8]], df_groups.response_rate[[8]]; color=:red, label="Primer 3", markersize=15)
+	Makie.scatter!(ax, df_groups.M_read_depths[[4]], df_groups.response_rate[[4]]; color=:blue, label="Primer 4", markersize=15)
+	Makie.scatter!(ax, df_groups.M_read_depths[[5,9]], df_groups.response_rate[[5,9]]; color=:teal, label="Primer 5", markersize=15)
+	Makie.xlims!(ax, 0, 3.1e4)
+	Makie.ylims!(ax, -0.05, 0.65)
+	
+	ax = Makie.Axis(fig[1,2]; width=200, height=200, xlabel="Read depth (M)", ylabel="Inconclusive rate")
+	Makie.scatter!(ax, df_groups.M_read_depths[[6]], df_groups.inconclusive_rate[[6]]; color=:orange, label="Primer 1", markersize=15)
+	Makie.scatter!(ax, df_groups.M_read_depths[[7]], df_groups.inconclusive_rate[[7]]; color=:purple, label="Primer 2", markersize=15)
+	Makie.scatter!(ax, df_groups.M_read_depths[[8]], df_groups.inconclusive_rate[[8]]; color=:red, label="Primer 3", markersize=15)
+	Makie.scatter!(ax, df_groups.M_read_depths[[4]], df_groups.inconclusive_rate[[4]]; color=:blue, label="Primer 4", markersize=15)
+	Makie.scatter!(ax, df_groups.M_read_depths[[5,9]], df_groups.inconclusive_rate[[5,9]]; color=:teal, label="Primer 5", markersize=15)
+	Makie.xlims!(ax, 0, 3.1e4)
+	Makie.ylims!(ax, -0.05, 0.65)
+	
+	fig[1,3] = Makie.Legend(fig, ax, "Primers", framevisible = false)
+	Makie.resize_to_layout!(fig)
+	fig
+end
+
+# ╔═╡ 66cc828d-53c6-4fac-a564-25c1c19ed45d
+df_groups.inconclusive_rate[[5,9]]
+
+# ╔═╡ 900d9a2b-d9ab-4730-9163-474cddc25689
+incl_rate = (df_groups.total_sequences - df_groups.responsives) ./ df_groups.total_sequences
+
+# ╔═╡ 53f5d185-ade0-4a4c-a77f-3dd08aecb7ac
+cor(log.(df_groups.M_read_depths), df_groups.response_rate)
 
 # ╔═╡ 72d66520-8b99-4f49-b42d-24f6681a656e
 CSV.write(tempname(), df_groups)
@@ -500,7 +749,6 @@ only(df.aligned_sequences[df.aligned_sequences .=== string(shape_data_500.aligne
 # ╠═84389a19-1f13-4162-a51b-19dcf16ea0c1
 # ╠═ee44f513-ffa0-4183-bcf9-fdbcb73dba69
 # ╠═781bdb61-4311-4e5c-95d4-4deb751c7e6e
-# ╠═bc4e3ac7-2464-4947-afb5-b081ea561953
 # ╠═aae30131-4654-4f98-83f1-9d0818189785
 # ╠═6781ca9d-85fc-46c9-8059-e62e13edabd2
 # ╠═ed515a86-9939-4123-9237-7747817b03d0
@@ -537,37 +785,38 @@ only(df.aligned_sequences[df.aligned_sequences .=== string(shape_data_500.aligne
 # ╠═67ee804e-8877-4fc1-b2b5-a213bce545cd
 # ╠═7e76da0f-91ca-4c5b-bf1d-ca10a2a6c5a8
 # ╠═bfe80af1-a0ad-4702-9571-869aec104c28
+# ╠═b5b6abab-40b0-430e-a012-59af58325a4d
+# ╠═400df1dd-979a-45f4-9884-a6d9c012bd32
 # ╠═f6bb72e2-267f-45e6-b2f9-905bda307b06
 # ╠═f1d5d25d-aa49-4255-9b99-413356541622
-# ╠═e65e14dc-0779-4317-82cb-3b405a1676f9
 # ╠═1cfc835b-679a-4966-9088-275ef43a0159
-# ╠═1acc88d4-9b91-4de4-9dff-aa832ea818f6
-# ╠═2c1f9a8d-613a-44aa-b90c-34305a6140fa
-# ╠═352d2ce8-53ba-4684-8064-06a2b6cf9ef3
-# ╠═6454fe46-d476-45b0-bb0d-62c5497b2a67
-# ╠═6a07d1cd-b017-438a-aa8c-a0c6b6279ee7
-# ╠═0709a2f7-1540-4438-a652-6b9a081c66a1
-# ╠═7285e625-08f0-4142-b40f-f1d9063535e3
-# ╠═ccfc9d80-dcfc-4c4e-882c-58ecee3cb2b9
-# ╠═cb41329c-7f84-4fa5-9e59-9baa30c64b3b
-# ╠═01fe2bac-fb10-4d85-9a22-3fd1a267024d
-# ╠═92869ab8-681d-4ca9-9186-cab52eac0a93
-# ╠═a5f171ca-c3dc-4d6b-a283-879cb5659cf0
-# ╠═c87e5fa7-5166-4dd7-87bd-65c4ae11b037
-# ╟─12dac916-1ae9-4b50-b154-d833e7588e34
-# ╠═ab83d317-1cb9-4649-aea0-4a891361fe70
 # ╠═51bae40e-9128-4675-b021-cda716620d05
 # ╠═0840f95e-092f-4d89-a697-0cfc38e810cf
 # ╠═9a8605cc-99a1-4fcc-9e8d-dd8a61fd26ca
 # ╠═0e568f56-d77b-4b67-9f45-5ccbe4b21841
 # ╠═6756bc38-4381-4d65-8af4-eddeaeb8cdc8
 # ╠═dd49243c-3bbb-40fa-ac72-308c4ddebb57
-# ╠═f9e141d1-4c6c-4dab-b49c-6eba71efaade
 # ╠═3ff21fe5-49a0-4fc4-ad25-ca0fee168e88
+# ╠═d80fdd97-e1c5-48aa-94c1-ed8dcf1b2b59
+# ╠═79421a94-979a-48fc-939c-079202bf115c
+# ╠═528d061b-3147-47a0-be06-a8e673edc1d8
+# ╠═50f29fb4-00f6-4ead-970c-04f7aad653aa
+# ╠═fec7d3da-3b86-43a5-886d-4e621155901d
+# ╠═18582db7-f6a2-4892-9a9e-b31d31c05dbd
+# ╠═09a381b2-4564-4499-887b-14b7bdbaef00
 # ╠═abfae16d-d438-40d1-aef1-10cd407cbc70
-# ╠═dcfdcae5-110a-4e39-93f4-273833a4a850
-# ╠═f68ed2e0-f4f5-423f-8ac5-24c24e312004
+# ╠═c0ee24d7-6560-496b-9c16-181d8577a422
+# ╠═afa683f5-4bc3-4bfd-8e73-ba3e4c911368
+# ╠═f9314f91-6986-495f-8797-3a6b5588e4ad
+# ╠═7452003d-b3f3-4e79-ad2d-638f53b0f91c
+# ╠═afdba201-d750-42b5-9ba2-6bd1946d3a21
 # ╠═8d003cc1-dbb8-4ae8-97d4-b74174c63b14
+# ╠═399072a0-2b27-4175-9cc8-479950d69215
+# ╠═824b1bf2-872e-40c8-9eb9-49adcc8cb9a9
+# ╠═bcb90e0e-4797-4160-9fb8-6d433bae5aaa
+# ╠═e142d322-2825-4dae-898b-76b0613be0d9
+# ╠═66cc828d-53c6-4fac-a564-25c1c19ed45d
+# ╠═900d9a2b-d9ab-4730-9163-474cddc25689
 # ╠═53f5d185-ade0-4a4c-a77f-3dd08aecb7ac
 # ╠═8ea8987c-5b69-495e-af4f-e71f86a648da
 # ╠═72d66520-8b99-4f49-b42d-24f6681a656e

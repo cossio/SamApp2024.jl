@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.6
+# v0.20.8
 
 using Markdown
 using InteractiveUtils
@@ -114,15 +114,16 @@ wuss = SamApp2024.rfam_ss("RF00162"; inserts=false)
 # ╔═╡ 84cb87f0-e81a-4799-aa19-57b9b5fb63c3
 ss = SamApp2024.clean_wuss(wuss)
 
-# ╔═╡ 27a1a97c-5ffc-4033-841f-191c6472580b
-p1_pos = SamApp2024.RF00162_sites_annotated_secondary_structure().p1
-
 # ╔═╡ f1de1a29-8301-447f-adad-ec906d94724a
-ss_without_P1 = join([i ∈ p1_pos ? '.' : c for (i,c) in enumerate(ss)]);
+ss_without_P1 = join([i ∈ SamApp2024.RF00162_sites_annotated_secondary_structure().p1 ? '.' : c for (i,c) in enumerate(ss)]);
 
 # ╔═╡ a0ee4304-50ff-440a-b363-2ea91a911384
 # full seq, with P1 and terminator bound (OFF state)
-ss_full_P1 = ss * repeat('.', length(109:115)) * repeat('(', length(116:123)) * repeat('.', length(124:130)) * repeat(')', length(131:138)) * repeat('.', length(139:153))
+ss_full_P1_and_terminator = ss * repeat('.', length(109:115)) * repeat('(', length(116:123)) * repeat('.', length(124:130)) * repeat(')', length(131:138)) * repeat('.', length(139:153))
+
+# ╔═╡ 85895b80-369c-474e-a134-9b95b45b60a6
+# full seq, with P1 but without terminator
+ss_full_P1_and_no_terminator = ss * repeat('.', length(109:153))
 
 # ╔═╡ d1244e1c-91f8-4378-8734-c52d3fa95385
 # full seq, with P1 unbound and anti-terminator bound (ON state)
@@ -136,25 +137,143 @@ Vienna_energies_aptamer_only_ss = [ustrip(ViennaRNA.energy(string(seq[1:108]), s
 Vienna_energies_aptamer_only_noP1 = [ustrip(ViennaRNA.energy(string(seq[1:108]), ss_without_P1)) for seq = alnseqs];
 
 # ╔═╡ 5eefdb8e-85bd-4116-9346-e9394de89475
-Vienna_energies_full_P1 = [ustrip(ViennaRNA.energy(string(seq), ss_full_P1)) for seq = alnseqs];
+Vienna_energies_full_P1_and_terminator = [ustrip(ViennaRNA.energy(string(seq), ss_full_P1_and_terminator)) for seq = alnseqs];
+
+# ╔═╡ 06236adb-22da-4e8e-80f6-f4398e1f5b5f
+Vienna_energies_full_P1_and_no_terminator = [ustrip(ViennaRNA.energy(string(seq), ss_full_P1_and_no_terminator)) for seq = alnseqs];
 
 # ╔═╡ e66a8b94-73a8-42a4-b65f-4190d37fe172
-Vienna_energies_full_noP1 = [ustrip(ViennaRNA.energy(string(seq), ss_full_noP1)) for seq = alnseqs];
+Vienna_energies_full_noP1_antiterminator = [ustrip(ViennaRNA.energy(string(seq), ss_full_noP1)) for seq = alnseqs];
 
 # ╔═╡ c5735f3f-8982-4eab-bc30-39b0b80a27c5
 P1_deltaF_aptamer_only = Vienna_energies_aptamer_only_ss - Vienna_energies_aptamer_only_noP1
 
-# ╔═╡ bf0edb4e-fd56-4355-bd43-f768f243294a
-P1_deltaF_full = Vienna_energies_full_P1 - Vienna_energies_full_noP1
+# ╔═╡ 4a8133b7-f404-4364-ae3a-ab7457364456
+P1_deltaF_full = Vienna_energies_full_P1_and_terminator - Vienna_energies_full_noP1_antiterminator
+
+# ╔═╡ eddb9d24-017e-40a6-ae17-00cc4e407e00
+P1_deltaF_full_no_terminator = Vienna_energies_full_P1_and_no_terminator - Vienna_energies_full_noP1_antiterminator
 
 # ╔═╡ ee17763e-7ab0-4234-b10f-cca58f12e814
 let fig = Makie.Figure()
-	ax = Makie.Axis(fig[1,1]; width=500, height=500, xlabel="ΔF(OFF) - ΔF(ON) for aptamer only", ylabel="ΔF(OFF) - ΔF(ON) for full riboswitch")
+	_sz = 350
+	
+	ax = Makie.Axis(fig[1,1]; width=_sz, height=_sz, xlabel="ΔF(OFF) - ΔF(ON) for aptamer only", ylabel="ΔF(OFF) - ΔF(ON) for full riboswitch")
 	Makie.scatter!(ax, P1_deltaF_aptamer_only, P1_deltaF_full)
 	Makie.ablines!(ax, 0, 1; color=:red, linestyle=:dash)
+
+	ax = Makie.Axis(fig[1,2]; width=_sz, height=_sz, xlabel="ΔF(OFF) - ΔF(ON) for aptamer only", ylabel="ΔF(OFF) - ΔF(ON) for full riboswitch (without terminator)")
+	Makie.scatter!(ax, P1_deltaF_aptamer_only, P1_deltaF_full_no_terminator)
+	Makie.ablines!(ax, 0, 1; color=:red, linestyle=:dash)
+	
 	Makie.resize_to_layout!(fig)
 	fig
 end
+
+# ╔═╡ b2b18a43-2a76-4f34-b041-0d123ea48e10
+Makie.heatmap(ViennaRNA.bpp(string(alnseqs[1][1:108]))[1:8,101:108])
+
+# ╔═╡ 0fbc4fa8-5903-4afb-9759-2ac24a637003
+BPs_full = [ViennaRNA.bpp(string(seq)) for seq = alnseqs]
+
+# ╔═╡ 7648e808-a0e0-485f-8bd8-5d898b5b3941
+BPs_aptamer = [ViennaRNA.bpp(string(seq[1:108])) for seq = alnseqs]
+
+# ╔═╡ 43564b0d-3a29-4f88-8d15-8120300660fa
+let seq = string(alnseqs[30])
+	println(seq[1:108])
+	println(ViennaRNA.mfe(seq[1:108])[1])
+	println(seq)
+	println(ViennaRNA.mfe(seq)[1])
+end
+
+# ╔═╡ 888345b7-8661-47d5-bedd-5d59612071b6
+let fig = Makie.Figure()
+	bins = 0:0.1:1
+	for i = 1:8
+		ax = Makie.Axis(fig[fld1(i, 4), mod1(i, 4)]; width=200, height=200, xlabel="Base-pair prob. P1", ylabel="aptamers (freq.)", title="site = $i")
+		
+		Makie.hist!(ax, [bp[i, 109 - i] for bp = BPs_full]; normalization=:pdf, bins, label="full", color=:gray)
+		Makie.stephist!(ax, [bp[i, 109 - i] for bp = BPs_aptamer]; normalization=:pdf, bins, label="aptamer only", color=:blue, linewidth=2)
+
+		Makie.vlines!(ax, mean([bp[i, 109 - i] for bp = BPs_full]); color=:black, linestyle=:dash, linewidth=4)
+		Makie.vlines!(ax, mean([bp[i, 109 - i] for bp = BPs_aptamer]); color=:blue, linestyle=:dash, linewidth=4)
+
+		Makie.xlims!(ax, 0, 1)
+		Makie.ylims!(ax, 0, 10)
+		
+		if i == 8
+			Makie.axislegend(ax; position=:lt)
+		end
+	end
+	Makie.resize_to_layout!(fig)
+	fig
+end
+
+# ╔═╡ abfb5f30-5e6d-4c3f-8030-81b319787203
+prod(mean([bp[i, 109 - i] for bp = BPs_full]) for i=1:8) / 
+	prod(mean([bp[i, 109 - i] for bp = BPs_aptamer]) for i=1:8)
+
+# ╔═╡ 858cf27e-ea29-4d4f-9205-c6de4ba49f33
+let fig = Makie.Figure()
+	bins = 0:0.1:1
+	for (n, (i,j)) = enumerate(zip([13:17; 21:23], reverse([29:31; 38:42])))
+		ax = Makie.Axis(fig[fld1(n, 4), mod1(n, 4)]; width=200, height=200, xlabel="Base-pair prob. (P2)", ylabel="aptamers (freq.)", title="site = $n")
+		
+		Makie.hist!(ax, [bp[i,j] for bp = BPs_full]; normalization=:pdf, bins, label="full", color=:gray)
+		Makie.stephist!(ax, [bp[i,j] for bp = BPs_aptamer]; normalization=:pdf, bins, label="aptamer only", color=:blue, linewidth=2)
+
+		Makie.vlines!(ax, mean([bp[i,j] for bp = BPs_full]); color=:black, linestyle=:dash, linewidth=4)
+		Makie.vlines!(ax, mean([bp[i,j] for bp = BPs_aptamer]); color=:blue, linestyle=:dash, linewidth=4)
+
+		Makie.xlims!(ax, 0, 1)
+		Makie.ylims!(ax, 0, 10)
+		
+		if n == 8
+			Makie.axislegend(ax; position=:lt)
+		end
+	end
+	Makie.resize_to_layout!(fig)
+	fig
+end
+
+# ╔═╡ c783cf11-f5c2-4ef5-8dc4-cf9dc0e4b479
+prod(mean([bp[i,j] for bp = BPs_full]) for (i,j) = zip([13:17; 21:23], reverse([29:31; 38:42]))) / 
+	prod(mean([bp[i,j] for bp = BPs_aptamer]) for (i,j) = zip([13:17; 21:23], reverse([29:31; 38:42])))
+
+# ╔═╡ df7fccd6-a5c4-47c4-afe4-a55a19ed57e3
+let fig = Makie.Figure()
+	bins = 0:0.1:1
+	for i = 81:86
+		j = 97 - i + 81
+		n = i - 80
+		ax = Makie.Axis(fig[fld1(n, 4), mod1(n,4)]; width=200, height=200, xlabel="Base-pair prob. (P4)", ylabel="aptamers (freq.)", title="sites = ($i,$j)")
+		
+		Makie.hist!(ax, [bp[i,j] for bp = BPs_full]; normalization=:pdf, bins, label="full", color=:gray)
+		Makie.stephist!(ax, [bp[i,j] for bp = BPs_aptamer]; normalization=:pdf, bins, label="aptamer only", color=:blue, linewidth=2)
+
+		Makie.vlines!(ax, mean([bp[i,j] for bp = BPs_full]); color=:black, linestyle=:dash, linewidth=4)
+		Makie.vlines!(ax, mean([bp[i,j] for bp = BPs_aptamer]); color=:blue, linestyle=:dash, linewidth=4)
+
+		Makie.xlims!(ax, 0, 1)
+		Makie.ylims!(ax, 0, 10)
+		
+		if n == 4
+			Makie.axislegend(ax; position=:lt)
+		end
+	end
+	Makie.resize_to_layout!(fig)
+	fig
+end
+
+# ╔═╡ 64128cc4-44dc-4023-9600-1dcca76cfe31
+prod(mean([bp[i,97-i+81] for bp = BPs_full]) for i=81:86) / prod(mean([bp[i,97-i+81] for bp = BPs_aptamer]) for i=81:86)
+
+# ╔═╡ e4044118-c03d-4b20-ba8c-0284d7d250fb
+SamApp2024.RF00162_sites_annotated_secondary_structure().p4
+
+# ╔═╡ 21c629a1-5b4e-45ee-ae6b-18da275f3d0e
+length([13:16; 21:23])
 
 # ╔═╡ Cell order:
 # ╠═c89c23fe-3b38-415b-b11d-541e814d94fb
@@ -183,14 +302,28 @@ end
 # ╠═daa6be95-b968-4002-8ad4-b1c8aa2d38b7
 # ╠═fafcc597-a322-48a2-ad6d-eb9ef95b6527
 # ╠═84cb87f0-e81a-4799-aa19-57b9b5fb63c3
-# ╠═27a1a97c-5ffc-4033-841f-191c6472580b
 # ╠═f1de1a29-8301-447f-adad-ec906d94724a
 # ╠═a0ee4304-50ff-440a-b363-2ea91a911384
+# ╠═85895b80-369c-474e-a134-9b95b45b60a6
 # ╠═d1244e1c-91f8-4378-8734-c52d3fa95385
 # ╠═a6744f6a-477d-47c4-9dcf-6466026893a5
 # ╠═93c341ff-dde3-4dd9-b245-fc9db2d9a5ab
 # ╠═5eefdb8e-85bd-4116-9346-e9394de89475
+# ╠═06236adb-22da-4e8e-80f6-f4398e1f5b5f
 # ╠═e66a8b94-73a8-42a4-b65f-4190d37fe172
 # ╠═c5735f3f-8982-4eab-bc30-39b0b80a27c5
-# ╠═bf0edb4e-fd56-4355-bd43-f768f243294a
+# ╠═4a8133b7-f404-4364-ae3a-ab7457364456
+# ╠═eddb9d24-017e-40a6-ae17-00cc4e407e00
 # ╠═ee17763e-7ab0-4234-b10f-cca58f12e814
+# ╠═b2b18a43-2a76-4f34-b041-0d123ea48e10
+# ╠═0fbc4fa8-5903-4afb-9759-2ac24a637003
+# ╠═7648e808-a0e0-485f-8bd8-5d898b5b3941
+# ╠═43564b0d-3a29-4f88-8d15-8120300660fa
+# ╠═888345b7-8661-47d5-bedd-5d59612071b6
+# ╠═abfb5f30-5e6d-4c3f-8030-81b319787203
+# ╠═858cf27e-ea29-4d4f-9205-c6de4ba49f33
+# ╠═c783cf11-f5c2-4ef5-8dc4-cf9dc0e4b479
+# ╠═df7fccd6-a5c4-47c4-afe4-a55a19ed57e3
+# ╠═64128cc4-44dc-4023-9600-1dcca76cfe31
+# ╠═e4044118-c03d-4b20-ba8c-0284d7d250fb
+# ╠═21c629a1-5b4e-45ee-ae6b-18da275f3d0e

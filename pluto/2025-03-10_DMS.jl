@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.5
+# v0.20.8
 
 using Markdown
 using InteractiveUtils
@@ -30,6 +30,9 @@ using Statistics: mean
 
 # ╔═╡ 4244cffe-81f2-41ff-950d-97e973947a32
 using StatsBase: countmap
+
+# ╔═╡ 6b5e7730-952d-4533-b6a7-7caa14d82fb0
+using NaNStatistics: nanmean, nanstd
 
 # ╔═╡ d42dae48-fdc2-11ef-191c-b7b143d538a5
 md"# Imports"
@@ -80,7 +83,7 @@ md"# General data"
 _sites = SamApp2024.hallmark_sites_20230507
 
 # ╔═╡ e0367f59-2f02-4a09-8018-e71317695f3b
-md"# DMS data"
+md"# Load DMS data"
 
 # ╔═╡ af8c9beb-f844-4238-8967-2dbff72ac27c
 dms_df = SamApp2024.load_dms_data_sequences_table_20250303_with_aligned_sequences()
@@ -94,9 +97,6 @@ dms_data_primers = dms_df.primer[[only(findall(dms_df.name .== name)) for name =
 # ╔═╡ 4875da0e-9898-4498-8b29-cb60282e2cc2
 unique(dms_data_primers)
 
-# ╔═╡ f1f436b9-33a4-4181-86ca-71119456b084
-
-
 # ╔═╡ 50c9a9c5-0253-4cc5-aaa5-d58472e8920c
 for p = unique(dms_data_primers)
 	println(p, "\t", count(!ismissing(dms_df.aligned_sequence) .&& dms_df.primer .== p))
@@ -104,6 +104,9 @@ end
 
 # ╔═╡ 5f64c1d1-b429-4946-a122-a02fcb7ff1f6
 dms_df.aligned_sequence
+
+# ╔═╡ 8ab280ee-8a1a-495a-ac75-dee2ca199759
+dms_df
 
 # ╔═╡ 2b18233e-d2ae-485e-9ad7-17e20a26fee7
 num_sites, num_seqs, num_conds = size(dms_data.shape_reactivities)
@@ -275,6 +278,9 @@ conds_30C_500 = [6];
 # ╔═╡ 13d43c06-6a78-4f81-b735-02b6dc6c1662
 shape_data_500 = SamApp2024.load_shapemapper_data_500v2_20240315();
 
+# ╔═╡ 21f4d2dd-ad45-485f-bcc9-21a735f31c57
+unique(shape_data_500.aptamer_origin)
+
 # ╔═╡ 9e1fca3b-3733-4fc2-b00e-beb8c318713d
 bps_reactivities_500 = shape_data_500.shape_reactivities[bps, :, conds_sam_500];
 
@@ -315,126 +321,59 @@ _responds_sam_inconcl_500 = ((!).(_responds_sam_yes_500)) .& ((!).(_responds_sam
 md"# Comparison DMS vs. SHAPE Repl.0"
 
 # ╔═╡ 10e1166d-5e07-45aa-8adc-1b92f370d26d
+# indices of DMS probed sequences in Rep0 (or nothing if it is not in Rep0)
 _dms_rep0_indices = indexin(dms_data.aligned_sequence, shape_data_rep0.aligned_sequences)
-
-# ╔═╡ 74fffba4-b0d1-4f15-b430-81e1d677d2f4
-_responds_sam_yes_rep0_dms_seqs = [isnothing(n) ? nothing : _responds_sam_yes_rep0[n] for n = _dms_rep0_indices]
-
-# ╔═╡ 29729f40-dbc3-4d28-946e-cee8ec62bd81
-_responds_sam_nop_rep0_dms_seqs = [isnothing(n) ? nothing : _responds_sam_nop_rep0[n] for n = _dms_rep0_indices]
-
-# ╔═╡ 84be17bf-eafa-404b-a264-b64e6206a725
-_responds_sam_inconcl_rep0_dms_seqs = [isnothing(n) ? nothing : _responds_sam_inconcl_rep0[n] for n = _dms_rep0_indices]
-
-# ╔═╡ 9597c913-72e6-41f2-9072-983b03a278d5
-# DMS yes and SHAPE (rep.0) yes
-count(_responds_sam_yes_dms[findall(!isnothing, _dms_rep0_indices)] .&& _responds_sam_yes_rep0_dms_seqs[findall(!isnothing, _dms_rep0_indices)])
-
-# ╔═╡ bfb20f7d-e892-4254-a2b6-8700d0958072
-# DMS yes and SHAPE (rep.0) nop
-count(_responds_sam_yes_dms[findall(!isnothing, _dms_rep0_indices)] .&& _responds_sam_nop_rep0_dms_seqs[findall(!isnothing, _dms_rep0_indices)])
-
-# ╔═╡ 54b11c1f-271b-461c-9662-e838c56d4e87
-# DMS yes and SHAPE (rep.0) inconclusive
-count(_responds_sam_yes_dms[findall(!isnothing, _dms_rep0_indices)] .&& _responds_sam_inconcl_rep0_dms_seqs[findall(!isnothing, _dms_rep0_indices)])
-
-# ╔═╡ 72e0ed21-0f65-4ffa-9cb1-02e45bb7a474
-# DMS nop and SHAPE (rep.0) yes
-count(_responds_sam_nop_dms[findall(!isnothing, _dms_rep0_indices)] .&& _responds_sam_yes_rep0_dms_seqs[findall(!isnothing, _dms_rep0_indices)])
-
-# ╔═╡ d25c2bc7-930c-4133-ab2a-2ef29c0b6e82
-# DMS nop and SHAPE (rep.0) nop
-count(_responds_sam_nop_dms[findall(!isnothing, _dms_rep0_indices)] .&& _responds_sam_nop_rep0_dms_seqs[findall(!isnothing, _dms_rep0_indices)])
-
-# ╔═╡ fda5a42a-509e-41e6-98e6-598261190276
-# DMS nop and SHAPE (rep.0) inconclusive
-count(_responds_sam_nop_dms[findall(!isnothing, _dms_rep0_indices)] .&& _responds_sam_inconcl_rep0_dms_seqs[findall(!isnothing, _dms_rep0_indices)])
-
-# ╔═╡ 33ca29be-cb6c-47dd-82f5-43c4596bb84e
-# DMS inconclusive and SHAPE (rep.0) yes
-count(_responds_sam_inconcl_dms[findall(!isnothing, _dms_rep0_indices)] .&& _responds_sam_yes_rep0_dms_seqs[findall(!isnothing, _dms_rep0_indices)])
-
-# ╔═╡ 25b42825-6964-4ab8-b043-3740112b7dfe
-# DMS inconclusive and SHAPE (rep.0) nop
-count(_responds_sam_inconcl_dms[findall(!isnothing, _dms_rep0_indices)] .&& _responds_sam_nop_rep0_dms_seqs[findall(!isnothing, _dms_rep0_indices)])
-
-# ╔═╡ 0a698578-2c83-42b5-b7fa-a80fb0887bba
-# DMS inconclusive and SHAPE (rep.0) inconclusive
-count(_responds_sam_inconcl_dms[findall(!isnothing, _dms_rep0_indices)] .&& _responds_sam_inconcl_rep0_dms_seqs[findall(!isnothing, _dms_rep0_indices)])
-
-# ╔═╡ 755c1c17-20b4-4ee9-96ef-201473651a58
-# How many RBM are confirmed ?
-count(_responds_sam_yes_dms[rbm_seqs_rep0 ∩ findall(!isnothing, _dms_rep0_indices)] .&& _responds_sam_inconcl_rep0_dms_seqs[rbm_seqs_rep0 ∩ findall(!isnothing, _dms_rep0_indices)])
-
-# ╔═╡ 16d309f1-480a-4b60-90cf-a9ef9bbe67a1
-# How many RBM are confirmed ?
-count(_responds_sam_nop_dms[rbm_seqs_rep0 ∩ findall(!isnothing, _dms_rep0_indices)] .&& _responds_sam_inconcl_rep0_dms_seqs[rbm_seqs_rep0 ∩ findall(!isnothing, _dms_rep0_indices)])
-
-# ╔═╡ 5e6d4cc3-e1a9-4535-aced-835d77303d83
-# How many RBM are confirmed ?
-count(_responds_sam_inconcl_dms[rbm_seqs_rep0 ∩ findall(!isnothing, _dms_rep0_indices)] .&& _responds_sam_inconcl_rep0_dms_seqs[rbm_seqs_rep0 ∩ findall(!isnothing, _dms_rep0_indices)])
 
 # ╔═╡ 154f87e7-3199-4232-980c-f6f29b1db1fe
 [
 	begin
-		count(dms[findall(!isnothing, _dms_rep0_indices)] .&& rep0[findall(!isnothing, _dms_rep0_indices)])
-	end for rep0 = (_responds_sam_yes_rep0_dms_seqs, _responds_sam_nop_rep0_dms_seqs, _responds_sam_inconcl_rep0_dms_seqs), dms = (_responds_sam_yes_dms, _responds_sam_nop_dms, _responds_sam_inconcl_dms)
+		count(dms[findall(!isnothing, _dms_rep0_indices)] .&& rep0[filter(!isnothing, _dms_rep0_indices)])
+	end for rep0 = (_responds_sam_yes_rep0, _responds_sam_nop_rep0, _responds_sam_inconcl_rep0), dms = (_responds_sam_yes_dms, _responds_sam_nop_dms, _responds_sam_inconcl_dms)
 ]
 
 # ╔═╡ 5660fe93-b5b5-4bdf-9f80-918815c766bb
+# natural only
+[
+	begin
+		[ for (i,n) = _dms_rep0_indices]
+		count(dms[findall(n -> (!isnothing(n)) && (n ∈ nat_seqs_rep0), _dms_rep0_indices)] .&& rep0[nat_seqs_rep0 ∩ filter(!isnothing, _dms_rep0_indices)])
+	end for rep0 = (_responds_sam_yes_rep0, _responds_sam_nop_rep0, _responds_sam_inconcl_rep0), dms = (_responds_sam_yes_dms, _responds_sam_nop_dms, _responds_sam_inconcl_dms)
+]
+
+# ╔═╡ 9f35ef98-909d-43e1-818c-1b631fcd919f
+nat_seqs_rep0
+
+# ╔═╡ f4ec3184-6c46-4e88-bf96-c5cd514febd8
 # RBM only
 [
 	begin
-		count(dms[rbm_seqs_rep0 ∩ findall(!isnothing, _dms_rep0_indices)] .&& rep0[rbm_seqs_rep0 ∩ findall(!isnothing, _dms_rep0_indices)])
-	end for rep0 = (_responds_sam_yes_rep0_dms_seqs, _responds_sam_nop_rep0_dms_seqs, _responds_sam_inconcl_rep0_dms_seqs), dms = (_responds_sam_yes_dms, _responds_sam_nop_dms, _responds_sam_inconcl_dms)
+		count(dms[findall(n -> (!isnothing(n)) && (n ∈ rbm_seqs_rep0), _dms_rep0_indices)] .&& rep0[rbm_seqs_rep0 ∩ filter(!isnothing, _dms_rep0_indices)])
+	end for rep0 = (_responds_sam_yes_rep0, _responds_sam_nop_rep0, _responds_sam_inconcl_rep0), dms = (_responds_sam_yes_dms, _responds_sam_nop_dms, _responds_sam_inconcl_dms)
 ]
 
-# ╔═╡ 40c13e35-4c52-4051-8f85-fdb1ca99d3b1
-# primer 1
-[
-	begin
-		count(dms[findall(!isnothing, _dms_rep0_indices)] .&& rep0[findall(!isnothing, _dms_rep0_indices)] .&& (dms_data_primers .== unique(dms_data_primers)[1])[findall(!isnothing, _dms_rep0_indices)])
-	end for rep0 = (_responds_sam_yes_rep0_dms_seqs, _responds_sam_nop_rep0_dms_seqs, _responds_sam_inconcl_rep0_dms_seqs), dms = (_responds_sam_yes_dms, _responds_sam_nop_dms, _responds_sam_inconcl_dms)
-]
-
-# ╔═╡ c7a94bc0-c9d2-45e5-ac3a-75e25e5c288f
-# primer 2
-[
-	begin
-		count(dms[findall(!isnothing, _dms_rep0_indices)] .&& rep0[findall(!isnothing, _dms_rep0_indices)] .&& (dms_data_primers .== unique(dms_data_primers)[2])[findall(!isnothing, _dms_rep0_indices)])
-	end for rep0 = (_responds_sam_yes_rep0_dms_seqs, _responds_sam_nop_rep0_dms_seqs, _responds_sam_inconcl_rep0_dms_seqs), dms = (_responds_sam_yes_dms, _responds_sam_nop_dms, _responds_sam_inconcl_dms)
-]
-
-# ╔═╡ 2b0d56a5-de91-45af-83aa-5ca3de9b8427
-# primer 3
-[
-	begin
-		count(dms[findall(!isnothing, _dms_rep0_indices)] .&& rep0[findall(!isnothing, _dms_rep0_indices)] .&& (dms_data_primers .== unique(dms_data_primers)[3])[findall(!isnothing, _dms_rep0_indices)])
-	end for rep0 = (_responds_sam_yes_rep0_dms_seqs, _responds_sam_nop_rep0_dms_seqs, _responds_sam_inconcl_rep0_dms_seqs), dms = (_responds_sam_yes_dms, _responds_sam_nop_dms, _responds_sam_inconcl_dms)
-]
-
-# ╔═╡ 6a825260-2887-41d4-9e20-fd66ec0e2e8c
-# primer 4
-[
-	begin
-		count(dms[findall(!isnothing, _dms_rep0_indices)] .&& rep0[findall(!isnothing, _dms_rep0_indices)] .&& (dms_data_primers .== unique(dms_data_primers)[4])[findall(!isnothing, _dms_rep0_indices)])
-	end for rep0 = (_responds_sam_yes_rep0_dms_seqs, _responds_sam_nop_rep0_dms_seqs, _responds_sam_inconcl_rep0_dms_seqs), dms = (_responds_sam_yes_dms, _responds_sam_nop_dms, _responds_sam_inconcl_dms)
-]
-
-# ╔═╡ 6f7f502f-3a03-4f94-ba92-75fc71427564
+# ╔═╡ eb047b2f-f822-4e03-94bd-aabab68f9610
 unique(dms_data_primers)
 
-# ╔═╡ b4acfb01-3865-4a34-8b25-3e474a306da4
-length(dms_data_primers)
+# ╔═╡ 529b46ff-b9cd-45c9-b202-6b2faeacb40c
+SamApp2024.primers20250607()
 
-# ╔═╡ 9163a506-bc9f-4877-978f-ef854b858be1
-length(_dms_rep0_indices)
+# ╔═╡ 40c13e35-4c52-4051-8f85-fdb1ca99d3b1
+# per primers
+[
+	begin
+		count(dms[findall(!isnothing, _dms_rep0_indices)] .&& rep0[filter(!isnothing, _dms_rep0_indices)] .&& (dms_data_primers .== SamApp2024.primers20250607()[4])[findall(!isnothing, _dms_rep0_indices)])
+	end for rep0 = (_responds_sam_yes_rep0, _responds_sam_nop_rep0, _responds_sam_inconcl_rep0), dms = (_responds_sam_yes_dms, _responds_sam_nop_dms, _responds_sam_inconcl_dms)
+]
 
 # ╔═╡ 6aa691a1-6e62-4077-83f6-e168810f4ec2
 md"# Comparison DMS vs. SHAPE 500"
 
 # ╔═╡ 8a604d45-5890-4578-8a82-01065faf1a1c
-_dms_500_indices = indexin(dms_data.aligned_sequence, map(string, shape_data_500.aligned_sequences))
+# indices of DMS probed sequences in 500 (or nothing if it is not in 500)
+_dms_500_indices = indexin(dms_data.aligned_sequence, map(string, shape_data_500.aligned_sequences[1:450]))
+
+# ╔═╡ b1c874f0-fed5-4d51-95a4-69a5870d6695
+count(!isnothing, _dms_500_indices)
 
 # ╔═╡ cc2bd6ed-6e09-453d-91ea-552aebe1ca1d
 _responds_sam_yes_500_dms_seqs = [isnothing(n) ? nothing : _responds_sam_yes_500[n] for n = _dms_500_indices]
@@ -445,80 +384,310 @@ _responds_sam_nop_500_dms_seqs = [isnothing(n) ? nothing : _responds_sam_nop_500
 # ╔═╡ f366dabf-e8b7-4417-9a1e-99412ec6c582
 _responds_sam_inconcl_500_dms_seqs = [isnothing(n) ? nothing : _responds_sam_inconcl_500[n] for n = _dms_500_indices]
 
-# ╔═╡ d56ea5f4-59a3-4f96-87d3-e435303e7cf2
-# DMS yes and SHAPE (500) yes
-count(_responds_sam_yes_dms[findall(!isnothing, _dms_500_indices)] .&& _responds_sam_yes_500_dms_seqs[findall(!isnothing, _dms_500_indices)])
-
-# ╔═╡ 4089033a-e18e-4be3-b3e9-b22d23de0656
-# DMS yes and SHAPE (500) nop
-count(_responds_sam_yes_dms[findall(!isnothing, _dms_500_indices)] .&& _responds_sam_nop_500_dms_seqs[findall(!isnothing, _dms_500_indices)])
-
-# ╔═╡ c6a5fbf0-971c-48e0-9bee-3512a788d11c
-# DMS yes and SHAPE (500) inconclusive
-count(_responds_sam_yes_dms[findall(!isnothing, _dms_500_indices)] .&& _responds_sam_inconcl_500_dms_seqs[findall(!isnothing, _dms_500_indices)])
-
-# ╔═╡ e9e5fe1d-2331-453e-bca8-e587f62da74d
-# DMS nop and SHAPE (500) yes
-count(_responds_sam_nop_dms[findall(!isnothing, _dms_500_indices)] .&& _responds_sam_yes_500_dms_seqs[findall(!isnothing, _dms_500_indices)])
-
-# ╔═╡ c19502ff-1dfb-477c-8069-5a2c272740fb
-# DMS nop and SHAPE (500) nop
-count(_responds_sam_nop_dms[findall(!isnothing, _dms_500_indices)] .&& _responds_sam_nop_500_dms_seqs[findall(!isnothing, _dms_500_indices)])
-
-# ╔═╡ d33911ab-0a8d-4d9f-b1f3-d4eda14ec64c
-# DMS nop and SHAPE (500) inconclusive
-count(_responds_sam_nop_dms[findall(!isnothing, _dms_500_indices)] .&& _responds_sam_inconcl_500_dms_seqs[findall(!isnothing, _dms_500_indices)])
-
-# ╔═╡ 2273495b-7150-4ffb-adb0-c26de1762c25
-# DMS inconclusive and SHAPE (500) yes
-count(_responds_sam_inconcl_dms[findall(!isnothing, _dms_500_indices)] .&& _responds_sam_yes_500_dms_seqs[findall(!isnothing, _dms_500_indices)])
-
-# ╔═╡ 7fd2cf30-9848-4f61-b641-82572f83591b
-# DMS inconclusive and SHAPE (500) nop
-count(_responds_sam_inconcl_dms[findall(!isnothing, _dms_500_indices)] .&& _responds_sam_nop_500_dms_seqs[findall(!isnothing, _dms_500_indices)])
-
-# ╔═╡ 0b8aec74-cf6e-4b18-8929-8ac6faeddce2
-# DMS inconclusive and SHAPE (500) inconclusive
-count(_responds_sam_inconcl_dms[findall(!isnothing, _dms_500_indices)] .&& _responds_sam_inconcl_500_dms_seqs[findall(!isnothing, _dms_500_indices)])
-
 # ╔═╡ 6ce57a7b-0e16-43f8-a840-d2ab4e9e03d3
 [
 	begin
-		count(dms[findall(!isnothing, _dms_500_indices)] .&& shape500[findall(!isnothing, _dms_500_indices)])
-	end for shape500 = (_responds_sam_yes_500_dms_seqs, _responds_sam_nop_500_dms_seqs, _responds_sam_inconcl_500_dms_seqs), dms = (_responds_sam_yes_dms, _responds_sam_nop_dms, _responds_sam_inconcl_dms)
+		count(dms[findall(!isnothing, _dms_500_indices)] .&& shape500[filter(!isnothing, _dms_500_indices)])
+	end for shape500 = (_responds_sam_yes_500, _responds_sam_nop_500, _responds_sam_inconcl_500), dms = (_responds_sam_yes_dms, _responds_sam_nop_dms, _responds_sam_inconcl_dms)
 ]
 
 # ╔═╡ 1fda3f8c-4477-4039-8636-14b2ae0a5df3
-# primer 1
+# per primer
 [
 	begin
-		count(dms[findall(!isnothing, _dms_500_indices)] .&& shape500[findall(!isnothing, _dms_500_indices)] .&& (dms_data_primers .== unique(dms_data_primers)[1])[findall(!isnothing, _dms_500_indices)])
-	end for shape500 = (_responds_sam_yes_500_dms_seqs, _responds_sam_nop_500_dms_seqs, _responds_sam_inconcl_500_dms_seqs), dms = (_responds_sam_yes_dms, _responds_sam_nop_dms, _responds_sam_inconcl_dms)
+		count(dms[findall(!isnothing, _dms_500_indices)] .&& shape500[filter(!isnothing, _dms_500_indices)] .&& (dms_data_primers .== SamApp2024.primers20250607()[5])[findall(!isnothing, _dms_500_indices)])
+	end for shape500 = (_responds_sam_yes_500, _responds_sam_nop_500, _responds_sam_inconcl_500), dms = (_responds_sam_yes_dms, _responds_sam_nop_dms, _responds_sam_inconcl_dms)
 ]
 
-# ╔═╡ 61738118-55ec-4c08-85f8-de345c103ee6
-# primer 2
-[
+# ╔═╡ e7b53f31-137d-43cb-8d80-bb9ddf420828
+md"# Read depths"
+
+# ╔═╡ 7c7c7ef4-c613-4868-ac35-57a498765ef6
+nanmean(dms_data.shape_M_depth; dim=(2,3))
+
+# ╔═╡ 66f55016-2e10-4590-8d65-f24609f25f48
+unique(dms_data_primers)
+
+# ╔═╡ ee9ff992-672e-46fa-87e1-c9c8adb87845
+primers = SamApp2024.primers20250607()
+
+# ╔═╡ 5f372f6c-9c6d-44b1-8b29-681b4383d820
+SamApp2024.primers20250607()[1] ∈ unique(dms_data_primers)
+
+# ╔═╡ 86651e08-1f33-4fc1-8780-888714d9c86c
+let fig = Makie.Figure()
+	groups = "primer" .* string.(1:5)
+	colors = [:orange, :purple, :red, :blue, :teal]
+
+	_width = 1000
+	_height = 200
+	
+	ax = Makie.Axis(fig[1,1]; width=_width, height=_height, xticks=5:5:108, title="Modified condition", xlabel="Position         ", ylabel="Read depth")
+	for (primer, gr, color) = zip(SamApp2024.primers20250607(), groups, colors)
+		μ = nanmean(dms_data.shape_M_depth[:, dms_data_primers .== primer, :]; dim=(2,3))
+		σ = nanstd(dms_data.shape_M_depth[:, dms_data_primers .== primer, :]; dim=(2,3))
+		Makie.band!(ax, 1:108, μ - σ/2, μ + σ/2; color=(color, 0.1))
+		Makie.scatterlines!(ax, 1:108, μ; label=gr, color)
+	end
+	Makie.xlims!(ax, 0.5, 120)
+	Makie.axislegend(ax)
+
+	ax = Makie.Axis(fig[2,1]; width=_width, height=_height, xticks=5:5:108, title="Unmodified condition", xlabel="Position         ", ylabel="Read depth")
+	for (primer, gr, color) = zip(SamApp2024.primers20250607(), groups, colors)
+		μ = nanmean(dms_data.shape_U_depth[:, dms_data_primers .== primer, :]; dim=(2,3))
+		σ = nanstd(dms_data.shape_U_depth[:, dms_data_primers .== primer, :]; dim=(2,3))
+		Makie.band!(ax, 1:108, μ - σ/2, μ + σ/2; color=(color, 0.1))
+		Makie.scatterlines!(ax, 1:108, μ; label=gr, color)
+	end
+	Makie.xlims!(ax, 0.5, 120)
+	Makie.axislegend(ax)
+	
+	ax = Makie.Axis(fig[3,1]; width=_width, height=_height, xticks=5:5:108, title="Denatured condition", xlabel="Position         ", ylabel="Read depth")
+	for (primer, gr, color) = zip(SamApp2024.primers20250607(), groups, colors)
+		μ = nanmean(dms_data.shape_D_depth[:, dms_data_primers .== primer, :]; dim=(2,3))
+		σ = nanstd(dms_data.shape_D_depth[:, dms_data_primers .== primer, :]; dim=(2,3))
+		Makie.band!(ax, 1:108, μ - σ/2, μ + σ/2; color=(color, 0.1))
+		Makie.scatterlines!(ax, 1:108, μ; label=gr, color)
+	end
+	Makie.xlims!(ax, 0.5, 120)
+	Makie.axislegend(ax)
+
+	Makie.resize_to_layout!(fig)
+	fig
+end
+
+# ╔═╡ a8c4c868-8d9f-4027-a265-700fbb19b895
+let fig = Makie.Figure()
+	groups = "primer" .* string.(1:5)
+	colors = [:orange, :purple, :red, :blue, :teal]
+
+	ax_succ = Makie.Axis(fig[1,1]; width=200, height=200, xlabel="Read depth (M)", ylabel="Response rate", xticks=[0, 2e4, 4e4])
+	ax_incl = Makie.Axis(fig[1,2]; width=200, height=200, xlabel="Read depth (M)", ylabel="Inconclusive rate", xticks=[0, 2e4, 4e4])
+
+	for (primer, color) = zip(SamApp2024.primers20250607(), colors)
+		Makie.scatter!(ax_succ, [nanmean(dms_data.shape_M_depth[:, dms_data_primers .== primer, :])], [mean(_responds_sam_yes_dms[dms_data_primers .== primer])]; color, markersize=15)
+		Makie.scatter!(ax_incl, [nanmean(dms_data.shape_M_depth[:, dms_data_primers .== primer, :])], [mean(_responds_sam_inconcl_dms[dms_data_primers .== primer])]; color, markersize=15)
+	end
+
+	for ax = (ax_succ,ax_incl)
+		Makie.xlims!(ax, 0, 6e4)
+		Makie.ylims!(ax, 0.05, 0.35)
+	end
+
+	Makie.resize_to_layout!(fig)
+	fig
+end
+
+# ╔═╡ 9c105581-0ba6-46f4-a7eb-65f76260d8c4
+dms_data.
+
+# ╔═╡ e38e1a07-8aad-4185-9c08-b9522bf3384e
+SamApp2024.primers20250607()
+
+# ╔═╡ 9bf2fc7d-abd7-45a7-bd0d-455b86d7c4bb
+let fig = Makie.Figure()
+	colors = [:orange, :purple, :red, :blue, :teal]
+	
+	ax = Makie.Axis(fig[1,1]; width=230, height=230, xlabel="Read depth (M)", ylabel="Inconclusive rate")
+	for (gr_n, gr) = enumerate(groups)
+		primer = parse(Int, last(gr))
+		read_depth = nanmean(mapreduce(vec, vcat, df.read_depth_M[df.sequencing_group .== gr]))
+		inconclusive_rate = mean(df.responsive[df.sequencing_group .== gr] .== "Inconclusive")
+		if gr_n ≤ 5
+			Makie.scatter!(ax, read_depth, inconclusive_rate; color=primer_colors[primer], label="Primer $primer", markersize=15)
+		elseif gr_n < 9 # skip last one which has a single sequence
+			Makie.scatter!(ax, read_depth, inconclusive_rate; color=primer_colors[primer], markersize=15)
+		end
+	end
+	Makie.xlims!(ax, 0, 3.3e4)
+	Makie.ylims!(ax, -0.05, 0.65)
+
+	fig[1,2] = Makie.Legend(fig, ax, "Primers", framevisible = false)
+
+	for (col, (origin, title)) = enumerate(zip([["RF00162_full30", "RF00162_seed70"], ["RF00162_syn_rbm", "rbm"], ["RF00162_syn_inf", "infernal"]], ["Naturals", "RBM", "CM"]))
+		ax = Makie.Axis(fig[1,3][1,col]; width=100, height=100, xlabel="Read depth (M)", ylabel="Resp. rate", title, xticks=[1e4, 3e4])
+		for (gr_n, gr) = enumerate(sort(unique(df.sequencing_group)))
+			_flag = (df.sequencing_group .== gr) .&& (df.aptamer_origin .∈ Ref(origin))
+			if any(_flag)
+				primer = parse(Int, last(gr))
+				read_depth = nanmean(mapreduce(vec, vcat, df.read_depth_M[_flag]))
+				resp_rate = mean(df.responsive[_flag] .== "Responsive")
+				if gr_n ≤ 5
+					Makie.scatter!(ax, read_depth, resp_rate; color=primer_colors[primer], label="Primer $primer", markersize=15)
+				elseif gr_n < 9 # skip last one which has a single sequence
+					Makie.scatter!(ax, read_depth, resp_rate; color=primer_colors[primer], markersize=15)
+				end
+			end
+		end
+		Makie.xlims!(ax, 0, 3.3e4)
+		Makie.ylims!(ax, -0.05, 0.75)
+
+		ax = Makie.Axis(fig[1,3][2,col]; width=100, height=100, xlabel="Read depth (M)", ylabel="Resp./(1-Inc.)", xticks=[1e4, 3e4])
+		for (gr_n, gr) = enumerate(sort(unique(df.sequencing_group)))
+			_flag = (df.sequencing_group .== gr) .&& (df.aptamer_origin .∈ Ref(origin))
+			if any(_flag)
+				primer = parse(Int, last(gr))
+				read_depth = nanmean(mapreduce(vec, vcat, df.read_depth_M[_flag]))
+				resp_rate = mean(df.responsive[_flag] .== "Responsive")
+				inconclusive_rate = mean(df.responsive[df.sequencing_group .== gr] .== "Inconclusive")
+				if gr_n ≤ 5
+					Makie.scatter!(ax, read_depth, resp_rate / (1 - inconclusive_rate); color=primer_colors[primer], label="Primer $primer", markersize=15)
+				elseif gr_n < 9 # skip last one which has a single sequence
+					Makie.scatter!(ax, read_depth, resp_rate / (1 - inconclusive_rate); color=primer_colors[primer], markersize=15)
+				end
+			end
+		end
+		Makie.xlims!(ax, 0, 3.3e4)
+		Makie.ylims!(ax, -0.05, 0.75)
+
+	end
+
+	Makie.resize_to_layout!(fig)
+	fig
+end
+
+# ╔═╡ 86771e5d-a4b2-424b-8e72-2939148a4451
+unique(shape_data_500.aptamer_origin)
+
+# ╔═╡ 532fb8ca-296a-4afc-b0ba-a9a40e18b03e
+length(dms_data.aptamer_names)
+
+# ╔═╡ b2fb16b0-93a8-450f-bde3-7d19a2ab6399
+length([n for n = dms_data.aptamer_names if startswith(n, "APSAMN")])
+
+# ╔═╡ 7de7f351-2b52-43de-980c-947304970843
+length([n for n = dms_data.aptamer_names if startswith(n, "APSAMS")])
+
+# ╔═╡ 150b2b5e-6f77-420e-b4e5-c1c683044c4c
+aptamer_names_500 = "APSAM-S2-" .* lpad.(0:499, 3, '0')
+
+# ╔═╡ eba33d20-66dd-4cc4-b980-cd7013026c89
+dms_aptamer_origin = [
 	begin
-		count(dms[findall(!isnothing, _dms_500_indices)] .&& shape500[findall(!isnothing, _dms_500_indices)] .&& (dms_data_primers .== unique(dms_data_primers)[2])[findall(!isnothing, _dms_500_indices)])
-	end for shape500 = (_responds_sam_yes_500_dms_seqs, _responds_sam_nop_500_dms_seqs, _responds_sam_inconcl_500_dms_seqs), dms = (_responds_sam_yes_dms, _responds_sam_nop_dms, _responds_sam_inconcl_dms)
+		if n ∈ shape_data_045.aptamer_names[shape_data_045.aptamer_origin .== "RF00162_syn_rbm"]
+			"rbm"
+		elseif n ∈ shape_data_045.aptamer_names[shape_data_045.aptamer_origin .== "RF00162_seed70"]
+			"natural"
+		elseif n ∈ shape_data_045.aptamer_names[shape_data_045.aptamer_origin .== "RF00162_full30"]
+				"natural"
+		elseif n ∈ shape_data_045.aptamer_names[shape_data_045.aptamer_origin .== "RF00162_syn_inf"]
+			"infernal"
+		elseif n ∈ aptamer_names_500[shape_data_500.aptamer_origin .== "rbm"]
+			"rbm"
+		elseif n ∈ aptamer_names_500[shape_data_500.aptamer_origin .== "infernal"]
+			"infernal"
+		elseif n ∈ aptamer_names_500[shape_data_500.aptamer_origin .== "Infrared"]
+			"Infrared"
+		end
+	end for n = dms_data.aptamer_names
 ]
 
-# ╔═╡ d2553930-1e08-4ece-9ae7-23d1256bd2c7
-# primer 3
-[
-	begin
-		count(dms[findall(!isnothing, _dms_500_indices)] .&& shape500[findall(!isnothing, _dms_500_indices)] .&& (dms_data_primers .== unique(dms_data_primers)[3])[findall(!isnothing, _dms_500_indices)])
-	end for shape500 = (_responds_sam_yes_500_dms_seqs, _responds_sam_nop_500_dms_seqs, _responds_sam_inconcl_500_dms_seqs), dms = (_responds_sam_yes_dms, _responds_sam_nop_dms, _responds_sam_inconcl_dms)
-]
+# ╔═╡ 0e21f914-aec2-416d-a8fa-293767a3d12c
+let fig = Makie.Figure()
+	groups = "primer" .* string.(1:5)
+	colors = [:orange, :purple, :red, :blue, :teal]
 
-# ╔═╡ d8e143e4-5ef4-489c-9107-1cbdd1d78028
-# primer 4
-[
-	begin
-		count(dms[findall(!isnothing, _dms_500_indices)] .&& shape500[findall(!isnothing, _dms_500_indices)] .&& (dms_data_primers .== unique(dms_data_primers)[4])[findall(!isnothing, _dms_500_indices)])
-	end for shape500 = (_responds_sam_yes_500_dms_seqs, _responds_sam_nop_500_dms_seqs, _responds_sam_inconcl_500_dms_seqs), dms = (_responds_sam_yes_dms, _responds_sam_nop_dms, _responds_sam_inconcl_dms)
-]
+	for (n, seq_type) = enumerate(unique(dms_aptamer_origin))
+		ax_succ = Makie.Axis(fig[1,n]; width=200, height=200, xlabel="Read depth (M)", ylabel="Response rate", xticks=[0, 3e4, 6e4], title=seq_type)
+		ax_incl = Makie.Axis(fig[2,n]; width=200, height=200, xlabel="Read depth (M)", ylabel="Inconclusive rate", xticks=[0, 3e4, 6e4])
+
+		for (n, (primer, color)) = enumerate(zip(SamApp2024.primers20250607(), colors))
+			read_depth = [nanmean(dms_data.shape_M_depth[:, (dms_data_primers .== primer) .&& (dms_aptamer_origin .== seq_type), :])]
+
+			println("No. sequences for primer $n $primer $color, $seq_type: " , count((dms_data_primers .== primer) .&& (dms_aptamer_origin .== seq_type)))
+			
+			Makie.scatter!(ax_succ, read_depth, [mean(_responds_sam_yes_dms[(dms_data_primers .== primer) .&& (dms_aptamer_origin .== seq_type)])]; 
+						   color, markersize=15)
+			Makie.scatter!(ax_incl, read_depth, [mean(_responds_sam_inconcl_dms[(dms_data_primers .== primer) .&& (dms_aptamer_origin .== seq_type)])]; 
+						   color, markersize=15)
+		end
+
+		for ax = (ax_succ, ax_incl)
+			Makie.xlims!(ax, 0, 8e4)
+			Makie.ylims!(ax, -0.05, 0.55)
+		end
+	end
+
+	Makie.resize_to_layout!(fig)
+	fig
+end
+
+# ╔═╡ 9026821c-a1eb-4d45-96b4-28384701d1ad
+let fig = Makie.Figure()
+	groups = "primer" .* string.(1:5)
+	colors = [:orange, :purple, :red, :blue, :teal]
+
+	for (n, seq_type) = enumerate(unique(dms_aptamer_origin))
+		ax_succ = Makie.Axis(fig[1,n]; width=200, height=200, xlabel="Read depth (M)", ylabel="Response rate / (1 - Incl. rate)", xticks=[0, 3e4, 6e4], title=seq_type)
+		ax_incl = Makie.Axis(fig[2,n]; width=200, height=200, xlabel="Read depth (M)", ylabel="Inconclusive rate", xticks=[0, 3e4, 6e4])
+
+		for (primer, color) = zip(SamApp2024.primers20250607(), colors)
+			read_depth = [nanmean(dms_data.shape_M_depth[:, (dms_data_primers .== primer) .&& (dms_aptamer_origin .== seq_type), :])]
+			response_rate = [mean(_responds_sam_yes_dms[(dms_data_primers .== primer) .&& (dms_aptamer_origin .== seq_type)])]
+			inconclusive_rate = [mean(_responds_sam_inconcl_dms[(dms_data_primers .== primer) .&& (dms_aptamer_origin .== seq_type)])]
+			
+			Makie.scatter!(ax_succ, read_depth, response_rate ./ (1 .- inconclusive_rate); color, markersize=15)
+			Makie.scatter!(ax_incl, read_depth, inconclusive_rate; color, markersize=15)
+		end
+
+		for ax = (ax_succ,ax_incl)
+			Makie.xlims!(ax, 0, 8e4)
+			Makie.ylims!(ax, -0.05, 0.6)
+		end
+	end
+
+	Makie.resize_to_layout!(fig)
+	fig
+end
+
+# ╔═╡ 4b46eae3-a8de-4eaf-8207-3aa89a6594fa
+unique(dms_aptamer_origin)
+
+# ╔═╡ 0779d301-a8f7-4cf0-a98f-c7fdd18b4430
+length([n for n = dms_data.aptamer_names if n ∈ shape_data_045.aptamer_names[shape_data_045.aptamer_origin .== "RF00162_syn_rbm"]])
+
+# ╔═╡ 3e99bdff-31cc-47c3-8ca5-3bf21dfcdc22
+length([n for n = dms_data.aptamer_names if n ∈ aptamer_names_500[shape_data_500.aptamer_origin .== "rbm"]])
+
+# ╔═╡ bee7d3a1-2727-4314-8113-ad770800980b
+length([n for n = dms_data.aptamer_names if n ∈ aptamer_names_500[shape_data_500.aptamer_origin .== "infernal"]])
+
+# ╔═╡ d426efcc-4a7a-433c-930e-740a37a03e1d
+length([n for n = dms_data.aptamer_names if n ∈ aptamer_names_500[shape_data_500.aptamer_origin .== "Infrared"]])
+
+# ╔═╡ c928d8df-19c2-4411-9cbf-1183fd141a96
+length([n for n = dms_data.aptamer_names if startswith(n, "APSAM-S2")])
+
+# ╔═╡ 969913ea-2c77-4fff-8846-f7bc80a77629
+152+100+148
+
+# ╔═╡ ba53fbdc-97f5-444e-945a-3ff807d1b1ee
+dms_data.aptamer_names[end]
+
+# ╔═╡ b7018bdc-8240-4a2e-bc07-5d1d1053ae3d
+let fig = Makie.Figure()
+	ax = Makie.Axis(fig[1,1]; width=200, height=200, xlabel="Read depth (M)", ylabel="Response rate")
+	Makie.scatter!(ax, df_groups.M_read_depths[[1,6]], df_groups.response_rate[[1,6]]; color=:orange, label="Primer 1", markersize=15)
+	Makie.scatter!(ax, df_groups.M_read_depths[[2,7]], df_groups.response_rate[[2,7]]; color=:purple, label="Primer 2", markersize=15)
+	Makie.scatter!(ax, df_groups.M_read_depths[[3,8]], df_groups.response_rate[[3,8]]; color=:red, label="Primer 3", markersize=15)
+	Makie.scatter!(ax, df_groups.M_read_depths[[4]], df_groups.response_rate[[4]]; color=:blue, label="Primer 4", markersize=15)
+	Makie.scatter!(ax, df_groups.M_read_depths[[5,9]], df_groups.response_rate[[5,9]]; color=:teal, label="Primer 5", markersize=15)
+
+	incl_rate = (df_groups.total_sequences - df_groups.responsives) ./ df_groups.total_sequences
+	
+	ax = Makie.Axis(fig[1,2]; width=200, height=200, xlabel="Read depth (M)", ylabel="Inconclusive rate")
+	Makie.scatter!(ax, df_groups.M_read_depths[[1,6]], incl_rate[[1,6]]; color=:orange, label="Primer 1", markersize=15)
+	Makie.scatter!(ax, df_groups.M_read_depths[[2,7]], incl_rate[[2,7]]; color=:purple, label="Primer 2", markersize=15)
+	Makie.scatter!(ax, df_groups.M_read_depths[[3,8]], incl_rate[[3,8]]; color=:red, label="Primer 3", markersize=15)
+	Makie.scatter!(ax, df_groups.M_read_depths[[4]], incl_rate[[4]]; color=:blue, label="Primer 4", markersize=15)
+	Makie.scatter!(ax, df_groups.M_read_depths[[5,9]], incl_rate[[5,9]]; color=:teal, label="Primer 5", markersize=15)
+	
+	#Makie.ylims!(ax, 0.05, 0.5)
+	#Makie.xlims!(ax, 0, 5e4)
+	fig[1,3] = Makie.Legend(fig, ax, "Primers", framevisible = false)
+	Makie.resize_to_layout!(fig)
+	fig
+end
 
 # ╔═╡ Cell order:
 # ╠═d42dae48-fdc2-11ef-191c-b7b143d538a5
@@ -543,6 +712,7 @@ count(_responds_sam_inconcl_dms[findall(!isnothing, _dms_500_indices)] .&& _resp
 # ╠═c4f91ffb-cc6e-4347-804a-887ca45be249
 # ╠═a718fd95-2963-4b35-bddd-d3b53a2faf52
 # ╠═4244cffe-81f2-41ff-950d-97e973947a32
+# ╠═6b5e7730-952d-4533-b6a7-7caa14d82fb0
 # ╠═6155ff9f-af5f-4c1a-8e6e-965f11efd285
 # ╠═ed1f893e-29e0-446f-bbd4-dc5516614aa1
 # ╠═1a341857-b3e4-4b7e-8172-13c399b0fca3
@@ -551,9 +721,9 @@ count(_responds_sam_inconcl_dms[findall(!isnothing, _dms_500_indices)] .&& _resp
 # ╠═aae7a9e7-cf14-4c09-a6fb-93d6e1e19b3d
 # ╠═e00ec7b5-4f06-4200-9bd0-9e486e4322bc
 # ╠═4875da0e-9898-4498-8b29-cb60282e2cc2
-# ╠═f1f436b9-33a4-4181-86ca-71119456b084
 # ╠═50c9a9c5-0253-4cc5-aaa5-d58472e8920c
 # ╠═5f64c1d1-b429-4946-a122-a02fcb7ff1f6
+# ╠═8ab280ee-8a1a-495a-ac75-dee2ca199759
 # ╠═2b18233e-d2ae-485e-9ad7-17e20a26fee7
 # ╠═59a5fee0-59f1-49da-9940-8827c5a23b99
 # ╠═025f0c01-0e0d-4a50-b9cd-becd304a7a42
@@ -594,6 +764,7 @@ count(_responds_sam_inconcl_dms[findall(!isnothing, _dms_500_indices)] .&& _resp
 # ╠═804b0de7-57b2-4ef1-8fe5-af03466207f1
 # ╠═16341f0f-4e41-446c-9095-dd90f21538da
 # ╠═13d43c06-6a78-4f81-b735-02b6dc6c1662
+# ╠═21f4d2dd-ad45-485f-bcc9-21a735f31c57
 # ╠═9e1fca3b-3733-4fc2-b00e-beb8c318713d
 # ╠═ba975787-84e4-479b-ad49-f7e54b90c5ce
 # ╠═709eeec8-b9d0-4a63-91d1-9d6aec643ce5
@@ -606,46 +777,45 @@ count(_responds_sam_inconcl_dms[findall(!isnothing, _dms_500_indices)] .&& _resp
 # ╠═f515605a-f8e9-4c86-9388-ef5565520074
 # ╠═cf94281c-f97d-4966-bd3f-ddad7b8c21d0
 # ╠═10e1166d-5e07-45aa-8adc-1b92f370d26d
-# ╠═74fffba4-b0d1-4f15-b430-81e1d677d2f4
-# ╠═29729f40-dbc3-4d28-946e-cee8ec62bd81
-# ╠═84be17bf-eafa-404b-a264-b64e6206a725
-# ╠═9597c913-72e6-41f2-9072-983b03a278d5
-# ╠═bfb20f7d-e892-4254-a2b6-8700d0958072
-# ╠═54b11c1f-271b-461c-9662-e838c56d4e87
-# ╠═72e0ed21-0f65-4ffa-9cb1-02e45bb7a474
-# ╠═d25c2bc7-930c-4133-ab2a-2ef29c0b6e82
-# ╠═fda5a42a-509e-41e6-98e6-598261190276
-# ╠═33ca29be-cb6c-47dd-82f5-43c4596bb84e
-# ╠═25b42825-6964-4ab8-b043-3740112b7dfe
-# ╠═0a698578-2c83-42b5-b7fa-a80fb0887bba
-# ╠═755c1c17-20b4-4ee9-96ef-201473651a58
-# ╠═16d309f1-480a-4b60-90cf-a9ef9bbe67a1
-# ╠═5e6d4cc3-e1a9-4535-aced-835d77303d83
 # ╠═154f87e7-3199-4232-980c-f6f29b1db1fe
 # ╠═5660fe93-b5b5-4bdf-9f80-918815c766bb
+# ╠═9f35ef98-909d-43e1-818c-1b631fcd919f
+# ╠═f4ec3184-6c46-4e88-bf96-c5cd514febd8
+# ╠═eb047b2f-f822-4e03-94bd-aabab68f9610
+# ╠═529b46ff-b9cd-45c9-b202-6b2faeacb40c
 # ╠═40c13e35-4c52-4051-8f85-fdb1ca99d3b1
-# ╠═c7a94bc0-c9d2-45e5-ac3a-75e25e5c288f
-# ╠═2b0d56a5-de91-45af-83aa-5ca3de9b8427
-# ╠═6a825260-2887-41d4-9e20-fd66ec0e2e8c
-# ╠═6f7f502f-3a03-4f94-ba92-75fc71427564
-# ╠═b4acfb01-3865-4a34-8b25-3e474a306da4
-# ╠═9163a506-bc9f-4877-978f-ef854b858be1
 # ╠═6aa691a1-6e62-4077-83f6-e168810f4ec2
 # ╠═8a604d45-5890-4578-8a82-01065faf1a1c
+# ╠═b1c874f0-fed5-4d51-95a4-69a5870d6695
 # ╠═cc2bd6ed-6e09-453d-91ea-552aebe1ca1d
 # ╠═deb8707e-3e53-4f95-ac51-e6ebf5bffe9c
 # ╠═f366dabf-e8b7-4417-9a1e-99412ec6c582
-# ╠═d56ea5f4-59a3-4f96-87d3-e435303e7cf2
-# ╠═4089033a-e18e-4be3-b3e9-b22d23de0656
-# ╠═c6a5fbf0-971c-48e0-9bee-3512a788d11c
-# ╠═e9e5fe1d-2331-453e-bca8-e587f62da74d
-# ╠═c19502ff-1dfb-477c-8069-5a2c272740fb
-# ╠═d33911ab-0a8d-4d9f-b1f3-d4eda14ec64c
-# ╠═2273495b-7150-4ffb-adb0-c26de1762c25
-# ╠═7fd2cf30-9848-4f61-b641-82572f83591b
-# ╠═0b8aec74-cf6e-4b18-8929-8ac6faeddce2
 # ╠═6ce57a7b-0e16-43f8-a840-d2ab4e9e03d3
 # ╠═1fda3f8c-4477-4039-8636-14b2ae0a5df3
-# ╠═61738118-55ec-4c08-85f8-de345c103ee6
-# ╠═d2553930-1e08-4ece-9ae7-23d1256bd2c7
-# ╠═d8e143e4-5ef4-489c-9107-1cbdd1d78028
+# ╠═e7b53f31-137d-43cb-8d80-bb9ddf420828
+# ╠═7c7c7ef4-c613-4868-ac35-57a498765ef6
+# ╠═66f55016-2e10-4590-8d65-f24609f25f48
+# ╠═ee9ff992-672e-46fa-87e1-c9c8adb87845
+# ╠═5f372f6c-9c6d-44b1-8b29-681b4383d820
+# ╠═86651e08-1f33-4fc1-8780-888714d9c86c
+# ╠═a8c4c868-8d9f-4027-a265-700fbb19b895
+# ╠═0e21f914-aec2-416d-a8fa-293767a3d12c
+# ╠═9026821c-a1eb-4d45-96b4-28384701d1ad
+# ╠═9c105581-0ba6-46f4-a7eb-65f76260d8c4
+# ╠═e38e1a07-8aad-4185-9c08-b9522bf3384e
+# ╠═9bf2fc7d-abd7-45a7-bd0d-455b86d7c4bb
+# ╠═86771e5d-a4b2-424b-8e72-2939148a4451
+# ╠═532fb8ca-296a-4afc-b0ba-a9a40e18b03e
+# ╠═b2fb16b0-93a8-450f-bde3-7d19a2ab6399
+# ╠═7de7f351-2b52-43de-980c-947304970843
+# ╠═150b2b5e-6f77-420e-b4e5-c1c683044c4c
+# ╠═eba33d20-66dd-4cc4-b980-cd7013026c89
+# ╠═4b46eae3-a8de-4eaf-8207-3aa89a6594fa
+# ╠═0779d301-a8f7-4cf0-a98f-c7fdd18b4430
+# ╠═3e99bdff-31cc-47c3-8ca5-3bf21dfcdc22
+# ╠═bee7d3a1-2727-4314-8113-ad770800980b
+# ╠═d426efcc-4a7a-433c-930e-740a37a03e1d
+# ╠═c928d8df-19c2-4411-9cbf-1183fd141a96
+# ╠═969913ea-2c77-4fff-8846-f7bc80a77629
+# ╠═ba53fbdc-97f5-444e-945a-3ff807d1b1ee
+# ╠═b7018bdc-8240-4a2e-bc07-5d1d1053ae3d
