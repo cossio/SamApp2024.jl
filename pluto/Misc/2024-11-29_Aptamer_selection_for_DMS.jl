@@ -367,16 +367,18 @@ nanmean(shape_data_rep0.shape_M_depth[:, indexin(seq_groups_dfs["GP3-Natural-pri
 # ╔═╡ afa683f5-4bc3-4bfd-8e73-ba3e4c911368
 let fig = Makie.Figure()
 	primer_colors = (:orange, :purple, :red, :blue, :teal)
+	markers = (:utriangle, :xcross, :dtriangle, :cirlce, :cross)
 	
-	ax = Makie.Axis(fig[1,1]; width=230, height=230, xlabel="Read depth (M)", ylabel="Inconclusive rate")
+	ax = Makie.Axis(fig[1,1]; width=230, height=230, xlabel="Read depth (M)", ylabel="Inconclusives / Total")
 	for (gr_n, gr) = enumerate(sort(unique(df.sequencing_group)))
 		primer = parse(Int, last(gr))
+		
 		read_depth = nanmean(mapreduce(vec, vcat, df.read_depth_M[df.sequencing_group .== gr]))
 		inconclusive_rate = mean(df.responsive[df.sequencing_group .== gr] .== "Inconclusive")
 		if gr_n ≤ 5
-			Makie.scatter!(ax, read_depth, inconclusive_rate; color=primer_colors[primer], label="Primer $primer", markersize=15)
+			Makie.scatter!(ax, read_depth, inconclusive_rate; color=primer_colors[primer], marker=markers[primer], label="Primer $primer", markersize=15)
 		elseif gr_n < 9 # skip last one which has a single sequence
-			Makie.scatter!(ax, read_depth, inconclusive_rate; color=primer_colors[primer], markersize=15)
+			Makie.scatter!(ax, read_depth, inconclusive_rate; color=primer_colors[primer], marker=markers[primer], markersize=15)
 		end
 	end
 	Makie.xlims!(ax, 0, 3.3e4)
@@ -388,14 +390,15 @@ let fig = Makie.Figure()
 		ax = Makie.Axis(fig[1,3][1,col]; width=100, height=100, xlabel="Read depth (M)", ylabel="Resp. rate", title, xticks=[1e4, 3e4])
 		for (gr_n, gr) = enumerate(sort(unique(df.sequencing_group)))
 			_flag = (df.sequencing_group .== gr) .&& (df.aptamer_origin .∈ Ref(origin))
+			primer = parse(Int, last(gr))
+			println("$gr Primer$primer origin $origin ", count(_flag))
 			if any(_flag)
-				primer = parse(Int, last(gr))
 				read_depth = nanmean(mapreduce(vec, vcat, df.read_depth_M[_flag]))
 				resp_rate = mean(df.responsive[_flag] .== "Responsive")
 				if gr_n ≤ 5
-					Makie.scatter!(ax, read_depth, resp_rate; color=primer_colors[primer], label="Primer $primer", markersize=15)
+					Makie.scatter!(ax, read_depth, resp_rate; color=primer_colors[primer], marker=markers[primer], label="Primer $primer", markersize=15)
 				elseif gr_n < 9 # skip last one which has a single sequence
-					Makie.scatter!(ax, read_depth, resp_rate; color=primer_colors[primer], markersize=15)
+					Makie.scatter!(ax, read_depth, resp_rate; color=primer_colors[primer], marker=markers[primer], markersize=15)
 				end
 			end
 		end
@@ -411,9 +414,9 @@ let fig = Makie.Figure()
 				resp_rate = mean(df.responsive[_flag] .== "Responsive")
 				inconclusive_rate = mean(df.responsive[df.sequencing_group .== gr] .== "Inconclusive")
 				if gr_n ≤ 5
-					Makie.scatter!(ax, read_depth, resp_rate / (1 - inconclusive_rate); color=primer_colors[primer], label="Primer $primer", markersize=15)
+					Makie.scatter!(ax, read_depth, resp_rate / (1 - inconclusive_rate); color=primer_colors[primer], marker=markers[primer], label="Primer $primer", markersize=15)
 				elseif gr_n < 9 # skip last one which has a single sequence
-					Makie.scatter!(ax, read_depth, resp_rate / (1 - inconclusive_rate); color=primer_colors[primer], markersize=15)
+					Makie.scatter!(ax, read_depth, resp_rate / (1 - inconclusive_rate); color=primer_colors[primer], marker=markers[primer], markersize=15)
 				end
 			end
 		end
@@ -421,41 +424,25 @@ let fig = Makie.Figure()
 		Makie.ylims!(ax, -0.05, 0.75)
 
 	end
-
-
-
-	# Makie.scatter!(ax, df_groups.M_read_depths[[2,7]], df_groups.inconclusive_rate[[2,7]]; color=:purple, label="Primer 2", markersize=15)
-	# Makie.scatter!(ax, df_groups.M_read_depths[[3,8]], df_groups.inconclusive_rate[[3,8]]; color=:red, label="Primer 3", markersize=15)
-	# Makie.scatter!(ax, df_groups.M_read_depths[[4]], df_groups.inconclusive_rate[[4]]; color=:blue, label="Primer 4", markersize=15)
-	# Makie.scatter!(ax, df_groups.M_read_depths[[5]], df_groups.inconclusive_rate[[5]]; color=:teal, label="Primer 5", markersize=15)
-	# Makie.xlims!(ax, 0, 3.3e4)
-	# Makie.ylims!(ax, -0.05, 0.65)
-
-	# ax = Makie.Axis(fig[1,3]; width=200, height=200, xlabel="Read depth (M)", ylabel="Response rate", title="Natural")
-	# Makie.scatter!(ax, df_groups.M_read_depths[[1]], df_groups.response_rate[[1]]; color=:orange, label="Primer 1", markersize=15)
-	# Makie.scatter!(ax, df_groups.M_read_depths[[2]], df_groups.response_rate[[2]]; color=:purple, label="Primer 2", markersize=15)
-	# Makie.scatter!(ax, df_groups.M_read_depths[[3]], df_groups.response_rate[[3]]; color=:red, label="Primer 3", markersize=15)
-	# Makie.xlims!(ax, 0, 3.3e4)
-	# Makie.ylims!(ax, -0.05, 0.65)
-
-	# ax = Makie.Axis(fig[1,4]; width=200, height=200, xlabel="Read depth (M)", ylabel="Response rate", title="Artificial")
-	# Makie.scatter!(ax, df_groups.M_read_depths[[6]], df_groups.response_rate[[6]]; color=:orange, label="Primer 1", markersize=15)
-	# Makie.scatter!(ax, df_groups.M_read_depths[[7]], df_groups.response_rate[[7]]; color=:purple, label="Primer 2", markersize=15)
-	# Makie.scatter!(ax, df_groups.M_read_depths[[8]], df_groups.response_rate[[8]]; color=:red, label="Primer 3", markersize=15)
-	# Makie.scatter!(ax, df_groups.M_read_depths[[4]], df_groups.response_rate[[4]]; color=:blue, label="Primer 4", markersize=15)
-	# Makie.scatter!(ax, df_groups.M_read_depths[[5]], df_groups.response_rate[[5]]; color=:teal, label="Primer 5", markersize=15)
-	# Makie.xlims!(ax, 0, 3.3e4)
-	# Makie.ylims!(ax, -0.05, 0.65)
-
+	
 	Makie.resize_to_layout!(fig)
 	fig
 end
 
+# ╔═╡ e4036a20-aca2-4255-812f-1e698aa448f1
+
+
 # ╔═╡ f9314f91-6986-495f-8797-3a6b5588e4ad
 unique(df.responsive)
 
+# ╔═╡ c89ab7a9-a35c-474b-b9db-70d0a2c226c7
+unique(df.sequencing_group)
+
 # ╔═╡ 7452003d-b3f3-4e79-ad2d-638f53b0f91c
 unique(df.aptamer_origin)
+
+# ╔═╡ 61359389-76ca-4413-8fde-e7a5c8b2a23f
+df.aptamer_origin[df.aptamer_origin .∈ Ref(["RF00162_syn_inf", "infernal"])]
 
 # ╔═╡ afdba201-d750-42b5-9ba2-6bd1946d3a21
 sort(unique(df.sequencing_group))
@@ -807,8 +794,11 @@ only(df.aligned_sequences[df.aligned_sequences .=== string(shape_data_500.aligne
 # ╠═abfae16d-d438-40d1-aef1-10cd407cbc70
 # ╠═c0ee24d7-6560-496b-9c16-181d8577a422
 # ╠═afa683f5-4bc3-4bfd-8e73-ba3e4c911368
+# ╠═e4036a20-aca2-4255-812f-1e698aa448f1
 # ╠═f9314f91-6986-495f-8797-3a6b5588e4ad
+# ╠═c89ab7a9-a35c-474b-b9db-70d0a2c226c7
 # ╠═7452003d-b3f3-4e79-ad2d-638f53b0f91c
+# ╠═61359389-76ca-4413-8fde-e7a5c8b2a23f
 # ╠═afdba201-d750-42b5-9ba2-6bd1946d3a21
 # ╠═8d003cc1-dbb8-4ae8-97d4-b74174c63b14
 # ╠═399072a0-2b27-4175-9cc8-479950d69215

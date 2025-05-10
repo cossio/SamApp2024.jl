@@ -94,6 +94,24 @@ dms_data = SamApp2024.load_dms_data_20250303()
 # ╔═╡ e00ec7b5-4f06-4200-9bd0-9e486e4322bc
 dms_data_primers = dms_df.primer[[only(findall(dms_df.name .== name)) for name = dms_data.aptamer_names]]
 
+# ╔═╡ 9763e16f-1fc6-4c79-8fed-176f847d9898
+length(dms_data_primers)
+
+# ╔═╡ ffa01cd2-cc36-403d-86e8-c3a7e68ac97b
+length(dms_data.aptamer_names)
+
+# ╔═╡ 2c0519f1-367d-4fdd-a346-ad550c2e80c6
+
+
+# ╔═╡ 8fc06bf7-a380-4698-8971-e96df77764b9
+length(dms_df.name)
+
+# ╔═╡ df8d1d78-6cd2-40a5-a739-221ed6d03df8
+dms_data.aptamer_names ⊆ dms_df.name
+
+# ╔═╡ 5663156d-3342-4cac-9446-1fee39923ce4
+dms_data.aptamer_names == dms_df.name[1:400]
+
 # ╔═╡ 4875da0e-9898-4498-8b29-cb60282e2cc2
 unique(dms_data_primers)
 
@@ -478,73 +496,8 @@ let fig = Makie.Figure()
 	fig
 end
 
-# ╔═╡ 9c105581-0ba6-46f4-a7eb-65f76260d8c4
-dms_data.
-
-# ╔═╡ e38e1a07-8aad-4185-9c08-b9522bf3384e
-SamApp2024.primers20250607()
-
-# ╔═╡ 9bf2fc7d-abd7-45a7-bd0d-455b86d7c4bb
-let fig = Makie.Figure()
-	colors = [:orange, :purple, :red, :blue, :teal]
-	
-	ax = Makie.Axis(fig[1,1]; width=230, height=230, xlabel="Read depth (M)", ylabel="Inconclusive rate")
-	for (gr_n, gr) = enumerate(groups)
-		primer = parse(Int, last(gr))
-		read_depth = nanmean(mapreduce(vec, vcat, df.read_depth_M[df.sequencing_group .== gr]))
-		inconclusive_rate = mean(df.responsive[df.sequencing_group .== gr] .== "Inconclusive")
-		if gr_n ≤ 5
-			Makie.scatter!(ax, read_depth, inconclusive_rate; color=primer_colors[primer], label="Primer $primer", markersize=15)
-		elseif gr_n < 9 # skip last one which has a single sequence
-			Makie.scatter!(ax, read_depth, inconclusive_rate; color=primer_colors[primer], markersize=15)
-		end
-	end
-	Makie.xlims!(ax, 0, 3.3e4)
-	Makie.ylims!(ax, -0.05, 0.65)
-
-	fig[1,2] = Makie.Legend(fig, ax, "Primers", framevisible = false)
-
-	for (col, (origin, title)) = enumerate(zip([["RF00162_full30", "RF00162_seed70"], ["RF00162_syn_rbm", "rbm"], ["RF00162_syn_inf", "infernal"]], ["Naturals", "RBM", "CM"]))
-		ax = Makie.Axis(fig[1,3][1,col]; width=100, height=100, xlabel="Read depth (M)", ylabel="Resp. rate", title, xticks=[1e4, 3e4])
-		for (gr_n, gr) = enumerate(sort(unique(df.sequencing_group)))
-			_flag = (df.sequencing_group .== gr) .&& (df.aptamer_origin .∈ Ref(origin))
-			if any(_flag)
-				primer = parse(Int, last(gr))
-				read_depth = nanmean(mapreduce(vec, vcat, df.read_depth_M[_flag]))
-				resp_rate = mean(df.responsive[_flag] .== "Responsive")
-				if gr_n ≤ 5
-					Makie.scatter!(ax, read_depth, resp_rate; color=primer_colors[primer], label="Primer $primer", markersize=15)
-				elseif gr_n < 9 # skip last one which has a single sequence
-					Makie.scatter!(ax, read_depth, resp_rate; color=primer_colors[primer], markersize=15)
-				end
-			end
-		end
-		Makie.xlims!(ax, 0, 3.3e4)
-		Makie.ylims!(ax, -0.05, 0.75)
-
-		ax = Makie.Axis(fig[1,3][2,col]; width=100, height=100, xlabel="Read depth (M)", ylabel="Resp./(1-Inc.)", xticks=[1e4, 3e4])
-		for (gr_n, gr) = enumerate(sort(unique(df.sequencing_group)))
-			_flag = (df.sequencing_group .== gr) .&& (df.aptamer_origin .∈ Ref(origin))
-			if any(_flag)
-				primer = parse(Int, last(gr))
-				read_depth = nanmean(mapreduce(vec, vcat, df.read_depth_M[_flag]))
-				resp_rate = mean(df.responsive[_flag] .== "Responsive")
-				inconclusive_rate = mean(df.responsive[df.sequencing_group .== gr] .== "Inconclusive")
-				if gr_n ≤ 5
-					Makie.scatter!(ax, read_depth, resp_rate / (1 - inconclusive_rate); color=primer_colors[primer], label="Primer $primer", markersize=15)
-				elseif gr_n < 9 # skip last one which has a single sequence
-					Makie.scatter!(ax, read_depth, resp_rate / (1 - inconclusive_rate); color=primer_colors[primer], markersize=15)
-				end
-			end
-		end
-		Makie.xlims!(ax, 0, 3.3e4)
-		Makie.ylims!(ax, -0.05, 0.75)
-
-	end
-
-	Makie.resize_to_layout!(fig)
-	fig
-end
+# ╔═╡ 03b6232d-295c-4e37-be8b-72ada0e1a05e
+length(dms_data_primers)
 
 # ╔═╡ 86771e5d-a4b2-424b-8e72-2939148a4451
 unique(shape_data_500.aptamer_origin)
@@ -640,6 +593,55 @@ let fig = Makie.Figure()
 	fig
 end
 
+# ╔═╡ 9bf2fc7d-abd7-45a7-bd0d-455b86d7c4bb
+let fig = Makie.Figure()
+	colors = [:orange, :purple, :red, :blue, :teal]
+	
+	ax = Makie.Axis(fig[1,1]; width=230, height=230, xlabel="Read depth (M)", ylabel="Inconclusives / Total", xticks=[1e4, 3e4, 5e4])
+	for (m, (primer, color)) = enumerate(zip(SamApp2024.primers20250607(), colors))
+		read_depth = nanmean(dms_data.shape_M_depth[:, (dms_data_primers .== primer) .&& (dms_aptamer_origin .!= "Infrared"), :])
+		inconclusive_rate = mean(_responds_sam_inconcl_dms[(dms_data_primers .== primer) .&& (dms_aptamer_origin .!= "Infrared")])
+		Makie.scatter!(ax, read_depth, inconclusive_rate; color, label="Primer $m", markersize=15)
+	end
+	Makie.xlims!(ax, 0, 7e4)
+	Makie.ylims!(ax, -0.05, 0.45)
+
+	fig[1,2] = Makie.Legend(fig, ax, "Primers", framevisible = false)
+
+	for (col, (origin, title)) = enumerate(zip(["natural", "rbm", "infernal"], ["Natural", "RBM", "CM"]))		
+		ax_resp = Makie.Axis(fig[1,3][1,col]; width=100, height=100, xlabel="Read depth (M)", ylabel="Resp. / Total", title, xticks=[1e4, 5e4])
+		ax_resp_norm = Makie.Axis(fig[1,3][2,col]; width=100, height=100, xlabel="Read depth (M)", ylabel="Resp. rate", xticks=[1e4, 5e4])
+		
+		for (m, (primer, color)) = enumerate(zip(SamApp2024.primers20250607(), colors))
+			_flag = (dms_data_primers .== primer) .&& (dms_aptamer_origin .== origin)
+
+			println("Primer $m, $primer, $origin ", count(_flag))
+			
+			if any(_flag)
+				read_depth = nanmean(dms_data.shape_M_depth[:, _flag, :])
+				inconclusive_rate = mean(_responds_sam_inconcl_dms[_flag])
+				response_rate = mean(_responds_sam_yes_dms[_flag])
+				Makie.scatter!(ax_resp, read_depth, response_rate; color, markersize=15)
+				Makie.scatter!(ax_resp_norm, read_depth, response_rate / (1 - inconclusive_rate); color, markersize=15)
+			end
+		end
+		
+		for ax = (ax_resp, ax_resp_norm)
+			Makie.xlims!(ax, 0, 7e4)
+			Makie.ylims!(ax, -0.05, 0.6)
+		end
+	end
+
+	Makie.resize_to_layout!(fig)
+	fig
+end
+
+# ╔═╡ 09496c9f-059c-4c24-9bb9-0dbc4e95a55b
+length(dms_aptamer_origin)
+
+# ╔═╡ 25f2170b-3fd2-4b3b-be42-8c877cae748f
+unique(dms_aptamer_origin)
+
 # ╔═╡ 4b46eae3-a8de-4eaf-8207-3aa89a6594fa
 unique(dms_aptamer_origin)
 
@@ -720,6 +722,12 @@ end
 # ╠═af8c9beb-f844-4238-8967-2dbff72ac27c
 # ╠═aae7a9e7-cf14-4c09-a6fb-93d6e1e19b3d
 # ╠═e00ec7b5-4f06-4200-9bd0-9e486e4322bc
+# ╠═9763e16f-1fc6-4c79-8fed-176f847d9898
+# ╠═ffa01cd2-cc36-403d-86e8-c3a7e68ac97b
+# ╠═2c0519f1-367d-4fdd-a346-ad550c2e80c6
+# ╠═8fc06bf7-a380-4698-8971-e96df77764b9
+# ╠═df8d1d78-6cd2-40a5-a739-221ed6d03df8
+# ╠═5663156d-3342-4cac-9446-1fee39923ce4
 # ╠═4875da0e-9898-4498-8b29-cb60282e2cc2
 # ╠═50c9a9c5-0253-4cc5-aaa5-d58472e8920c
 # ╠═5f64c1d1-b429-4946-a122-a02fcb7ff1f6
@@ -801,9 +809,10 @@ end
 # ╠═a8c4c868-8d9f-4027-a265-700fbb19b895
 # ╠═0e21f914-aec2-416d-a8fa-293767a3d12c
 # ╠═9026821c-a1eb-4d45-96b4-28384701d1ad
-# ╠═9c105581-0ba6-46f4-a7eb-65f76260d8c4
-# ╠═e38e1a07-8aad-4185-9c08-b9522bf3384e
 # ╠═9bf2fc7d-abd7-45a7-bd0d-455b86d7c4bb
+# ╠═03b6232d-295c-4e37-be8b-72ada0e1a05e
+# ╠═09496c9f-059c-4c24-9bb9-0dbc4e95a55b
+# ╠═25f2170b-3fd2-4b3b-be42-8c877cae748f
 # ╠═86771e5d-a4b2-424b-8e72-2939148a4451
 # ╠═532fb8ca-296a-4afc-b0ba-a9a40e18b03e
 # ╠═b2fb16b0-93a8-450f-bde3-7d19a2ab6399
