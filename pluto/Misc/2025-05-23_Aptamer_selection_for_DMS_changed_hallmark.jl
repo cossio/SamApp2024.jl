@@ -101,8 +101,8 @@ md"# General data"
 ENV["JULIA_RFAM_DIR"]
 
 # ╔═╡ 84389a19-1f13-4162-a51b-19dcf16ea0c1
-# Hallmark sites
-_sites = SamApp2024.hallmark_sites_20230507;
+# Hallmark sites (without 10, 11)
+_sites = SamApp2024.hallmark_sites_20230507[3:end]
 
 # ╔═╡ ee44f513-ffa0-4183-bcf9-fdbcb73dba69
 # signifcance threshold for protection scores
@@ -251,9 +251,9 @@ seq_groups_dfs = SamApp2024.artifact_load_sequencing_groups_2024_11_27()
 md"# Add columns interesting for DMS"
 
 # ╔═╡ 1cfc835b-679a-4966-9088-275ef43a0159
-Extended_Hallmark_sites = [
+Extended_Hallmark_sites = [ # MODIFIED hallamark sites
 	1:8; 101:108; # P1
-	10:11; # SAM contact
+	#10:11; # SAM contact
     25:28; 77:80; # Pseudoknot
     34:37; # Kink-turn
     73:75; # A-minor

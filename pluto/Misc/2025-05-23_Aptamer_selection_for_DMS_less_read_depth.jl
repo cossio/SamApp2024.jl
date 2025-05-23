@@ -120,7 +120,17 @@ shape_data_045 = SamApp2024.load_shapemapper_data_pierre_demux_20230920(; demux=
 
 # ╔═╡ ed515a86-9939-4123-9237-7747817b03d0
 # split rep0 from rep4+5
-shape_data_rep0 = SamApp2024.select_conditions_20231002(shape_data_045, filter(endswith("_rep0"), shape_data_045.conditions));
+begin
+	shape_data_rep0 = SamApp2024.select_conditions_20231002(shape_data_045, filter(endswith("_rep0"), shape_data_045.conditions));
+	
+	shape_data_rep0.shape_M_depth ./= 2
+	shape_data_rep0.shape_U_depth ./= 2
+	shape_data_rep0.shape_D_depth ./= 2
+
+	shape_data_rep0.shape_M_stderr .*= sqrt(2)
+	shape_data_rep0.shape_U_stderr .*= sqrt(2)
+	shape_data_rep0.shape_D_stderr .*= sqrt(2)
+end
 
 # ╔═╡ b222c039-9c93-4bcb-a4cb-bc4219b11f8f
 conds_sam_rep0 = identity.(indexin(["SAMAP_1M7_0-1SAM_5Mg_T30C_rep0", "SAMAP_1M7_0-5SAM_5Mg_T30C_rep0", "SAMAP_1M7_1SAM_5Mg_T30C_rep0"], shape_data_rep0.conditions));
@@ -189,8 +199,18 @@ aptamer_rbm_energies_rep0 = [
 # ╔═╡ b0b44ab1-bd99-4239-b93f-3dea79d0c053
 md"## Load data (500 seqs)"
 
-# ╔═╡ a94baef6-c552-4b33-9139-0dc61dcf5aa9
-shape_data_500 = SamApp2024.load_shapemapper_data_500v2_20240315();
+# ╔═╡ 7315e3c7-389d-466c-a695-5e3b05b8507b
+begin
+	shape_data_500 = SamApp2024.load_shapemapper_data_500v2_20240315()
+	
+	shape_data_500.shape_M_depth ./= 2
+	shape_data_500.shape_U_depth ./= 2
+	shape_data_500.shape_D_depth ./= 2
+
+	shape_data_500.shape_M_stderr .*= sqrt(2)
+	shape_data_500.shape_U_stderr .*= sqrt(2)
+	shape_data_500.shape_D_stderr .*= sqrt(2)
+end
 
 # ╔═╡ 3cfc5665-936a-4621-8aa4-820c9a3e2c78
 conds_sam_500, conds_mg_500, conds_30C_500 = [1,2], [4], [6];
@@ -351,12 +371,6 @@ seq_groups_dfs["GP3-Natural-primer3"].name
 
 # ╔═╡ 528d061b-3147-47a0-be06-a8e673edc1d8
 df.aptamer_names[df.sequencing_group .== "GP3-Natural-primer3"] == seq_groups_dfs["GP3-Natural-primer3"].name
-
-# ╔═╡ 50f29fb4-00f6-4ead-970c-04f7aad653aa
-seq_groups_dfs["GP1-Natural-primer1"].name
-
-# ╔═╡ fec7d3da-3b86-43a5-886d-4e621155901d
-
 
 # ╔═╡ 18582db7-f6a2-4892-9a9e-b31d31c05dbd
 nanmean(shape_data_rep0.shape_M_depth[:, df.sequencing_group[1:306] .== "GP3-Natural-primer3", :])
@@ -771,7 +785,7 @@ only(df.aligned_sequences[df.aligned_sequences .=== string(shape_data_500.aligne
 # ╠═430ded66-dc00-411a-9db7-130f2d6555bf
 # ╠═e1b3f8ef-9b44-4bec-8610-01145774be1a
 # ╠═b0b44ab1-bd99-4239-b93f-3dea79d0c053
-# ╠═a94baef6-c552-4b33-9139-0dc61dcf5aa9
+# ╠═7315e3c7-389d-466c-a695-5e3b05b8507b
 # ╠═3cfc5665-936a-4621-8aa4-820c9a3e2c78
 # ╠═2e606abc-4ae4-4798-88ff-48153e41038b
 # ╠═d1b68ed8-f33e-4a02-b84f-03130ab96e58
@@ -800,8 +814,6 @@ only(df.aligned_sequences[df.aligned_sequences .=== string(shape_data_500.aligne
 # ╠═d80fdd97-e1c5-48aa-94c1-ed8dcf1b2b59
 # ╠═79421a94-979a-48fc-939c-079202bf115c
 # ╠═528d061b-3147-47a0-be06-a8e673edc1d8
-# ╠═50f29fb4-00f6-4ead-970c-04f7aad653aa
-# ╠═fec7d3da-3b86-43a5-886d-4e621155901d
 # ╠═18582db7-f6a2-4892-9a9e-b31d31c05dbd
 # ╠═09a381b2-4564-4499-887b-14b7bdbaef00
 # ╠═abfae16d-d438-40d1-aef1-10cd407cbc70

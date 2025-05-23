@@ -101,7 +101,7 @@ length(dms_data_primers)
 length(dms_data.aptamer_names)
 
 # ╔═╡ 2c0519f1-367d-4fdd-a346-ad550c2e80c6
-
+dms_data 
 
 # ╔═╡ 8fc06bf7-a380-4698-8971-e96df77764b9
 length(dms_df.name)
@@ -340,32 +340,36 @@ md"# Comparison DMS vs. SHAPE Repl.0"
 
 # ╔═╡ 10e1166d-5e07-45aa-8adc-1b92f370d26d
 # indices of DMS probed sequences in Rep0 (or nothing if it is not in Rep0)
-_dms_rep0_indices = indexin(dms_data.aligned_sequence, shape_data_rep0.aligned_sequences)
+_dms_rep0_indices = indexin(dms_data.aptamer_names, shape_data_rep0.aptamer_names)
+
+# ╔═╡ c40c54d5-b448-41a1-b038-9e82cb804368
+unique(shape_data_045.aptamer_origin)
 
 # ╔═╡ 154f87e7-3199-4232-980c-f6f29b1db1fe
-[
+[ # all
 	begin
 		count(dms[findall(!isnothing, _dms_rep0_indices)] .&& rep0[filter(!isnothing, _dms_rep0_indices)])
 	end for rep0 = (_responds_sam_yes_rep0, _responds_sam_nop_rep0, _responds_sam_inconcl_rep0), dms = (_responds_sam_yes_dms, _responds_sam_nop_dms, _responds_sam_inconcl_dms)
 ]
 
-# ╔═╡ 5660fe93-b5b5-4bdf-9f80-918815c766bb
-# natural only
-[
+# ╔═╡ 80306132-cc00-4b7c-a012-3890aa00793f
+[ # RBM only
 	begin
-		[ for (i,n) = _dms_rep0_indices]
-		count(dms[findall(n -> (!isnothing(n)) && (n ∈ nat_seqs_rep0), _dms_rep0_indices)] .&& rep0[nat_seqs_rep0 ∩ filter(!isnothing, _dms_rep0_indices)])
+		count(dms[findall(!isnothing, _dms_rep0_indices)] .&& rep0[filter(!isnothing, _dms_rep0_indices)] .&& (shape_data_045.aptamer_origin .== "RF00162_syn_rbm")[filter(!isnothing, _dms_rep0_indices)])
 	end for rep0 = (_responds_sam_yes_rep0, _responds_sam_nop_rep0, _responds_sam_inconcl_rep0), dms = (_responds_sam_yes_dms, _responds_sam_nop_dms, _responds_sam_inconcl_dms)
 ]
 
-# ╔═╡ 9f35ef98-909d-43e1-818c-1b631fcd919f
-nat_seqs_rep0
-
-# ╔═╡ f4ec3184-6c46-4e88-bf96-c5cd514febd8
-# RBM only
-[
+# ╔═╡ 0d79ddcc-f6cc-405a-8a1c-a6d3336c1476
+[ # natural
 	begin
-		count(dms[findall(n -> (!isnothing(n)) && (n ∈ rbm_seqs_rep0), _dms_rep0_indices)] .&& rep0[rbm_seqs_rep0 ∩ filter(!isnothing, _dms_rep0_indices)])
+		count(dms[findall(!isnothing, _dms_rep0_indices)] .&& rep0[filter(!isnothing, _dms_rep0_indices)] .&& (shape_data_045.aptamer_origin .∈ Ref(["RF00162_full30", "RF00162_seed70"]))[filter(!isnothing, _dms_rep0_indices)])
+	end for rep0 = (_responds_sam_yes_rep0, _responds_sam_nop_rep0, _responds_sam_inconcl_rep0), dms = (_responds_sam_yes_dms, _responds_sam_nop_dms, _responds_sam_inconcl_dms)
+]
+
+# ╔═╡ 1d20ceef-c8ef-420d-9c31-e04db5d90a9b
+[ # CM
+	begin
+		count(dms[findall(!isnothing, _dms_rep0_indices)] .&& rep0[filter(!isnothing, _dms_rep0_indices)] .&& (shape_data_045.aptamer_origin .== "RF00162_syn_inf")[filter(!isnothing, _dms_rep0_indices)])
 	end for rep0 = (_responds_sam_yes_rep0, _responds_sam_nop_rep0, _responds_sam_inconcl_rep0), dms = (_responds_sam_yes_dms, _responds_sam_nop_dms, _responds_sam_inconcl_dms)
 ]
 
@@ -379,7 +383,7 @@ SamApp2024.primers20250607()
 # per primers
 [
 	begin
-		count(dms[findall(!isnothing, _dms_rep0_indices)] .&& rep0[filter(!isnothing, _dms_rep0_indices)] .&& (dms_data_primers .== SamApp2024.primers20250607()[4])[findall(!isnothing, _dms_rep0_indices)])
+		count(dms[findall(!isnothing, _dms_rep0_indices)] .&& rep0[filter(!isnothing, _dms_rep0_indices)] .&& (dms_data_primers .== SamApp2024.primers20250607()[5])[findall(!isnothing, _dms_rep0_indices)])
 	end for rep0 = (_responds_sam_yes_rep0, _responds_sam_nop_rep0, _responds_sam_inconcl_rep0), dms = (_responds_sam_yes_dms, _responds_sam_nop_dms, _responds_sam_inconcl_dms)
 ]
 
@@ -390,8 +394,11 @@ md"# Comparison DMS vs. SHAPE 500"
 # indices of DMS probed sequences in 500 (or nothing if it is not in 500)
 _dms_500_indices = indexin(dms_data.aligned_sequence, map(string, shape_data_500.aligned_sequences[1:450]))
 
-# ╔═╡ b1c874f0-fed5-4d51-95a4-69a5870d6695
-count(!isnothing, _dms_500_indices)
+# ╔═╡ f62fd44f-b0b8-42a7-b77f-5e5ab259293b
+string.(shape_data_500.aligned_sequences[filter(!isnothing, _dms_500_indices)]) == dms_data.aligned_sequence[findall(!isnothing, _dms_500_indices)]
+
+# ╔═╡ 500a63b1-b4c8-4624-9ddb-107808167ef8
+unique(shape_data_500.aptamer_origin)
 
 # ╔═╡ cc2bd6ed-6e09-453d-91ea-552aebe1ca1d
 _responds_sam_yes_500_dms_seqs = [isnothing(n) ? nothing : _responds_sam_yes_500[n] for n = _dms_500_indices]
@@ -409,13 +416,23 @@ _responds_sam_inconcl_500_dms_seqs = [isnothing(n) ? nothing : _responds_sam_inc
 	end for shape500 = (_responds_sam_yes_500, _responds_sam_nop_500, _responds_sam_inconcl_500), dms = (_responds_sam_yes_dms, _responds_sam_nop_dms, _responds_sam_inconcl_dms)
 ]
 
+# ╔═╡ 4aecd441-932b-44cb-a11b-3866f29f45d0
+[
+	begin
+		count(dms[findall(!isnothing, _dms_500_indices)] .&& shape500[filter(!isnothing, _dms_500_indices)] .&& (shape_data_500.aptamer_origin .== "infernal")[filter(!isnothing, _dms_500_indices)])
+	end for shape500 = (_responds_sam_yes_500, _responds_sam_nop_500, _responds_sam_inconcl_500), dms = (_responds_sam_yes_dms, _responds_sam_nop_dms, _responds_sam_inconcl_dms)
+]
+
 # ╔═╡ 1fda3f8c-4477-4039-8636-14b2ae0a5df3
 # per primer
 [
 	begin
-		count(dms[findall(!isnothing, _dms_500_indices)] .&& shape500[filter(!isnothing, _dms_500_indices)] .&& (dms_data_primers .== SamApp2024.primers20250607()[5])[findall(!isnothing, _dms_500_indices)])
+		count(dms[findall(!isnothing, _dms_500_indices)] .&& shape500[filter(!isnothing, _dms_500_indices)] .&& (dms_data_primers .== SamApp2024.primers20250607()[1])[findall(!isnothing, _dms_500_indices)])
 	end for shape500 = (_responds_sam_yes_500, _responds_sam_nop_500, _responds_sam_inconcl_500), dms = (_responds_sam_yes_dms, _responds_sam_nop_dms, _responds_sam_inconcl_dms)
 ]
+
+# ╔═╡ cf9a262a-42ac-40a2-b818-0a020974a6b7
+SamApp2024.primers20250607()[5]
 
 # ╔═╡ e7b53f31-137d-43cb-8d80-bb9ddf420828
 md"# Read depths"
@@ -785,21 +802,25 @@ end
 # ╠═f515605a-f8e9-4c86-9388-ef5565520074
 # ╠═cf94281c-f97d-4966-bd3f-ddad7b8c21d0
 # ╠═10e1166d-5e07-45aa-8adc-1b92f370d26d
+# ╠═c40c54d5-b448-41a1-b038-9e82cb804368
 # ╠═154f87e7-3199-4232-980c-f6f29b1db1fe
-# ╠═5660fe93-b5b5-4bdf-9f80-918815c766bb
-# ╠═9f35ef98-909d-43e1-818c-1b631fcd919f
-# ╠═f4ec3184-6c46-4e88-bf96-c5cd514febd8
+# ╠═80306132-cc00-4b7c-a012-3890aa00793f
+# ╠═0d79ddcc-f6cc-405a-8a1c-a6d3336c1476
+# ╠═1d20ceef-c8ef-420d-9c31-e04db5d90a9b
 # ╠═eb047b2f-f822-4e03-94bd-aabab68f9610
 # ╠═529b46ff-b9cd-45c9-b202-6b2faeacb40c
 # ╠═40c13e35-4c52-4051-8f85-fdb1ca99d3b1
 # ╠═6aa691a1-6e62-4077-83f6-e168810f4ec2
 # ╠═8a604d45-5890-4578-8a82-01065faf1a1c
-# ╠═b1c874f0-fed5-4d51-95a4-69a5870d6695
+# ╠═f62fd44f-b0b8-42a7-b77f-5e5ab259293b
+# ╠═500a63b1-b4c8-4624-9ddb-107808167ef8
 # ╠═cc2bd6ed-6e09-453d-91ea-552aebe1ca1d
 # ╠═deb8707e-3e53-4f95-ac51-e6ebf5bffe9c
 # ╠═f366dabf-e8b7-4417-9a1e-99412ec6c582
 # ╠═6ce57a7b-0e16-43f8-a840-d2ab4e9e03d3
+# ╠═4aecd441-932b-44cb-a11b-3866f29f45d0
 # ╠═1fda3f8c-4477-4039-8636-14b2ae0a5df3
+# ╠═cf9a262a-42ac-40a2-b818-0a020974a6b7
 # ╠═e7b53f31-137d-43cb-8d80-bb9ddf420828
 # ╠═7c7c7ef4-c613-4868-ac35-57a498765ef6
 # ╠═66f55016-2e10-4590-8d65-f24609f25f48
