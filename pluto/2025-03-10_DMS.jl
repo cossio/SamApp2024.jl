@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.8
+# v0.20.9
 
 using Markdown
 using InteractiveUtils
@@ -215,7 +215,11 @@ md"# Load SHAPE data (rep.0)"
 
 # ╔═╡ f1f0126d-e212-47bc-8acc-736bb5905c0a
 # load SHAPE data
-shape_data_045 = SamApp2024.load_shapemapper_data_pierre_demux_20230920(; demux=true);
+#shape_data_045 = SamApp2024.load_shapemapper_data_pierre_demux_20230920(; demux=true);
+
+# ╔═╡ 5d9f93d5-007c-4d1f-9b9b-a913a7f4c00a
+# load SHAPE data
+shape_data_045 = SamApp2024.load_shapemapper_data_pierre_demux_20240730_with_pdb();
 
 # ╔═╡ b7fe3fe6-a590-414e-8cbf-05daee93bab1
 # split rep0 from rep4+5
@@ -281,6 +285,107 @@ _responds_sam_nop_rep0 = (x_mg_rep0 .> +_thresh_rep0) .| (x_sam_rep0 .< -_thresh
 # ╔═╡ 9471fa84-538f-4b54-8e70-97eb279f0f7e
 _responds_sam_inconcl_rep0 = ((!).(_responds_sam_yes_rep0)) .& ((!).(_responds_sam_nop_rep0));
 
+# ╔═╡ 69de6e55-f5c6-4199-bb53-4469f1426d33
+md"# SHAPE repl.0 with or without A,C"
+
+# ╔═╡ 9e889b57-de0e-4632-94d3-030a5ee58bd0
+bps_reactivities_rep0_AC = [shape_data_rep0.shape_reactivities[i,n,c] for i=bps for n=nat_seqs_rep0 for c=conds_sam_rep0 if (!ismissing(dms_data.aligned_sequence[n])) && dms_data.aligned_sequence[n][i] ∈ ('A', 'C')]
+
+# ╔═╡ 2d7bd92e-dcb8-4987-a73d-e91ca9532a57
+nps_reactivities_rep0_AC = [shape_data_rep0.shape_reactivities[i,n,c] for i=nps for n=nat_seqs_rep0 for c=conds_sam_rep0 if (!ismissing(dms_data.aligned_sequence[n])) && dms_data.aligned_sequence[n][i] ∈ ('A', 'C')]
+
+# ╔═╡ ea8af6b3-b427-4930-b1d3-d11809c2d6c3
+all_reactivities_rep0_AC = [shape_data_rep0.shape_reactivities[i,n,c] for i=1:num_sites for n=nat_seqs_rep0 for c=conds_sam_rep0 if (!ismissing(dms_data.aligned_sequence[n])) && dms_data.aligned_sequence[n][i] ∈ ('A', 'C')]
+
+# ╔═╡ a82a1fbc-a450-4a61-987d-1ae1a40a95e6
+shape_stats_rep0_AC = SamApp2024.shape_basepair_log_odds_v4(;
+    shape_data = shape_data_rep0,
+    paired_reactivities = bps_reactivities_rep0_AC,
+    unpaired_reactivities = nps_reactivities_rep0_AC,
+    all_reactivities = all_reactivities_rep0_AC,
+    only_hq_profile = true, p_thresh = 1e-3, nsamples = 1000
+);
+
+# ╔═╡ 72b9f9c4-64e8-4d32-836d-954843e5d860
+x_mg_rep0_AC = [
+	begin
+		if ismissing(shape_data_rep0.aligned_sequences[n])
+			NaN
+		else
+			nansum([shape_stats_rep0_AC.shape_log_odds[i,n,c] for i = _sites for c=conds_mg_rep0 if shape_data_rep0.aligned_sequences[n][i] ∈ ('A', 'C')])
+		end
+	end for n=axes(shape_stats_rep0_AC.shape_log_odds, 2)
+];
+
+# ╔═╡ cf30e3f0-b478-43ae-88d4-433a2e5c54f5
+x_sam_rep0_AC = [
+	begin
+		if ismissing(shape_data_rep0.aligned_sequences[n])
+			NaN
+		else
+			nansum([shape_stats_rep0_AC.shape_log_odds[i,n,c] for i=_sites for c=conds_sam_rep0 if shape_data_rep0.aligned_sequences[n][i] ∈ ('A', 'C')])
+		end
+	end for n=axes(shape_stats_rep0_AC.shape_log_odds, 2)
+];
+
+# ╔═╡ b1f6d289-3fb9-4d03-a4e8-f65c118f536e
+_responds_sam_yes_rep0_AC = (x_mg_rep0_AC .< -_thresh_rep0) .& (x_sam_rep0_AC .> +_thresh_rep0);
+
+# ╔═╡ eafc4efa-6af5-4b02-8e2a-490cca3f9c7c
+_responds_sam_nop_rep0_AC = (x_mg_rep0_AC .> +_thresh_rep0) .| (x_sam_rep0_AC .< -_thresh_rep0);
+
+# ╔═╡ 7d04a758-95ab-46c1-ab13-9414afc5e560
+_responds_sam_inconcl_rep0_AC = ((!).(_responds_sam_yes_rep0_AC)) .& ((!).(_responds_sam_nop_rep0_AC));
+
+# ╔═╡ d3c68b7d-5f7c-4066-85cd-ba27b23d18bc
+bps_reactivities_rep0_UG = [shape_data_rep0.shape_reactivities[i,n,c] for i=bps for n=nat_seqs_rep0 for c=conds_sam_rep0 if (!ismissing(dms_data.aligned_sequence[n])) && dms_data.aligned_sequence[n][i] ∈ ('U', 'G')]
+
+# ╔═╡ 469b2593-9b77-478c-ab8f-5c6a04ffca19
+nps_reactivities_rep0_UG = [shape_data_rep0.shape_reactivities[i,n,c] for i=nps for n=nat_seqs_rep0 for c=conds_sam_rep0 if (!ismissing(dms_data.aligned_sequence[n])) && dms_data.aligned_sequence[n][i] ∈ ('U', 'G')]
+
+# ╔═╡ 4d03ee78-d457-4b49-a35e-4a49e351a254
+all_reactivities_rep0_UG = [shape_data_rep0.shape_reactivities[i,n,c] for i=1:num_sites for n=nat_seqs_rep0 for c=conds_sam_rep0 if (!ismissing(dms_data.aligned_sequence[n])) && dms_data.aligned_sequence[n][i] ∈ ('U', 'G')]
+
+# ╔═╡ 2794dc19-fb40-4e53-ac86-2b3494859810
+shape_stats_rep0_UG = SamApp2024.shape_basepair_log_odds_v4(;
+    shape_data = shape_data_rep0,
+    paired_reactivities = bps_reactivities_rep0_UG,
+    unpaired_reactivities = nps_reactivities_rep0_UG,
+    all_reactivities = all_reactivities_rep0_UG,
+    only_hq_profile = true, p_thresh = 1e-3, nsamples = 1000
+);
+
+# ╔═╡ e19791c3-34e9-47bb-a818-f59bc961f005
+x_mg_rep0_UG = [
+	begin
+		if ismissing(shape_data_rep0.aligned_sequences[n])
+			NaN
+		else
+			nansum([shape_stats_rep0_UG.shape_log_odds[i,n,c] for i = _sites for c=conds_mg_rep0 if shape_data_rep0.aligned_sequences[n][i] ∈ ('U', 'G')])
+		end
+	end for n=axes(shape_stats_rep0_UG.shape_log_odds, 2)
+];
+
+# ╔═╡ 6f06ce95-c96e-4566-96b6-2c02db6fd12d
+x_sam_rep0_UG = [
+	begin
+		if ismissing(shape_data_rep0.aligned_sequences[n])
+			NaN
+		else
+			nansum([shape_stats_rep0_UG.shape_log_odds[i,n,c] for i=_sites for c=conds_sam_rep0 if shape_data_rep0.aligned_sequences[n][i] ∈ ('U', 'G')])
+		end
+	end for n=axes(shape_stats_rep0_UG.shape_log_odds, 2)
+];
+
+# ╔═╡ 449ae230-8736-4590-99a9-15be03527fb6
+_responds_sam_yes_rep0_UG = (x_mg_rep0_UG .< -_thresh_rep0) .& (x_sam_rep0_UG .> +_thresh_rep0);
+
+# ╔═╡ bb1bbf19-5bce-4ce9-9bd5-b2440db7e216
+_responds_sam_nop_rep0_UG = (x_mg_rep0_UG .> +_thresh_rep0) .| (x_sam_rep0_UG .< -_thresh_rep0);
+
+# ╔═╡ d2330e77-03ee-4d49-b717-1c0b005c34d1
+_responds_sam_inconcl_rep0_UG = ((!).(_responds_sam_yes_rep0_UG)) .& ((!).(_responds_sam_nop_rep0_UG));
+
 # ╔═╡ c6aaed41-40ae-43ec-94c0-e70679251316
 md"# Load SHAPE data (500 aptamers)"
 
@@ -342,8 +447,112 @@ md"# Comparison DMS vs. SHAPE Repl.0"
 # indices of DMS probed sequences in Rep0 (or nothing if it is not in Rep0)
 _dms_rep0_indices = indexin(dms_data.aptamer_names, shape_data_rep0.aptamer_names)
 
-# ╔═╡ c40c54d5-b448-41a1-b038-9e82cb804368
-unique(shape_data_045.aptamer_origin)
+# ╔═╡ 35177920-959c-4de4-a54d-8be5037e75d6
+"APSAMN7" ∈ dms_data.aptamer_names
+
+# ╔═╡ 510af1b3-5ad3-4ccc-8cb3-1a08ff11e792
+unique([s[1:6] for s = dms_data.aptamer_names])
+
+# ╔═╡ 8b401a11-28f1-4044-9824-5e772bea37bf
+# structural motifs
+struct_bands = [
+    (; x0=0.5, xf=8.5, color="blue", alpha=0.1), # P1
+    (; x0=100.5, xf=108.5, color="blue", alpha=0.1), # P1
+    (; x0=11.5, xf=16.5, color="green", alpha=0.1), # P2
+    (; x0=20.5, xf=23.5, color="green", alpha=0.1), # P2
+    (; x0=28.5, xf=31.5, color="green", alpha=0.1), # P2
+    (; x0=37.5, xf=42.5, color="green", alpha=0.1), # P2
+    (; x0=42.5, xf=46.5, color="orange", alpha=0.1), # P3
+    (; x0=47.5, xf=53.5, color="orange", alpha=0.1), # P3
+    (; x0=60.5, xf=64.5, color="orange", alpha=0.1), # P3
+    (; x0=66.5, xf=72.5, color="orange", alpha=0.1), # P3
+    (; x0=80.5, xf=86.5, color="teal", alpha=0.1), # P4
+    (; x0=91.5, xf=97.5, color="teal", alpha=0.1), # P4
+    (; x0=24.5, xf=28.5, color="red", alpha=0.1), # Pk
+    (; x0=76.5, xf=80.5, color="red", alpha=0.1), # Pk
+];
+
+# ╔═╡ edc476ef-30aa-4fc7-bf26-041b768512e7
+findall(_responds_sam_yes_dms) ∩ findall(startswith("APSAMN"), dms_data.aptamer_names) # natural only
+
+# ╔═╡ eb60b8a8-905e-43b3-a3a7-b940bd563d3c
+let fig = Makie.Figure()
+	ex_fig_5 = "APSAMN7"
+	#n_ex = only(findall(dms_data.aptamer_names .== ex_fig_5))
+	#n_ex = only(findall(dms_data.aptamer_names .== "APSAMN62"))
+	n_ex = 47
+	
+	width = 700
+	height = 100
+	xticks = 5:5:108
+
+	_R_sam = dms_data.shape_reactivities[:, n_ex, 1]
+	_R_mg = dms_data.shape_reactivities[:, n_ex, 2]
+
+	AC_positions = Int[]
+	UG_positions = Int[]
+	for i = 1:108
+		if dms_data.aligned_sequence[n_ex][i] == 'A' || dms_data.aligned_sequence[n_ex][i] == 'C'
+			push!(AC_positions, i)
+		elseif dms_data.aligned_sequence[n_ex][i] == 'U' || dms_data.aligned_sequence[n_ex][i] == 'G'
+			push!(UG_positions, i)
+		end
+	end
+	
+	ax_react = Makie.Axis(
+		fig[1,1]; valign=:bottom, width, height, xticks, ylabel="react.", xgridvisible=false, ygridvisible=false, yticks=0:2:8, xtrimspine=true, ytrimspine=true
+	)
+	ax_diff = Makie.Axis(
+		fig[2,1]; valign=:bottom, width, height, xticks, xlabel="site", ylabel="Δreact.", xgridvisible=false, ygridvisible=false, 
+		yticks=[-2,-1,0], xtrimspine=true, ytrimspine=true
+	)
+
+	for (x0, xf, color, alpha) = struct_bands
+	    Makie.vspan!(ax_react, x0, xf; color=(color, alpha))
+		Makie.vspan!(ax_diff, x0, xf; color=(color, alpha))
+	end
+	
+	Makie.stairs!(ax_react, 1:108, _R_mg; step=:center, color=:gray, label="no SAM")
+	Makie.stairs!(ax_react, 1:108, _R_sam; step=:center, color=:purple, label="with SAM")
+	#Makie.axislegend(ax_react, position=(0.0, -13), framevisible=false)
+	#Makie.hidespines!(ax_react_1, :t, :r, :b)
+	#Makie.hidexdecorations!(ax_react_1)
+	
+	Makie.barplot!(ax_diff, 1:108, _R_sam - _R_mg, color=ifelse.(_R_sam - _R_mg .< 0, :green, :gray))
+	Makie.scatter!(ax_diff, _sites, -1.1one.(_sites), markersize=7, color=:black, marker=:utriangle)
+
+	Makie.scatter!(ax_react, AC_positions, 3one.(AC_positions), markersize=7, color=:blue, marker=:utriangle)
+	Makie.scatter!(ax_react, UG_positions, 3one.(UG_positions), markersize=7, color=:red, marker=:utriangle)
+	
+	Makie.xlims!(ax_diff, 0, 109)
+	
+	Makie.hidespines!(ax_diff, :r, :t)
+	Makie.hidespines!(ax_react, :r, :t, :b)
+	Makie.hidexdecorations!(ax_react)
+	#Makie.scatter!(ax_diff_1, _sites, -0.2one.(_sites), color=:blue, markersize=5)
+
+	Makie.linkxaxes!(ax_react, ax_diff)
+	Makie.ylims!(ax_diff, -1.2, 0.5)
+	Makie.ylims!(ax_react, -0.5, 5)
+	
+	Makie.xlims!(ax_react, 0.5, 108.5)
+	Makie.xlims!(ax_diff,  0.5, 108.5)
+
+	Makie.resize_to_layout!(fig)
+	#Makie.save("Figures/Fig5new_SHAPE_example.pdf", fig)
+	fig
+end
+
+# ╔═╡ 7c9bdcc0-aa11-423c-8c40-5fb81cba5ca3
+dms_data.aligned_sequence[]
+
+# ╔═╡ 465306c4-7032-4ae7-b9b3-af53b3af7963
+dms_data.conditions
+
+# ╔═╡ 88480f95-2d25-4ddf-8635-b3883d842175
+for p = dms_data.aptamer_names
+	println(p)
+end
 
 # ╔═╡ 154f87e7-3199-4232-980c-f6f29b1db1fe
 [ # all
@@ -385,6 +594,77 @@ SamApp2024.primers20250607()
 	begin
 		count(dms[findall(!isnothing, _dms_rep0_indices)] .&& rep0[filter(!isnothing, _dms_rep0_indices)] .&& (dms_data_primers .== SamApp2024.primers20250607()[5])[findall(!isnothing, _dms_rep0_indices)])
 	end for rep0 = (_responds_sam_yes_rep0, _responds_sam_nop_rep0, _responds_sam_inconcl_rep0), dms = (_responds_sam_yes_dms, _responds_sam_nop_dms, _responds_sam_inconcl_dms)
+]
+
+# ╔═╡ cc8349ec-cc68-447a-9260-9b0549290fc9
+only(findall(shape_data_045.aptamer_names .== "SAMAP-PDB10"))
+
+# ╔═╡ c93357a0-9f66-40cb-a55f-eeed5bb203c7
+shape_data_045.aptamer_names
+
+# ╔═╡ 62e04c51-bfbd-4f3b-a057-ca0d75481ca8
+md"## Comparison DMS vs SHAPE with A,C only"
+
+# ╔═╡ c86f4278-c152-4b5b-9660-3c3134049e46
+[ # natural (SHAPE A,C)
+	begin
+		count(
+			dms[findall(!isnothing, _dms_rep0_indices)] .&& rep0[filter(!isnothing, _dms_rep0_indices)] .&& (shape_data_045.aptamer_origin .∈ Ref(["RF00162_full30", "RF00162_seed70"]))[filter(!isnothing, _dms_rep0_indices)]
+		)
+	end for rep0 = (_responds_sam_yes_rep0_AC, _responds_sam_nop_rep0_AC, _responds_sam_inconcl_rep0_AC), dms = (_responds_sam_yes_dms, _responds_sam_nop_dms, _responds_sam_inconcl_dms)
+]
+
+# ╔═╡ 34159350-a262-4121-b600-98d3e0a2f1b2
+[ # natural (SHAPE A,C)
+	begin
+		count(
+			dms[findall(!isnothing, _dms_rep0_indices)] .&& rep0[filter(!isnothing, _dms_rep0_indices)] .&& (shape_data_045.aptamer_origin .∈ Ref(["RF00162_full30", "RF00162_seed70"]))[filter(!isnothing, _dms_rep0_indices)].&&
+			_responds_sam_yes_rep0[filter(!isnothing, _dms_rep0_indices)] .&& _responds_sam_nop_dms[findall(!isnothing, _dms_rep0_indices)]
+		)
+	end for rep0 = (_responds_sam_yes_rep0_AC, _responds_sam_nop_rep0_AC, _responds_sam_inconcl_rep0_AC), dms = (_responds_sam_yes_dms, _responds_sam_nop_dms, _responds_sam_inconcl_dms)
+]
+
+# ╔═╡ fe0ed922-c2b8-4f25-bd35-211c4f70e02e
+[ # natural (SHAPE U,G)
+	begin
+		count(
+			dms[findall(!isnothing, _dms_rep0_indices)] .&& rep0[filter(!isnothing, _dms_rep0_indices)] .&& (shape_data_045.aptamer_origin .∈ Ref(["RF00162_full30", "RF00162_seed70"]))[filter(!isnothing, _dms_rep0_indices)]
+		)
+	end for rep0 = (_responds_sam_yes_rep0_UG, _responds_sam_nop_rep0_UG, _responds_sam_inconcl_rep0_UG), dms = (_responds_sam_yes_dms, _responds_sam_nop_dms, _responds_sam_inconcl_dms)
+]
+
+# ╔═╡ 5bff2e5e-4aab-45df-a088-0d97cccc4def
+[ # natural (SHAPE A,C)
+	begin
+		count(dms[findall(!isnothing, _dms_rep0_indices)] .&& rep0[filter(!isnothing, _dms_rep0_indices)] .&& (shape_data_045.aptamer_origin .∈ Ref(["RF00162_full30", "RF00162_seed70"]))[filter(!isnothing, _dms_rep0_indices)] .&&
+			_responds_sam_yes_rep0[filter(!isnothing, _dms_rep0_indices)] .&& _responds_sam_nop_dms[findall(!isnothing, _dms_rep0_indices)])
+	end for rep0 = (_responds_sam_yes_rep0_AC, _responds_sam_nop_rep0_AC, _responds_sam_inconcl_rep0_AC), dms = (_responds_sam_yes_dms, _responds_sam_nop_dms, _responds_sam_inconcl_dms)
+]
+
+# ╔═╡ a8090cba-8d47-4371-95b8-3aacdac29594
+[ # natural (SHAPE U, G)
+	begin
+		count(dms[findall(!isnothing, _dms_rep0_indices)] .&& rep0[filter(!isnothing, _dms_rep0_indices)] .&& (shape_data_045.aptamer_origin .∈ Ref(["RF00162_full30", "RF00162_seed70"]))[filter(!isnothing, _dms_rep0_indices)] .&&_responds_sam_yes_rep0[filter(!isnothing, _dms_rep0_indices)] .&& 		_responds_sam_nop_dms[findall(!isnothing, _dms_rep0_indices)])
+	end for rep0 = (_responds_sam_yes_rep0_UG, _responds_sam_nop_rep0_UG, _responds_sam_inconcl_rep0_UG), dms = (_responds_sam_yes_dms, _responds_sam_nop_dms, _responds_sam_inconcl_dms)
+]
+
+# ╔═╡ 75902f05-30c0-4e0e-b696-eb1e9e96cd2e
+[ # natural (SHAPE A,C vs. U,G)
+	begin
+		count(rep0_AC[filter(!isnothing, _dms_rep0_indices)] .&& rep0_UG[filter(!isnothing, _dms_rep0_indices)] .&& 
+			(shape_data_045.aptamer_origin .∈ Ref(["RF00162_full30", "RF00162_seed70"]))[filter(!isnothing, _dms_rep0_indices)] .&& 
+				_responds_sam_yes_rep0[filter(!isnothing, _dms_rep0_indices)] .&& _responds_sam_nop_dms[findall(!isnothing, _dms_rep0_indices)])
+	end for rep0_AC = (_responds_sam_yes_rep0_AC, _responds_sam_nop_rep0_AC, _responds_sam_inconcl_rep0_AC), rep0_UG = (_responds_sam_yes_rep0_UG, _responds_sam_nop_rep0_UG, _responds_sam_inconcl_rep0_UG)
+]
+
+# ╔═╡ f696a001-9e73-4cef-8940-760718dbb4c7
+[ # natural (SHAPE A,C vs. U,G)
+	begin
+		count(rep0_AC[filter(!isnothing, _dms_rep0_indices)] .&& rep0_UG[filter(!isnothing, _dms_rep0_indices)] .&& 
+			(shape_data_045.aptamer_origin .∈ Ref(["RF00162_full30", "RF00162_seed70"]))[filter(!isnothing, _dms_rep0_indices)] #.&& 
+				#_responds_sam_yes_rep0[filter(!isnothing, _dms_rep0_indices)] #.&& _responds_sam_nop_dms[findall(!isnothing, _dms_rep0_indices)]
+	)
+	end for rep0_AC = (_responds_sam_yes_rep0_AC, _responds_sam_nop_rep0_AC, _responds_sam_inconcl_rep0_AC), rep0_UG = (_responds_sam_yes_rep0_UG, _responds_sam_nop_rep0_UG, _responds_sam_inconcl_rep0_UG)
 ]
 
 # ╔═╡ 6aa691a1-6e62-4077-83f6-e168810f4ec2
@@ -765,6 +1045,7 @@ end
 # ╠═f22df52d-cb6b-4fe8-9a16-bc1488a0122f
 # ╠═c4fe44f9-fd26-4450-9479-afc596abe4ee
 # ╠═f1f0126d-e212-47bc-8acc-736bb5905c0a
+# ╠═5d9f93d5-007c-4d1f-9b9b-a913a7f4c00a
 # ╠═b7fe3fe6-a590-414e-8cbf-05daee93bab1
 # ╠═110aeb3e-2eab-44cf-ba3a-238075218ae4
 # ╠═8caabc4e-2ac7-4ee8-a2c3-d162078904f5
@@ -784,6 +1065,25 @@ end
 # ╠═61613274-8e04-46ba-90dc-aa5b4e0c661f
 # ╠═70b61f1d-c2a7-4f3b-bbfd-aabcca807470
 # ╠═9471fa84-538f-4b54-8e70-97eb279f0f7e
+# ╠═69de6e55-f5c6-4199-bb53-4469f1426d33
+# ╠═9e889b57-de0e-4632-94d3-030a5ee58bd0
+# ╠═2d7bd92e-dcb8-4987-a73d-e91ca9532a57
+# ╠═ea8af6b3-b427-4930-b1d3-d11809c2d6c3
+# ╠═a82a1fbc-a450-4a61-987d-1ae1a40a95e6
+# ╠═72b9f9c4-64e8-4d32-836d-954843e5d860
+# ╠═cf30e3f0-b478-43ae-88d4-433a2e5c54f5
+# ╠═b1f6d289-3fb9-4d03-a4e8-f65c118f536e
+# ╠═eafc4efa-6af5-4b02-8e2a-490cca3f9c7c
+# ╠═7d04a758-95ab-46c1-ab13-9414afc5e560
+# ╠═d3c68b7d-5f7c-4066-85cd-ba27b23d18bc
+# ╠═469b2593-9b77-478c-ab8f-5c6a04ffca19
+# ╠═4d03ee78-d457-4b49-a35e-4a49e351a254
+# ╠═2794dc19-fb40-4e53-ac86-2b3494859810
+# ╠═e19791c3-34e9-47bb-a818-f59bc961f005
+# ╠═6f06ce95-c96e-4566-96b6-2c02db6fd12d
+# ╠═449ae230-8736-4590-99a9-15be03527fb6
+# ╠═bb1bbf19-5bce-4ce9-9bd5-b2440db7e216
+# ╠═d2330e77-03ee-4d49-b717-1c0b005c34d1
 # ╠═c6aaed41-40ae-43ec-94c0-e70679251316
 # ╠═022735fe-bae2-4b21-a786-3d4e373eb24f
 # ╠═804b0de7-57b2-4ef1-8fe5-af03466207f1
@@ -802,7 +1102,14 @@ end
 # ╠═f515605a-f8e9-4c86-9388-ef5565520074
 # ╠═cf94281c-f97d-4966-bd3f-ddad7b8c21d0
 # ╠═10e1166d-5e07-45aa-8adc-1b92f370d26d
-# ╠═c40c54d5-b448-41a1-b038-9e82cb804368
+# ╠═35177920-959c-4de4-a54d-8be5037e75d6
+# ╠═510af1b3-5ad3-4ccc-8cb3-1a08ff11e792
+# ╠═8b401a11-28f1-4044-9824-5e772bea37bf
+# ╠═edc476ef-30aa-4fc7-bf26-041b768512e7
+# ╠═eb60b8a8-905e-43b3-a3a7-b940bd563d3c
+# ╠═7c9bdcc0-aa11-423c-8c40-5fb81cba5ca3
+# ╠═465306c4-7032-4ae7-b9b3-af53b3af7963
+# ╠═88480f95-2d25-4ddf-8635-b3883d842175
 # ╠═154f87e7-3199-4232-980c-f6f29b1db1fe
 # ╠═80306132-cc00-4b7c-a012-3890aa00793f
 # ╠═0d79ddcc-f6cc-405a-8a1c-a6d3336c1476
@@ -810,6 +1117,16 @@ end
 # ╠═eb047b2f-f822-4e03-94bd-aabab68f9610
 # ╠═529b46ff-b9cd-45c9-b202-6b2faeacb40c
 # ╠═40c13e35-4c52-4051-8f85-fdb1ca99d3b1
+# ╠═cc8349ec-cc68-447a-9260-9b0549290fc9
+# ╠═c93357a0-9f66-40cb-a55f-eeed5bb203c7
+# ╠═62e04c51-bfbd-4f3b-a057-ca0d75481ca8
+# ╠═c86f4278-c152-4b5b-9660-3c3134049e46
+# ╠═34159350-a262-4121-b600-98d3e0a2f1b2
+# ╠═fe0ed922-c2b8-4f25-bd35-211c4f70e02e
+# ╠═5bff2e5e-4aab-45df-a088-0d97cccc4def
+# ╠═a8090cba-8d47-4371-95b8-3aacdac29594
+# ╠═75902f05-30c0-4e0e-b696-eb1e9e96cd2e
+# ╠═f696a001-9e73-4cef-8940-760718dbb4c7
 # ╠═6aa691a1-6e62-4077-83f6-e168810f4ec2
 # ╠═8a604d45-5890-4578-8a82-01065faf1a1c
 # ╠═f62fd44f-b0b8-42a7-b77f-5e5ab259293b
