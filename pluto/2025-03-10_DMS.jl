@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.9
+# v0.20.10
 
 using Markdown
 using InteractiveUtils
@@ -94,38 +94,6 @@ dms_data = SamApp2024.load_dms_data_20250303()
 # ╔═╡ e00ec7b5-4f06-4200-9bd0-9e486e4322bc
 dms_data_primers = dms_df.primer[[only(findall(dms_df.name .== name)) for name = dms_data.aptamer_names]]
 
-# ╔═╡ 9763e16f-1fc6-4c79-8fed-176f847d9898
-length(dms_data_primers)
-
-# ╔═╡ ffa01cd2-cc36-403d-86e8-c3a7e68ac97b
-length(dms_data.aptamer_names)
-
-# ╔═╡ 2c0519f1-367d-4fdd-a346-ad550c2e80c6
-dms_data 
-
-# ╔═╡ 8fc06bf7-a380-4698-8971-e96df77764b9
-length(dms_df.name)
-
-# ╔═╡ df8d1d78-6cd2-40a5-a739-221ed6d03df8
-dms_data.aptamer_names ⊆ dms_df.name
-
-# ╔═╡ 5663156d-3342-4cac-9446-1fee39923ce4
-dms_data.aptamer_names == dms_df.name[1:400]
-
-# ╔═╡ 4875da0e-9898-4498-8b29-cb60282e2cc2
-unique(dms_data_primers)
-
-# ╔═╡ 50c9a9c5-0253-4cc5-aaa5-d58472e8920c
-for p = unique(dms_data_primers)
-	println(p, "\t", count(!ismissing(dms_df.aligned_sequence) .&& dms_df.primer .== p))
-end
-
-# ╔═╡ 5f64c1d1-b429-4946-a122-a02fcb7ff1f6
-dms_df.aligned_sequence
-
-# ╔═╡ 8ab280ee-8a1a-495a-ac75-dee2ca199759
-dms_df
-
 # ╔═╡ 2b18233e-d2ae-485e-9ad7-17e20a26fee7
 num_sites, num_seqs, num_conds = size(dms_data.shape_reactivities)
 
@@ -160,11 +128,6 @@ x_mg_dms = [
 			NaN
 		else
 			reactivities = [dms_stats.shape_log_odds[i,n,2] for i = _sites if dms_data.aligned_sequence[n][i] ∈ ('A', 'C')]
-			# if isempty(reactivities)
-			# 	NaN
-			# else
-			# 	nansum(reactivities)
-			# end
 			nansum(reactivities)
 		end
 	end for n=1:400
@@ -177,11 +140,6 @@ x_sam_dms = [
 			NaN
 		else
 			reactivities = [dms_stats.shape_log_odds[i,n,1] for i = _sites if dms_data.aligned_sequence[n][i] ∈ ('A', 'C')]
-			# if isempty(reactivities)
-			# 	NaN
-			# else
-			# 	nansum(reactivities)
-			# end
 			nansum(reactivities)
 		end
 	end for n=1:400
@@ -209,6 +167,54 @@ _responds_sam_nop_dms = (x_mg_dms .> +_thresh_dms) .| (x_sam_dms .< -_thresh_dms
 
 # ╔═╡ f22df52d-cb6b-4fe8-9a16-bc1488a0122f
 _responds_sam_inconcl_dms = ((!).(_responds_sam_yes_dms)) .& ((!).(_responds_sam_nop_dms));
+
+# ╔═╡ 1844dcba-9000-4d9a-abb0-866c39976417
+dms_4kqy_data = SamApp2024.load_dms_data_20250609_pdb_4kqy();
+
+# ╔═╡ b78e2d5c-6b1a-4aea-8b72-e926aa85457d
+dms_stats_4kqy_dms = SamApp2024.shape_basepair_log_odds_v4(;
+    shape_data = dms_4kqy_data,
+    paired_reactivities = bps_dms_reactivities,
+    unpaired_reactivities = nps_dms_reactivities,
+    all_reactivities = all_dms_reactivities,
+    only_hq_profile = true, p_thresh = 1e-2, nsamples=5000
+);
+
+# ╔═╡ 3cb95456-1ab3-4ba3-a16c-a51ed8cd5801
+_sites_ex = _sites ∪ [9, 24]
+
+# ╔═╡ 4fa39043-b67e-4a7d-8a6e-e97a9acfcde5
+x_mg_dms_4kqy = [
+	begin
+		if ismissing(dms_4kqy_data.aligned_sequence[n])
+			NaN
+		else
+			reactivities = [dms_stats_4kqy_dms.shape_log_odds[i,n,2] for i = _sites_ex if dms_4kqy_data.aligned_sequence[n][i] ∈ ('A', 'C')]
+			nansum(reactivities)
+		end
+	end for n=1:1
+];
+
+# ╔═╡ 1a09c421-da49-48f8-ba08-3e9bb65e47cb
+x_sam_dms_4kqy = [
+	begin
+		if ismissing(dms_4kqy_data.aligned_sequence[n])
+			NaN
+		else
+			reactivities = [dms_stats_4kqy_dms.shape_log_odds[i,n,1] for i = _sites_ex if dms_4kqy_data.aligned_sequence[n][i] ∈ ('A', 'C')]
+			nansum(reactivities)
+		end
+	end for n=1:1
+];
+
+# ╔═╡ 3bea40c7-1c63-4bbd-a1fa-e28409a0c0bf
+_responds_sam_yes_dms_4kqy = (x_mg_dms_4kqy .< -_thresh_dms) .& (x_sam_dms_4kqy .> +_thresh_dms)
+
+# ╔═╡ 6f79ba8b-b609-4ae5-9a04-724e14cc559f
+x_mg_dms_4kqy, x_sam_dms_4kqy
+
+# ╔═╡ 6581c638-a0f8-42cb-9e14-f52e2d5efca3
+_thresh_dms
 
 # ╔═╡ c4fe44f9-fd26-4450-9479-afc596abe4ee
 md"# Load SHAPE data (rep.0)"
@@ -284,6 +290,16 @@ _responds_sam_nop_rep0 = (x_mg_rep0 .> +_thresh_rep0) .| (x_sam_rep0 .< -_thresh
 
 # ╔═╡ 9471fa84-538f-4b54-8e70-97eb279f0f7e
 _responds_sam_inconcl_rep0 = ((!).(_responds_sam_yes_rep0)) .& ((!).(_responds_sam_nop_rep0));
+
+# ╔═╡ 4076ed6d-6f5f-4207-ac76-e045aa0b1c75
+# All merged data, for the reactivity profiles plots
+shape_data_all_merged = SamApp2024.load_shapemapper_data_pierre_demux_20240801_with_pdb_repls_merged();
+
+# ╔═╡ 306072f8-c317-40f3-aa43-5d23d24fbcc7
+conds_SAM_all_merged = map(identity, indexin(["SAMAP_1M7_0-1SAM_5Mg_T30C_allrep", "SAMAP_1M7_1SAM_5Mg_T30C_allrep"], shape_data_all_merged.conditions));
+
+# ╔═╡ 3affcd4d-e17d-456f-b24d-d66236cf1c9d
+conds_Mg_all_merged = map(identity, indexin(["SAMAP_1M7_noSAM_5Mg_T30C_allrep"], shape_data_all_merged.conditions));
 
 # ╔═╡ 69de6e55-f5c6-4199-bb53-4469f1426d33
 md"# SHAPE repl.0 with or without A,C"
@@ -472,39 +488,50 @@ struct_bands = [
     (; x0=76.5, xf=80.5, color="red", alpha=0.1), # Pk
 ];
 
+# ╔═╡ ef3554ab-8bed-40ba-9f3e-800159d899a4
+length(findall(startswith("APSAMN"), dms_data.aptamer_names))
+
 # ╔═╡ edc476ef-30aa-4fc7-bf26-041b768512e7
 findall(_responds_sam_yes_dms) ∩ findall(startswith("APSAMN"), dms_data.aptamer_names) # natural only
 
-# ╔═╡ eb60b8a8-905e-43b3-a3a7-b940bd563d3c
+# ╔═╡ 1d37e22b-57b1-4ffb-a31b-229eb15eb4c1
 let fig = Makie.Figure()
 	ex_fig_5 = "APSAMN7"
-	#n_ex = only(findall(dms_data.aptamer_names .== ex_fig_5))
-	#n_ex = only(findall(dms_data.aptamer_names .== "APSAMN62"))
-	n_ex = 47
-	
 	width = 700
 	height = 100
 	xticks = 5:5:108
 
-	_R_sam = dms_data.shape_reactivities[:, n_ex, 1]
-	_R_mg = dms_data.shape_reactivities[:, n_ex, 2]
+	n_ex = only(findall(shape_data_045.aptamer_names .== ex_fig_5))
+	@show shape_data_045.aptamer_ids[n_ex]
+	_R_sam = shape_data_all_merged.shape_reactivities[:, n_ex, conds_SAM_all_merged[1]]
+	_R_mg = shape_data_all_merged.shape_reactivities[:, n_ex, only(conds_Mg_all_merged)]
 
-	AC_positions = Int[]
-	UG_positions = Int[]
-	for i = 1:108
-		if dms_data.aligned_sequence[n_ex][i] == 'A' || dms_data.aligned_sequence[n_ex][i] == 'C'
-			push!(AC_positions, i)
-		elseif dms_data.aligned_sequence[n_ex][i] == 'U' || dms_data.aligned_sequence[n_ex][i] == 'G'
-			push!(UG_positions, i)
-		end
-	end
+	n_ex_DMS = only(findall(dms_data.aptamer_names .== ex_fig_5))
+	_R_sam_DMS = dms_data.shape_reactivities[:, n_ex_DMS, 1]
+	_R_mg_DMS = dms_data.shape_reactivities[:, n_ex_DMS, 2]
+	seq = dms_data.aligned_sequence[n_ex_DMS]
+
+	@assert dms_data.aligned_sequence[n_ex_DMS] == shape_data_all_merged.aligned_sequences[n_ex]
+
+	AC_positions = [i for (i, a) = enumerate(seq) if a == 'A' || a == 'C']
+	UG_positions = [i for (i, a) = enumerate(seq) if a == 'U' || a == 'G']
+
+	_R_sam_DMS[UG_positions] .= NaN
+	_R_mg_DMS[UG_positions] .= NaN
+
 	
 	ax_react = Makie.Axis(
-		fig[1,1]; valign=:bottom, width, height, xticks, ylabel="react.", xgridvisible=false, ygridvisible=false, yticks=0:2:8, xtrimspine=true, ytrimspine=true
+		fig[1,1]; valign=:bottom, width, height, xticks, ylabel="react. (SHAPE)", xgridvisible=false, ygridvisible=false, yticks=0:2:8, xtrimspine=true, ytrimspine=true
 	)
 	ax_diff = Makie.Axis(
-		fig[2,1]; valign=:bottom, width, height, xticks, xlabel="site", ylabel="Δreact.", xgridvisible=false, ygridvisible=false, 
-		yticks=[-2,-1,0], xtrimspine=true, ytrimspine=true
+		fig[2,1]; valign=:bottom, width, height, xticks, xlabel="site", ylabel="Δreact. (SHAPE)", xgridvisible=false, ygridvisible=false, yticks=[-4,-2,0], xtrimspine=true, ytrimspine=true
+	)
+
+	ax_react_DMS = Makie.Axis(
+		fig[1,1]; valign=:bottom, width, height, xticks, ylabel="react. (DMS)", xgridvisible=false, ygridvisible=false, yticks=0:2:8, xtrimspine=true, ytrimspine=true, yaxisposition=:right, yticklabelcolor=:orange, ylabelcolor=:orange
+	)
+	ax_diff_DMS = Makie.Axis(
+		fig[2,1]; valign=:bottom, width, height, xticks, xlabel="site", ylabel="Δreact. (DMS)", xgridvisible=false, ygridvisible=false, yticks=-4:0.5:1, xtrimspine=true, ytrimspine=true, yaxisposition=:right, yticklabelcolor=:orange, ylabelcolor=:orange
 	)
 
 	for (x0, xf, color, alpha) = struct_bands
@@ -514,15 +541,110 @@ let fig = Makie.Figure()
 	
 	Makie.stairs!(ax_react, 1:108, _R_mg; step=:center, color=:gray, label="no SAM")
 	Makie.stairs!(ax_react, 1:108, _R_sam; step=:center, color=:purple, label="with SAM")
+
+	Makie.scatter!(ax_react_DMS, 1:108, _R_mg_DMS; color=:gray, markersize=5)
+	Makie.scatter!(ax_react_DMS, 1:108, _R_sam_DMS; color=:orange, markersize=5)
+
 	#Makie.axislegend(ax_react, position=(0.0, -13), framevisible=false)
 	#Makie.hidespines!(ax_react_1, :t, :r, :b)
 	#Makie.hidexdecorations!(ax_react_1)
 	
 	Makie.barplot!(ax_diff, 1:108, _R_sam - _R_mg, color=ifelse.(_R_sam - _R_mg .< 0, :green, :gray))
-	Makie.scatter!(ax_diff, _sites, -1.1one.(_sites), markersize=7, color=:black, marker=:utriangle)
+	Makie.scatter!(ax_diff, _sites, -3.8one.(_sites), markersize=7, color=:black, marker=:utriangle)
 
-	Makie.scatter!(ax_react, AC_positions, 3one.(AC_positions), markersize=7, color=:blue, marker=:utriangle)
-	Makie.scatter!(ax_react, UG_positions, 3one.(UG_positions), markersize=7, color=:red, marker=:utriangle)
+	Makie.scatter!(ax_diff_DMS, 1:108, _R_sam_DMS - _R_mg_DMS; color=ifelse.(_R_sam_DMS - _R_mg_DMS .< 0, :orange, :gray), markersize=5)
+
+	
+	Makie.hidespines!(ax_diff, :r, :t)
+	Makie.hidespines!(ax_diff_DMS, :l, :t, :b)
+	Makie.hidespines!(ax_react, :r, :t, :b)
+	Makie.hidespines!(ax_react_DMS, :l, :t, :b)
+	Makie.hidexdecorations!(ax_react)
+	Makie.hidexdecorations!(ax_react_DMS)
+
+	Makie.linkxaxes!(ax_react, ax_diff, ax_react_DMS, ax_diff_DMS)
+	
+	Makie.ylims!(ax_diff, -4, 0.7)
+	Makie.ylims!(ax_diff_DMS, -1, 0.7/4)
+	Makie.ylims!(ax_react, -0.5, 6)
+	Makie.ylims!(ax_react_DMS, -0.25, 3)
+
+	for ax = (ax_react, ax_diff, ax_react_DMS, ax_diff_DMS)
+		Makie.xlims!(ax, 0.5, 108.5)
+	end
+
+	Makie.resize_to_layout!(fig)
+	#Makie.save("Figures/Fig5new_SHAPE_example2.pdf", fig)
+	fig
+end
+
+# ╔═╡ eb60b8a8-905e-43b3-a3a7-b940bd563d3c
+let fig = Makie.Figure()
+	ex_fig_5 = "APSAMN7"
+	n_ex = only(findall(dms_data.aptamer_names .== ex_fig_5))
+	#n_ex = only(findall(dms_data.aptamer_names .== "APSAMN62"))t
+	#n_ex = 47
+
+	good_coverage_flag = [mean(isnan, dms_data.shape_reactivities[:, n, :]) for n = axes(dms_data.shape_reactivities, 2)] .< 0.2
+	@show count(good_coverage_flag)
+	admissible_examples = findall(_responds_sam_yes_dms) ∩ findall(startswith("APSAMN"), dms_data.aptamer_names) ∩ findall(good_coverage_flag) # natural only
+	@show length(admissible_examples)
+	
+	#n_ex = rand(admissible_examples) 
+	@show n_ex
+	
+	# _R_sam = dms_data.shape_reactivities[:, n_ex, 1]
+	# _R_mg = dms_data.shape_reactivities[:, n_ex, 2]
+	# seq = dms_data.aligned_sequence[n_ex]
+
+	_R_sam = dms_4kqy_data.shape_reactivities[:, 1, 1]
+	_R_mg = dms_4kqy_data.shape_reactivities[:, 1, 2]
+	seq = dms_4kqy_data.aligned_sequence[1]
+
+	width = 700
+	height = 100
+	xticks = 5:5:108
+
+	AC_positions = Int[]
+	UG_positions = Int[]
+	for i = 1:108
+		if seq[i] == 'A' || seq[i] == 'C'
+			push!(AC_positions, i)
+		elseif seq[i] == 'U' || seq[i] == 'G'
+			push!(UG_positions, i)
+		end
+	end
+
+	_R_sam[UG_positions] .= NaN
+	_R_mg[UG_positions] .= NaN
+	
+	ax_react = Makie.Axis(
+		fig[1,1]; valign=:bottom, width, height, xticks, ylabel="react.", xgridvisible=false, ygridvisible=false, yticks=0:1:8, xtrimspine=true, ytrimspine=true
+	)
+	ax_diff = Makie.Axis(
+		fig[2,1]; valign=:bottom, width, height, xticks, xlabel="site", ylabel="Δreact.", xgridvisible=false, ygridvisible=false, 
+		yticks=-2:0.5:0, xtrimspine=true, ytrimspine=true
+	)
+
+	for (x0, xf, color, alpha) = struct_bands
+	    Makie.vspan!(ax_react, x0, xf; color=(color, alpha))
+		Makie.vspan!(ax_diff, x0, xf; color=(color, alpha))
+	end
+	
+	Makie.stairs!(ax_react, 1:108, _R_mg; step=:center, linewidth=2, color=:gray, label="no SAM")
+	Makie.stairs!(ax_react, 1:108, _R_sam; step=:center, linewidth=2, color=:purple, label="with SAM")
+	#Makie.axislegend(ax_react, position=(0.0, -13), framevisible=false)
+	#Makie.hidespines!(ax_react_1, :t, :r, :b)
+	#Makie.hidexdecorations!(ax_react_1)
+
+	#ΔR = replace(_R_sam - _R_mg, NaN => 0)
+	ΔR = _R_sam - _R_mg
+	
+	Makie.barplot!(ax_diff, 1:108, ΔR; color=ifelse.(ΔR .< 0, :green, :gray))
+	Makie.scatter!(ax_diff, _sites, -0.75one.(_sites), markersize=7, color=:black, marker=:utriangle)
+
+	# Makie.scatter!(ax_react, AC_positions, 1.5one.(AC_positions), markersize=7, color=:blue, marker=:utriangle)
+	# Makie.scatter!(ax_react, UG_positions, 1.5one.(UG_positions), markersize=7, color=:red, marker=:utriangle)
 	
 	Makie.xlims!(ax_diff, 0, 109)
 	
@@ -532,8 +654,8 @@ let fig = Makie.Figure()
 	#Makie.scatter!(ax_diff_1, _sites, -0.2one.(_sites), color=:blue, markersize=5)
 
 	Makie.linkxaxes!(ax_react, ax_diff)
-	Makie.ylims!(ax_diff, -1.2, 0.5)
-	Makie.ylims!(ax_react, -0.5, 5)
+	Makie.ylims!(ax_diff, -0.8, 0.2)
+	Makie.ylims!(ax_react, -0.5, 1.5)
 	
 	Makie.xlims!(ax_react, 0.5, 108.5)
 	Makie.xlims!(ax_diff,  0.5, 108.5)
@@ -543,16 +665,11 @@ let fig = Makie.Figure()
 	fig
 end
 
-# ╔═╡ 7c9bdcc0-aa11-423c-8c40-5fb81cba5ca3
-dms_data.aligned_sequence[]
+# ╔═╡ 1603e762-6c46-4e3a-b9c4-6f4e882abe3c
+replace([NaN, 1.0], NaN => 0)
 
-# ╔═╡ 465306c4-7032-4ae7-b9b3-af53b3af7963
-dms_data.conditions
-
-# ╔═╡ 88480f95-2d25-4ddf-8635-b3883d842175
-for p = dms_data.aptamer_names
-	println(p)
-end
+# ╔═╡ 86742efc-2d80-4aec-a1af-bf6b7f647f42
+_responds_sam_yes_dms[2]
 
 # ╔═╡ 154f87e7-3199-4232-980c-f6f29b1db1fe
 [ # all
@@ -1019,16 +1136,6 @@ end
 # ╠═af8c9beb-f844-4238-8967-2dbff72ac27c
 # ╠═aae7a9e7-cf14-4c09-a6fb-93d6e1e19b3d
 # ╠═e00ec7b5-4f06-4200-9bd0-9e486e4322bc
-# ╠═9763e16f-1fc6-4c79-8fed-176f847d9898
-# ╠═ffa01cd2-cc36-403d-86e8-c3a7e68ac97b
-# ╠═2c0519f1-367d-4fdd-a346-ad550c2e80c6
-# ╠═8fc06bf7-a380-4698-8971-e96df77764b9
-# ╠═df8d1d78-6cd2-40a5-a739-221ed6d03df8
-# ╠═5663156d-3342-4cac-9446-1fee39923ce4
-# ╠═4875da0e-9898-4498-8b29-cb60282e2cc2
-# ╠═50c9a9c5-0253-4cc5-aaa5-d58472e8920c
-# ╠═5f64c1d1-b429-4946-a122-a02fcb7ff1f6
-# ╠═8ab280ee-8a1a-495a-ac75-dee2ca199759
 # ╠═2b18233e-d2ae-485e-9ad7-17e20a26fee7
 # ╠═59a5fee0-59f1-49da-9940-8827c5a23b99
 # ╠═025f0c01-0e0d-4a50-b9cd-becd304a7a42
@@ -1043,6 +1150,14 @@ end
 # ╠═c5ffed2c-c1f3-41a8-82c1-a5842fba5ce4
 # ╠═010c18f0-8aea-4c91-b4d1-300117449683
 # ╠═f22df52d-cb6b-4fe8-9a16-bc1488a0122f
+# ╠═1844dcba-9000-4d9a-abb0-866c39976417
+# ╠═b78e2d5c-6b1a-4aea-8b72-e926aa85457d
+# ╠═3cb95456-1ab3-4ba3-a16c-a51ed8cd5801
+# ╠═4fa39043-b67e-4a7d-8a6e-e97a9acfcde5
+# ╠═1a09c421-da49-48f8-ba08-3e9bb65e47cb
+# ╠═3bea40c7-1c63-4bbd-a1fa-e28409a0c0bf
+# ╠═6f79ba8b-b609-4ae5-9a04-724e14cc559f
+# ╠═6581c638-a0f8-42cb-9e14-f52e2d5efca3
 # ╠═c4fe44f9-fd26-4450-9479-afc596abe4ee
 # ╠═f1f0126d-e212-47bc-8acc-736bb5905c0a
 # ╠═5d9f93d5-007c-4d1f-9b9b-a913a7f4c00a
@@ -1065,6 +1180,9 @@ end
 # ╠═61613274-8e04-46ba-90dc-aa5b4e0c661f
 # ╠═70b61f1d-c2a7-4f3b-bbfd-aabcca807470
 # ╠═9471fa84-538f-4b54-8e70-97eb279f0f7e
+# ╠═4076ed6d-6f5f-4207-ac76-e045aa0b1c75
+# ╠═306072f8-c317-40f3-aa43-5d23d24fbcc7
+# ╠═3affcd4d-e17d-456f-b24d-d66236cf1c9d
 # ╠═69de6e55-f5c6-4199-bb53-4469f1426d33
 # ╠═9e889b57-de0e-4632-94d3-030a5ee58bd0
 # ╠═2d7bd92e-dcb8-4987-a73d-e91ca9532a57
@@ -1105,11 +1223,12 @@ end
 # ╠═35177920-959c-4de4-a54d-8be5037e75d6
 # ╠═510af1b3-5ad3-4ccc-8cb3-1a08ff11e792
 # ╠═8b401a11-28f1-4044-9824-5e772bea37bf
+# ╠═ef3554ab-8bed-40ba-9f3e-800159d899a4
 # ╠═edc476ef-30aa-4fc7-bf26-041b768512e7
+# ╠═1d37e22b-57b1-4ffb-a31b-229eb15eb4c1
 # ╠═eb60b8a8-905e-43b3-a3a7-b940bd563d3c
-# ╠═7c9bdcc0-aa11-423c-8c40-5fb81cba5ca3
-# ╠═465306c4-7032-4ae7-b9b3-af53b3af7963
-# ╠═88480f95-2d25-4ddf-8635-b3883d842175
+# ╠═1603e762-6c46-4e3a-b9c4-6f4e882abe3c
+# ╠═86742efc-2d80-4aec-a1af-bf6b7f647f42
 # ╠═154f87e7-3199-4232-980c-f6f29b1db1fe
 # ╠═80306132-cc00-4b7c-a012-3890aa00793f
 # ╠═0d79ddcc-f6cc-405a-8a1c-a6d3336c1476
