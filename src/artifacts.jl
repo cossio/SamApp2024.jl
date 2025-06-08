@@ -136,3 +136,7 @@ function artifact_load_20250428_aligned_full_riboswitch_sequences()
     end
     return sequences
 end
+
+function artifact_dir_DMS_PDB_4KQY_20250607()
+    return artifact"DMS_PDB_4KQY_20250607"
+end

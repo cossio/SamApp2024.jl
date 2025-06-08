@@ -133,3 +133,11 @@ lazy = true
     [[2025-04-28_aligned_full_riboswitch_sequences.download]]
     sha256 = "254a0710bd6bf7160b0366559a032c24d81fd60a4da1b405349d31ddd327fac9"
     url = "https://gist.github.com/jfdcd/cf9a0c44e1b1509b44cdfd9e4b432496/raw/3924162b46a416d4a9f48678d90b80301dce1073.tar.gz"
+
+[DMS_PDB_4KQY_20250607]
+git-tree-sha1 = "6eecc4c3ffa6f24970f9762f82cebdab06217d33"
+lazy = true
+
+    [[DMS_PDB_4KQY_20250607.download]]
+    sha256 = "4c832d0f9fdae65aab2760dd1e63fe721dcfb68a33ee9c12db8b87bc6e00978d"
+    url = "https://gist.github.com/jfdcd/76fde6f2a68f8d45b44f9013143b21c4/raw/6eecc4c3ffa6f24970f9762f82cebdab06217d33.tar.gz"
