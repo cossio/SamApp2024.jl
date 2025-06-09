@@ -203,6 +203,9 @@ let fig = Makie.Figure()
 	ΔR_sam_std_rbmlo_no_NaN = replace(ΔR_sam_std_rbmlo, NaN => 0)
 	ΔR_sam_avg_rbmhi_no_NaN = replace(ΔR_sam_avg_rbmhi, NaN => 0)
 	ΔR_sam_std_rbmhi_no_NaN = replace(ΔR_sam_std_rbmhi, NaN => 0)
+
+	ΔR_sam_avg_rbmlo_no0std = [ΔR_sam_std_rbmlo[i] > 0 ? ΔR_sam_avg_rbmlo[i] : NaN for i = eachindex(ΔR_sam_std_rbmlo)]
+	ΔR_sam_avg_rbmhi_no0std = [ΔR_sam_std_rbmhi[i] > 0 ? ΔR_sam_avg_rbmhi[i] : NaN for i = eachindex(ΔR_sam_avg_rbmhi)]
 	
 	ax = Makie.Axis(fig[2,:], width=900, height=150, xticks=5:10:108, yticks=-2:0.5:1, xgridvisible=false, ygridvisible=false, ylabel="Δreactivity", xtrimspine=true, ytrimspine=true)
 	
@@ -211,8 +214,8 @@ let fig = Makie.Figure()
 	Makie.scatter!(ax, _xs, ΔR_sam_avg_natural[_xs], markersize=5, color=:black, label="Natural")
 	
 	Makie.band!(ax, _xs, (ΔR_sam_avg_rbmlo_no_NaN - ΔR_sam_std_rbmlo_no_NaN/2)[_xs], (ΔR_sam_avg_rbmlo_no_NaN + ΔR_sam_std_rbmlo_no_NaN/2)[_xs], markersize=5, color=(:blue, 0.25))
-	Makie.lines!(ax, _xs, ΔR_sam_avg_rbmlo[_xs], linewidth=1, color=:blue)
-	Makie.scatter!(ax, _xs, ΔR_sam_avg_rbmlo[_xs], markersize=5, color=:blue, label="RBM (RBMscore>300)")
+	Makie.lines!(ax, _xs, ΔR_sam_avg_rbmlo_no0std, linewidth=1, color=:blue)
+	Makie.scatter!(ax, _xs, ΔR_sam_avg_rbmlo_no0std, markersize=5, color=:blue, label="RBM (RBMscore>300)")
 	Makie.axislegend(ax, position=(0.5, 0), framevisible=false, patchlabelgap=-3)
 	Makie.hidespines!(ax, :t, :r, :b)
 	Makie.hidexdecorations!(ax)
@@ -251,7 +254,12 @@ let fig = Makie.Figure()
 end
 
 # ╔═╡ e9ab582c-e7fc-40cf-97f5-12f1d9fbff8f
-(ΔR_sam_avg_natural - ΔR_sam_std_natural/2)[15:25]
+let fig = Makie.Figure()
+	ax = Makie.Axis(fig[1,1]; width=400, height=100)
+	Makie.band!(ax, 1:5, (1:5) .- [1, 2, NaN, 2, 1], (1:5) .+ [1, 2, NaN, 2, 1])
+	Makie.resize_to_layout!(fig)
+	fig
+end
 
 # ╔═╡ Cell order:
 # ╠═8ead4fb8-9e99-4206-9d4d-4380efa8c844
