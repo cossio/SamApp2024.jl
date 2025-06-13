@@ -224,11 +224,11 @@ let fig = Makie.Figure()
 	
 	ax = Makie.Axis(fig[2,:], width=900, height=150, xticks=5:10:108, yticks=-2:1:1, xgridvisible=false, ygridvisible=false, ylabel="Δreactivity", xtrimspine=true, ytrimspine=true)
 	
-	Makie.band!(ax, _xs, (ΔR_sam_avg_seed - ΔR_sam_std_seed/2)[_xs], (ΔR_sam_avg_seed + ΔR_sam_std_seed/2)[_xs], markersize=5, color=(:gray, 0.25))
+	Makie.band!(ax, _xs, (ΔR_sam_avg_seed - ΔR_sam_std_seed/2)[_xs], (ΔR_sam_avg_seed + ΔR_sam_std_seed/2)[_xs], color=(:gray, 0.25))
 	Makie.lines!(ax, _xs, ΔR_sam_avg_seed[_xs], linewidth=1, color=:gray)
 	Makie.scatter!(ax, _xs, ΔR_sam_avg_seed[_xs], markersize=5, color=:black, label="Natural")
 	
-	Makie.band!(ax, _xs, (ΔR_sam_avg_rbmlo - ΔR_sam_std_rbmlo/2)[_xs], (ΔR_sam_avg_rbmlo + ΔR_sam_std_rbmlo/2)[_xs], markersize=5, color=(:blue, 0.25))
+	Makie.band!(ax, _xs, (ΔR_sam_avg_rbmlo - ΔR_sam_std_rbmlo/2)[_xs], (ΔR_sam_avg_rbmlo + ΔR_sam_std_rbmlo/2)[_xs], color=(:blue, 0.25))
 	Makie.lines!(ax, _xs, ΔR_sam_avg_rbmlo[_xs], linewidth=1, color=:blue)
 	Makie.scatter!(ax, _xs, ΔR_sam_avg_rbmlo[_xs], markersize=5, color=:blue, label="RBM (RBMscore>300)")
 	Makie.axislegend(ax, position=(0.5, 0), framevisible=false, patchlabelgap=-3)
@@ -238,11 +238,11 @@ let fig = Makie.Figure()
 	
 	ax = Makie.Axis(fig[3,:], width=900, height=150, xticks=5:10:108, yticks=-2:1:1, xgridvisible=false, ygridvisible=false, xlabel="site", ylabel="Δreactivity", xtrimspine=true, ytrimspine=true)
 	
-	Makie.band!(ax, _xs, (ΔR_sam_avg_seed - ΔR_sam_std_seed/2)[_xs], (ΔR_sam_avg_seed + ΔR_sam_std_seed/2)[_xs], markersize=5, color=(:gray, 0.25))
+	Makie.band!(ax, _xs, (ΔR_sam_avg_seed - ΔR_sam_std_seed/2)[_xs], (ΔR_sam_avg_seed + ΔR_sam_std_seed/2)[_xs], color=(:gray, 0.25))
 	Makie.lines!(ax, _xs, ΔR_sam_avg_seed[_xs], linewidth=1, color=:gray)
 	Makie.scatter!(ax, _xs, ΔR_sam_avg_seed[_xs], markersize=5, color=:black, label="Natural")
 	
-	Makie.band!(ax, _xs, (ΔR_sam_avg_inf - ΔR_sam_std_inf/2)[_xs], (ΔR_sam_avg_inf + ΔR_sam_std_inf/2)[_xs], markersize=5, color=(:red, 0.25))
+	Makie.band!(ax, _xs, (ΔR_sam_avg_inf - ΔR_sam_std_inf/2)[_xs], (ΔR_sam_avg_inf + ΔR_sam_std_inf/2)[_xs], color=(:red, 0.25))
 	Makie.lines!(ax, _xs, ΔR_sam_avg_inf[_xs], linewidth=1, color=:red)
 	Makie.scatter!(ax, _xs, ΔR_sam_avg_inf[_xs], markersize=5, color=:red, label="rCM")
 	Makie.scatter!(ax, SamApp2024.hallmark_sites_20230507, -2.0one.(SamApp2024.hallmark_sites_20230507), markersize=7, color=:black, marker=:utriangle)

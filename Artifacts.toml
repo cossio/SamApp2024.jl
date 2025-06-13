@@ -141,3 +141,11 @@ lazy = true
     [[DMS_PDB_4KQY_20250607.download]]
     sha256 = "4c832d0f9fdae65aab2760dd1e63fe721dcfb68a33ee9c12db8b87bc6e00978d"
     url = "https://gist.github.com/jfdcd/76fde6f2a68f8d45b44f9013143b21c4/raw/6eecc4c3ffa6f24970f9762f82cebdab06217d33.tar.gz"
+
+[pdb_2GIS_sequence]
+git-tree-sha1 = "abc070c03e6f64e77bc26ef35012b67f7c86a636"
+lazy = true
+
+    [[pdb_2GIS_sequence.download]]
+    sha256 = "25b4e2cdddfe50bf3f19fc346628a5edca1d5c33a802e612d1d645f0735d9c6f"
+    url = "https://gist.github.com/jfdcd/147c237a9d3cd8af01d337e27d11b1a3/raw/abc070c03e6f64e77bc26ef35012b67f7c86a636.tar.gz"

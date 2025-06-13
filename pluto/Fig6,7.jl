@@ -172,6 +172,9 @@ shape_stats_rep0 = SamApp2024.shape_basepair_log_odds_v4(;
     only_hq_profile = true, p_thresh = 1e-3, nsamples = 1000
 );
 
+# ╔═╡ 1978891c-c502-4a4d-bb0e-0b33635a3263
+length(rbm_seqs)
+
 # ╔═╡ ac0f6b9c-abdc-4aa3-bf00-29f63330d219
 _thresh = log(5)
 
@@ -198,6 +201,9 @@ _conclusive_rep0 = _responds_sam_yes_rep0 .| _responds_sam_nop_rep0;
 
 # ╔═╡ db615f71-8858-47da-be2f-8196f7070e6d
 sum(_responds_sam_yes_rep0), sum(_responds_sam_nop_rep0), sum(_inconclusive_rep0)
+
+# ╔═╡ d896c790-02ab-4f57-801b-cf2eb25aefab
+_responds_sam_yes_rep0[[299, 207]]
 
 # ╔═╡ 41caae29-9181-4cf8-a814-64868a9b8e90
 aptamer_rbm_energies = [
@@ -341,7 +347,7 @@ let fig = Makie.Figure(; halign = :left)
 	Makie.scatter!(ax, x_mg_rep0[findall(_responds_sam_nop_rep0) ∩ nat_seqs], -aptamer_rbm_energies[findall(_responds_sam_nop_rep0) ∩ nat_seqs], markersize=15, color=:green, marker='O')
 	Makie.scatter!(ax, x_mg_rep0[findall(_responds_sam_yes_rep0) ∩ nat_seqs], -aptamer_rbm_energies[findall(_responds_sam_yes_rep0) ∩ nat_seqs], markersize=15, color=:green, marker='●')
 	Makie.scatter!(ax, x_mg_rep0[findall(_responds_sam_nop_rep0) ∩ inf_seqs], -aptamer_rbm_energies[findall(_responds_sam_nop_rep0) ∩ inf_seqs], markersize=15, color=:red, marker='O')
-	Makie.scatter!(ax, x_mg_rep0[findall(_responds_sam_yes_rep0) ∩ inf_seqs], -aptamer_rbm_energies[findall(_responds_sam_yes_rep0) ∩ inf_seqs], markersize=15, color=:red, marker='●')
+	Makie.scatter!(ax, x_mg_rep0[findall(_responds_sam_yes_rep0) ∩ inf_seqs], -Float64.(aptamer_rbm_energies[findall(_responds_sam_yes_rep0) ∩ inf_seqs]), markersize=15, color=:red, marker='●') # empty
 	Makie.scatter!(ax, x_mg_rep0[findall(_responds_sam_nop_rep0) ∩ rbm_seqs], -aptamer_rbm_energies[findall(_responds_sam_nop_rep0) ∩ rbm_seqs], markersize=15, color=:blue, marker='O')
 	Makie.scatter!(ax, x_mg_rep0[findall(_responds_sam_yes_rep0) ∩ rbm_seqs], -aptamer_rbm_energies[findall(_responds_sam_yes_rep0) ∩ rbm_seqs], markersize=15, color=:blue, marker='●')
 	Makie.vlines!(ax, [-_thresh, _thresh], linestyle=:dash, color=:orange)
@@ -351,7 +357,7 @@ let fig = Makie.Figure(; halign = :left)
 	plt1 = Makie.scatter!(ax, x_sam_rep0[findall(_responds_sam_nop_rep0) ∩ nat_seqs], -aptamer_rbm_energies[findall(_responds_sam_nop_rep0) ∩ nat_seqs], markersize=15, color=:green, marker='O', label="Nat. (❌)")
 	plt2 = Makie.scatter!(ax, x_sam_rep0[findall(_responds_sam_yes_rep0) ∩ nat_seqs], -aptamer_rbm_energies[findall(_responds_sam_yes_rep0) ∩ nat_seqs], markersize=15, color=:green, marker='●', label="Nat. (✓)")
 	plt3 = Makie.scatter!(ax, x_sam_rep0[findall(_responds_sam_nop_rep0) ∩ inf_seqs], -aptamer_rbm_energies[findall(_responds_sam_nop_rep0) ∩ inf_seqs], markersize=15, color=:red, marker='O', label="CM (❌)")
-	plt4 = Makie.scatter!(ax, x_sam_rep0[findall(_responds_sam_yes_rep0) ∩ inf_seqs], -aptamer_rbm_energies[findall(_responds_sam_yes_rep0) ∩ inf_seqs], markersize=15, color=:red, marker='●', label="CM (✓)")
+	plt4 = Makie.scatter!(ax, x_sam_rep0[findall(_responds_sam_yes_rep0) ∩ inf_seqs], -Float64.(aptamer_rbm_energies[findall(_responds_sam_yes_rep0) ∩ inf_seqs]), markersize=15, color=:red, marker='●', label="CM (✓)") # Empty
 	plt5 = Makie.scatter!(ax, x_sam_rep0[findall(_responds_sam_nop_rep0) ∩ rbm_seqs], -aptamer_rbm_energies[findall(_responds_sam_nop_rep0) ∩ rbm_seqs], markersize=15, color=:blue, marker='O', label="RBM (❌)")
 	plt6 = Makie.scatter!(ax, x_sam_rep0[findall(_responds_sam_yes_rep0) ∩ rbm_seqs], -aptamer_rbm_energies[findall(_responds_sam_yes_rep0) ∩ rbm_seqs], markersize=15, color=:blue, marker='●', label="RBM (✓)")
 	Makie.vlines!(ax, [-_thresh, _thresh], linestyle=:dash, color=:orange)
@@ -439,6 +445,9 @@ let fig = Makie.Figure(; halign = :left)
 	Makie.save("Figures/SAM response Repl0 v2.pdf", fig)
 	fig
 end
+
+# ╔═╡ d3b705a7-03ac-4731-8c45-fa95c857d004
+Float64.(aptamer_rbm_energies[findall(_responds_sam_yes_rep0) ∩ inf_seqs])
 
 # ╔═╡ cb8c0927-cdda-4a9f-aad0-d6b8308ae933
 md"# Pairing energies"
@@ -852,6 +861,7 @@ end
 # ╠═fcd6da1f-2afb-4b47-8a39-4aacb2b48fb2
 # ╠═cb886986-01e2-494b-8d5d-0ceacaa6d886
 # ╠═92975e4a-13a1-42b2-8219-a1266b7189a1
+# ╠═1978891c-c502-4a4d-bb0e-0b33635a3263
 # ╠═ac0f6b9c-abdc-4aa3-bf00-29f63330d219
 # ╠═3922c5e8-6d40-4cf7-ae2a-3bcb5ae48d73
 # ╠═acf8bb76-bf87-4cf8-b280-e0e13c65fdff
@@ -861,6 +871,7 @@ end
 # ╠═e0223248-586e-48a1-9799-d3918f672e92
 # ╠═b8006eb5-b99f-4535-81ef-dfe669d0d332
 # ╠═db615f71-8858-47da-be2f-8196f7070e6d
+# ╠═d896c790-02ab-4f57-801b-cf2eb25aefab
 # ╠═41caae29-9181-4cf8-a814-64868a9b8e90
 # ╠═3d0cd846-07a7-4910-a2a2-2ef660355ad5
 # ╠═74fbb354-2657-475e-8d1e-42d39e255396
@@ -897,6 +908,7 @@ end
 # ╠═c87fa471-dbb6-4802-8bd0-aae1eafd7fc0
 # ╠═4c4144ca-9f36-44f0-b697-7411df2fac6a
 # ╠═9fcca185-180f-4478-8fa2-d0cf37e1937b
+# ╠═d3b705a7-03ac-4731-8c45-fa95c857d004
 # ╠═cb8c0927-cdda-4a9f-aad0-d6b8308ae933
 # ╠═935a3442-ed13-4239-962b-9c17dc86e792
 # ╠═fbbd6109-ac4e-4676-97b1-e9fef5a3b729

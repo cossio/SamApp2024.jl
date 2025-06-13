@@ -110,17 +110,14 @@ aptamer_rbm_energies = [
     for seq in dms_data.aligned_sequence
 ];
 
-# ╔═╡ 81c31eea-0ca4-46e4-baea-c11be6e34d06
-nat_seqs = [i for (i,n) = enumerate(dms_data.aptamer_names) if startswith(n, "APSAMN")]
-
-# ╔═╡ ff3bc8fd-d8cf-477c-8a94-7ac27a75c555
-rbm_seqs = findall(dms_aptamer_origin .== "rbm")
+# ╔═╡ 0c3e2755-0976-452e-a506-7b9ed175e0fa
+nat_seqs = findall(dms_aptamer_origin .== "natural")
 
 # ╔═╡ 1837c99a-5234-4827-99a3-d1dfe02d1732
-_rbmlo = rbm_seqs ∩ findall((!ismissing).(aptamer_rbm_energies) .&& (aptamer_rbm_energies .< -300));
+_rbmlo = findall(dms_aptamer_origin .== "rbm") ∩ findall((!ismissing).(aptamer_rbm_energies) .&& (aptamer_rbm_energies .< -300))
 
 # ╔═╡ e7b9f53e-1cea-4520-8b00-18b693da5f05
-_rbmhi = rbm_seqs ∩ findall((!ismissing).(aptamer_rbm_energies) .&& (aptamer_rbm_energies .> -300));
+_rbmhi = findall(dms_aptamer_origin .== "rbm") ∩ findall((!ismissing).(aptamer_rbm_energies) .&& (aptamer_rbm_energies .> -300))
 
 # ╔═╡ 9d689c9f-bfa7-4fc6-9f74-9dc759f6e45a
 conds_sam_dms = [1]
@@ -148,6 +145,9 @@ conds_mg_dms = [2]
 
 # ╔═╡ 21bf6c57-753d-4722-8d45-59787ce516e7
 ΔR_sam_std_rbmhi = [nanstd([ΔR_sam[i,n] for n = _rbmhi if !ismissing(dms_data.aligned_sequence[n]) && dms_data.aligned_sequence[n][i] ∈ ('A', 'C')]) for i = 1:108]
+
+# ╔═╡ c968d393-85e1-4abd-9fa6-f8a00f0d5f99
+AC_content = [mean(seq[i] ∈ ('A', 'C') for seq = skipmissing(dms_data.aligned_sequence)) for i = 1:108]
 
 # ╔═╡ d129042c-b6e3-4bf8-bf00-7d04bbfb8279
 md"# Histograms"
@@ -197,49 +197,41 @@ let fig = Makie.Figure()
 	
 	_xs = 1:108
 
-	ΔR_sam_std_natural_no_NaN = replace(ΔR_sam_std_natural, NaN => 0)
-	ΔR_sam_avg_natural_no_NaN = replace(ΔR_sam_avg_natural, NaN => 0)
-	ΔR_sam_avg_rbmlo_no_NaN = replace(ΔR_sam_avg_rbmlo, NaN => 0)
-	ΔR_sam_std_rbmlo_no_NaN = replace(ΔR_sam_std_rbmlo, NaN => 0)
-	ΔR_sam_avg_rbmhi_no_NaN = replace(ΔR_sam_avg_rbmhi, NaN => 0)
-	ΔR_sam_std_rbmhi_no_NaN = replace(ΔR_sam_std_rbmhi, NaN => 0)
-
-	ΔR_sam_avg_rbmlo_no0std = [ΔR_sam_std_rbmlo[i] > 0 ? ΔR_sam_avg_rbmlo[i] : NaN for i = eachindex(ΔR_sam_std_rbmlo)]
-	ΔR_sam_avg_rbmhi_no0std = [ΔR_sam_std_rbmhi[i] > 0 ? ΔR_sam_avg_rbmhi[i] : NaN for i = eachindex(ΔR_sam_avg_rbmhi)]
+	_std_thresh = 0
+	ΔR_sam_avg_natural_no0std = [ΔR_sam_std_natural[i] > _std_thresh ? ΔR_sam_avg_natural[i] : NaN for i = eachindex(ΔR_sam_avg_natural)]
+	ΔR_sam_avg_rbmlo_no0std = [ΔR_sam_std_rbmlo[i] > _std_thresh ? ΔR_sam_avg_rbmlo[i] : NaN for i = eachindex(ΔR_sam_std_rbmlo)]
+	ΔR_sam_avg_rbmhi_no0std = [ΔR_sam_std_rbmhi[i] > _std_thresh ? ΔR_sam_avg_rbmhi[i] : NaN for i = eachindex(ΔR_sam_avg_rbmhi)]
 	
 	ax = Makie.Axis(fig[2,:], width=900, height=150, xticks=5:10:108, yticks=-2:0.5:1, xgridvisible=false, ygridvisible=false, ylabel="Δreactivity", xtrimspine=true, ytrimspine=true)
 	
-	Makie.band!(ax, _xs, (ΔR_sam_avg_natural_no_NaN - ΔR_sam_std_natural_no_NaN/2)[_xs], (ΔR_sam_avg_natural_no_NaN + ΔR_sam_std_natural_no_NaN/2)[_xs]; markersize=5, color=(:gray, 0.25))
-	Makie.lines!(ax, _xs, ΔR_sam_avg_natural[_xs], linewidth=1, color=:gray)
-	Makie.scatter!(ax, _xs, ΔR_sam_avg_natural[_xs], markersize=5, color=:black, label="Natural")
-	
-	Makie.band!(ax, _xs, (ΔR_sam_avg_rbmlo_no_NaN - ΔR_sam_std_rbmlo_no_NaN/2)[_xs], (ΔR_sam_avg_rbmlo_no_NaN + ΔR_sam_std_rbmlo_no_NaN/2)[_xs], markersize=5, color=(:blue, 0.25))
-	Makie.lines!(ax, _xs, ΔR_sam_avg_rbmlo_no0std, linewidth=1, color=:blue)
-	Makie.scatter!(ax, _xs, ΔR_sam_avg_rbmlo_no0std, markersize=5, color=:blue, label="RBM (RBMscore>300)")
+	Makie.band!(ax, _xs, (ΔR_sam_avg_natural_no0std - ΔR_sam_std_natural/2)[_xs], (ΔR_sam_avg_natural_no0std + ΔR_sam_std_natural/2)[_xs]; color=(:gray, 0.25))
+	Makie.band!(ax, _xs, (ΔR_sam_avg_rbmlo_no0std - ΔR_sam_std_rbmlo/2)[_xs], (ΔR_sam_avg_rbmlo_no0std + ΔR_sam_std_rbmlo/2)[_xs], color=(:blue, 0.25))
+	Makie.scatterlines!(ax, _xs, ΔR_sam_avg_natural_no0std; linewidth=0.5, markersize=5, color=:black, label="Natural")
+	Makie.scatterlines!(ax, _xs, ΔR_sam_avg_rbmlo_no0std, linewidth=0.5, markersize=5, color=:blue, label="RBM (RBMscore>300)")
 	Makie.axislegend(ax, position=(0.5, 0), framevisible=false, patchlabelgap=-3)
 	Makie.hidespines!(ax, :t, :r, :b)
 	Makie.hidexdecorations!(ax)
 	Makie.xlims!(1, 108)
-	Makie.ylims!(-1.3, 0.7)
+	Makie.ylims!(-0.7, 0.7)
 
 	ax = Makie.Axis(fig[3,:], width=900, height=150, xticks=5:10:108, yticks=-2:0.5:1, xgridvisible=false, ygridvisible=false, xlabel="site", ylabel="Δreactivity", xtrimspine=true, ytrimspine=true)
 	
-	Makie.band!(ax, _xs, (ΔR_sam_avg_natural_no_NaN - ΔR_sam_std_natural_no_NaN/2)[_xs], (ΔR_sam_avg_natural_no_NaN + ΔR_sam_std_natural_no_NaN/2)[_xs], markersize=5, color=(:gray, 0.25))
-	Makie.lines!(ax, _xs, ΔR_sam_avg_natural[_xs], linewidth=1, color=:gray)
-	Makie.scatter!(ax, _xs, ΔR_sam_avg_natural[_xs], markersize=5, color=:black, label="Natural")
-
-	Makie.band!(ax, _xs, (ΔR_sam_avg_rbmhi_no_NaN - ΔR_sam_std_rbmhi_no_NaN/2)[_xs], (ΔR_sam_avg_rbmhi_no_NaN + ΔR_sam_std_rbmhi_no_NaN/2)[_xs], markersize=5, color=(:red, 0.25))
-	Makie.lines!(ax, _xs, ΔR_sam_avg_rbmhi[_xs], linewidth=1, color=:red)
-	Makie.scatter!(ax, _xs, ΔR_sam_avg_rbmhi[_xs], markersize=5, color=:red, label="RBM (RBMscore<300)")
+	Makie.band!(ax, _xs, (ΔR_sam_avg_natural_no0std - ΔR_sam_std_natural/2)[_xs], (ΔR_sam_avg_natural_no0std + ΔR_sam_std_natural/2)[_xs], color=(:gray, 0.25))
+	Makie.band!(ax, _xs, (ΔR_sam_avg_rbmhi - ΔR_sam_std_rbmhi/2)[_xs], (ΔR_sam_avg_rbmhi + ΔR_sam_std_rbmhi/2)[_xs], color=(:red, 0.25))
+	Makie.scatterlines!(ax, _xs, ΔR_sam_avg_natural_no0std; markersize=5, linewidth=0.5, color=:black, label="Natural")
+	Makie.scatterlines!(ax, _xs, ΔR_sam_avg_rbmhi_no0std; markersize=5, linewidth=0.5, color=:red, label="RBM (RBMscore<300)")
 	
-	# Makie.band!(ax, _xs, (ΔR_sam_avg_inf - ΔR_sam_std_inf/2)[_xs], (ΔR_sam_avg_inf + ΔR_sam_std_inf/2)[_xs], markersize=5, color=(:red, 0.25))
-	# Makie.lines!(ax, _xs, ΔR_sam_avg_inf[_xs], linewidth=1, color=:red)
-	# Makie.scatter!(ax, _xs, ΔR_sam_avg_inf[_xs], markersize=5, color=:red, label="rCM")
-	Makie.scatter!(ax, SamApp2024.hallmark_sites_20230507, -1.2one.(SamApp2024.hallmark_sites_20230507), markersize=7, color=:black, marker=:utriangle)
+	Makie.scatter!(ax, SamApp2024.hallmark_sites_20230507, -0.65one.(SamApp2024.hallmark_sites_20230507), markersize=7, color=:black, marker=:utriangle)
 	Makie.axislegend(ax, position=(0.5, 0), framevisible=false, patchlabelgap=-3)
 	Makie.hidespines!(ax, :t, :r)
 	Makie.xlims!(1, 108)
-	Makie.ylims!(-1.3, 0.7)
+	Makie.ylims!(-0.7, 0.7)
+
+	ax_AC = Makie.Axis(fig[4,:], width=900, height=40, xticks=5:10:108, xgridvisible=false, ygridvisible=false, xlabel="site", ylabel="A,C content", xtrimspine=true, ytrimspine=true)
+	Makie.barplot!(ax_AC, AC_content; width=0.5, color=:black)
+	Makie.xlims!(0, 109)
+	Makie.hidespines!(ax_AC, :t, :r)
+	Makie.linkxaxes!(ax, ax_AC)
 	
 	# Makie.Label(fig[1,1][1,1,Makie.TopLeft()], "A)", font=:bold, padding=(0,0,10,10))
 	# Makie.Label(fig[1,2][1,1,Makie.TopLeft()], "B)", font=:bold, padding=(0,0,10,10))
@@ -250,14 +242,6 @@ let fig = Makie.Figure()
 	Makie.resize_to_layout!(fig)
 	#Makie.save("/workspaces/SamApp.jl/notebooks/2024-03-14 New paper figures/Figures/SHAPE reactivities.pdf", fig)
 	#Makie.save("Figures/Fig5.pdf", fig)
-	fig
-end
-
-# ╔═╡ e9ab582c-e7fc-40cf-97f5-12f1d9fbff8f
-let fig = Makie.Figure()
-	ax = Makie.Axis(fig[1,1]; width=400, height=100)
-	Makie.band!(ax, 1:5, (1:5) .- [1, 2, NaN, 2, 1], (1:5) .+ [1, 2, NaN, 2, 1])
-	Makie.resize_to_layout!(fig)
 	fig
 end
 
@@ -290,8 +274,7 @@ end
 # ╠═76b10c95-17be-41f0-8e45-1304d5a1d46c
 # ╠═d50dffa9-837a-4045-a8c4-11e474cd88fc
 # ╠═5c25a6e5-674c-4463-b0cd-178fe6aca7db
-# ╠═81c31eea-0ca4-46e4-baea-c11be6e34d06
-# ╠═ff3bc8fd-d8cf-477c-8a94-7ac27a75c555
+# ╠═0c3e2755-0976-452e-a506-7b9ed175e0fa
 # ╠═1837c99a-5234-4827-99a3-d1dfe02d1732
 # ╠═e7b9f53e-1cea-4520-8b00-18b693da5f05
 # ╠═9d689c9f-bfa7-4fc6-9f74-9dc759f6e45a
@@ -303,6 +286,6 @@ end
 # ╠═30e40d75-b0c8-4848-8365-6745632046f6
 # ╠═720d6d0a-3670-4475-a222-08dbd4b6bdc7
 # ╠═21bf6c57-753d-4722-8d45-59787ce516e7
+# ╠═c968d393-85e1-4abd-9fa6-f8a00f0d5f99
 # ╠═d129042c-b6e3-4bf8-bf00-7d04bbfb8279
 # ╠═f299e745-9842-477f-b76c-28ed8b011a23
-# ╠═e9ab582c-e7fc-40cf-97f5-12f1d9fbff8f

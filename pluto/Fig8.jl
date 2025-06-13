@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.8
+# v0.20.10
 
 using Markdown
 using InteractiveUtils
@@ -322,12 +322,12 @@ let fig = Makie.Figure()
 	Makie.hidexdecorations!(ax_react_1)
 	#Makie.axislegend(ax_react_1, position=(0.0, -13), framevisible=false)
 	
-	ax_diff_1 = Makie.Axis(fig[1,2][2,1]; valign=:bottom, width=_width, height=_height, xticks=5:10:108, xlabel="site", ylabel="Δreact.", xgridvisible=false, ygridvisible=false, yticks=-1:1, xtrimspine=true, ytrimspine=true)
+	ax_diff_1 = Makie.Axis(fig[1,2][2,1]; valign=:bottom, width=_width, height=_height, xticks=5:10:108, xlabel="site", ylabel="Δreact.", xgridvisible=false, ygridvisible=false, yticks=-10:2:10, xtrimspine=true, ytrimspine=true)
 	for (x0, xf, color, alpha) = struct_bands
 	    Makie.vspan!(ax_diff_1, x0, xf; color=(color, alpha))
 	end
 	Makie.barplot!(ax_diff_1, 1:108, _R_sam - _R_mg, color=ifelse.(_R_sam - _R_mg .< 0, :green, :gray))
-	Makie.scatter!(ax_diff_1, _sites, -1.4one.(_sites), markersize=7, color=:black, marker=:utriangle)
+	Makie.scatter!(ax_diff_1, _sites, -2.5one.(_sites), markersize=7, color=:black, marker=:utriangle)
 	Makie.xlims!(ax_diff_1, 0, 109)
 	Makie.hidespines!(ax_diff_1, :r, :b, :t)
 	Makie.hidexdecorations!(ax_diff_1)
@@ -348,22 +348,24 @@ let fig = Makie.Figure()
 	Makie.hidespines!(ax_react_2, :t, :r, :b)
 	Makie.hidexdecorations!(ax_react_2)
 	
-	ax_diff_2 = Makie.Axis(fig[1,2][4,1]; valign=:bottom, width=_width, height=_height, xticks=5:10:108, yticks=-1:1, xlabel="site", ylabel="Δreact.", xgridvisible=false, ygridvisible=false, xtrimspine=true, ytrimspine=true)
+	ax_diff_2 = Makie.Axis(fig[1,2][4,1]; valign=:bottom, width=_width, height=_height, xticks=5:10:108, yticks=-10:1:10, xlabel="site", ylabel="Δreact.", xgridvisible=false, ygridvisible=false, xtrimspine=true, ytrimspine=true)
 	for (x0, xf, color, alpha) = struct_bands
 	    Makie.vspan!(ax_diff_2, x0, xf; color=(color, alpha))
 	end
 	Makie.barplot!(ax_diff_2, 1:108, _R_sam - _R_mg, color=ifelse.(_R_sam - _R_mg .< 0, :green, :gray))
-	Makie.scatter!(ax_diff_2, _sites, -1.4one.(_sites), markersize=7, color=:black, marker=:utriangle)
+	Makie.scatter!(ax_diff_2, _sites, -1.65one.(_sites), markersize=7, color=:black, marker=:utriangle)
 	Makie.hidespines!(ax_diff_2, :r, :t)
 	#Makie.scatter!(ax_diff_2, _sites, -0.2one.(_sites), color=:blue, markersize=5)
 	
 	Makie.linkxaxes!(ax_react_1, ax_diff_1)
 	Makie.linkxaxes!(ax_react_2, ax_diff_2)
-	Makie.linkyaxes!(ax_react_1, ax_react_2)
-	Makie.linkyaxes!(ax_diff_1, ax_diff_2)
+	#Makie.linkyaxes!(ax_react_1, ax_react_2)
+	#Makie.linkyaxes!(ax_diff_1, ax_diff_2)
 	
-	Makie.ylims!(ax_diff_1, -1.5, 1)
-	Makie.ylims!(ax_diff_2, -1.5, 1)
+	# Makie.ylims!(ax_diff_1, -1.5, 1)
+	# Makie.ylims!(ax_diff_2, -1.5, 1)
+	Makie.ylims!(ax_diff_1, -2.7, 3.4)
+	Makie.ylims!(ax_diff_2, -1.8, 0.7)
 	
 	Makie.ylims!(ax_react_1, -0.5, 8)
 	Makie.ylims!(ax_react_2, -0.5, 8)
@@ -374,7 +376,10 @@ let fig = Makie.Figure()
 	Makie.xlims!(ax_diff_2,  0.5, 108.5)
 	
 	Makie.resize_to_layout!(fig)
-	Makie.save("Figures/500 aptamers.pdf", fig)
+	#Makie.save("Figures/500 aptamers.pdf", fig)
+	save_path = mktempdir() * "/fig.pdf"
+	println("Saving to $save_path")
+	Makie.save(save_path, fig)
 	fig
 end
 
