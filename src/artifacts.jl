@@ -151,3 +151,14 @@ function artifact_load_pdb_2GIS_sequence()
     end
     return LongRNA{4}(only(sequences))
 end
+
+artifact_dir_pdb_4KQY_sequence() = artifact"pdb_4KQY_sequence"
+artifact_path_pdb_4KQY_sequence() = joinpath(artifact_dir_pdb_4KQY_sequence(), "rcsb_pdb_4KQY.fasta")
+
+function artifact_load_pdb_4KQY_sequence()
+    fasta_path = artifact_path_pdb_4KQY_sequence()
+    sequences = FASTX.FASTA.Reader(open(fasta_path)) do reader
+        return map(FASTX.sequence, reader)
+    end
+    return LongRNA{4}(only(sequences))
+end

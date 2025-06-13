@@ -149,3 +149,11 @@ lazy = true
     [[pdb_2GIS_sequence.download]]
     sha256 = "25b4e2cdddfe50bf3f19fc346628a5edca1d5c33a802e612d1d645f0735d9c6f"
     url = "https://gist.github.com/jfdcd/147c237a9d3cd8af01d337e27d11b1a3/raw/abc070c03e6f64e77bc26ef35012b67f7c86a636.tar.gz"
+
+[pdb_4KQY_sequence]
+git-tree-sha1 = "1b78061f14495bd60128b4f6f84a612966e0ad81"
+lazy = true
+
+    [[pdb_4KQY_sequence.download]]
+    sha256 = "a05251c4d390bfc022fdce3d24935608ea900e0277708c1a264381c955b713a9"
+    url = "https://gist.github.com/jfdcd/6c705415e47f00eb1eff01ae0ec6d674/raw/1b78061f14495bd60128b4f6f84a612966e0ad81.tar.gz"
