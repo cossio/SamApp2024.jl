@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.6
+# v0.20.10
 
 using Markdown
 using InteractiveUtils
@@ -50,7 +50,7 @@ import RestrictedBoltzmannMachines as RBMs
 import PlutoUI
 
 # ╔═╡ 88b56aee-8fd0-471a-a643-c99005125ab8
-import Logomaker
+import Logomaker, PythonPlot
 
 # ╔═╡ 0d0fce23-94dc-4a5d-9bab-38f25c78e516
 PlutoUI.TableOfContents()
@@ -88,19 +88,17 @@ function seqlogo_entropic(p::AbstractMatrix; max_ylim=true)
     @assert all(0 .≤ H .≤ log2(5))
 
     cons = w .* (log2(5) .- H)
-    logo = Logomaker.Logo(cons, collect("ACGU⊟"); color_scheme=seqlogo_color_scheme)
+	
+	fig, ax = PythonPlot.subplots(1, 1, figsize=[15, 4])
+	ax = PythonPlot.subplot(1, 1, 1)
+
+    logo = Logomaker.Logo(cons, collect("ACGU⊟"); color_scheme=seqlogo_color_scheme, ax=ax)
     max_ylim && logo.ax.set_ylim(0, log2(5))
     logo.ax.set_ylabel("conservation (bits)")
     logo.ax.set_xlabel("site")
-
-    return logo
-end
-
-# ╔═╡ c9688434-4563-4432-b598-4fda38bf8089
-function seqlogo_fields(w::AbstractMatrix)
-    logo = Logomaker.Logo(w, collect("ACGU⊟"); color_scheme=seqlogo_color_scheme)
-    logo.ax.set_ylabel("fields")
-    logo.ax.set_xlabel("site")
+	logo.ax.set_xticks(5:5:108)
+	logo.fig.tight_layout()	
+	logo.fig
     return logo
 end
 
@@ -135,6 +133,5 @@ seqlogo_entropic(reshape(mean(SamApp2024.onehot(msa); dims=3), 5, 108)).fig
 # ╠═275cd9fe-9f2c-486a-b6f2-b5077ff9edd0
 # ╠═ce46177d-d4df-433b-87ab-b96a76b66b25
 # ╠═b6a9b93e-33fe-4bbb-b0bf-025c72b33bd3
-# ╠═c9688434-4563-4432-b598-4fda38bf8089
 # ╠═e5e3700b-f9a7-46cc-b5ef-e861837e8143
 # ╠═82d312e7-4a3c-4594-a26b-317a7c64b1c2
