@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.8
+# v0.20.10
 
 using Markdown
 using InteractiveUtils
@@ -8,7 +8,10 @@ using InteractiveUtils
 import Pkg, Revise; Pkg.activate(Base.current_project())
 
 # ╔═╡ 75226411-330d-4450-a6d2-0ca3d6774f65
-using Statistics: mean, cov
+using Statistics: mean, cov, std, var
+
+# ╔═╡ 89c7b400-aa05-4a38-8dbb-130eec789084
+using Distributions: PoissonBinomial, pdf, logpdf
 
 # ╔═╡ b97d20b6-70e2-4194-b49c-3166761d6403
 using LogExpFunctions: xlogx
@@ -174,10 +177,10 @@ end
 Makie.heatmap(ViennaRNA.bpp(string(alnseqs[1][1:108]))[1:8,101:108])
 
 # ╔═╡ 0fbc4fa8-5903-4afb-9759-2ac24a637003
-BPs_full = [ViennaRNA.bpp(string(seq)) for seq = alnseqs]
+BPs_full = [ViennaRNA.bpp(string(seq)) for seq = alnseqs];
 
-# ╔═╡ 7648e808-a0e0-485f-8bd8-5d898b5b3941
-BPs_aptamer = [ViennaRNA.bpp(string(seq[1:108])) for seq = alnseqs]
+# ╔═╡ dd32923e-e86f-4165-8d38-5a7cdfb75bd6
+BPs_aptamer = [ViennaRNA.bpp(string(seq[1:108])) for seq = alnseqs];!
 
 # ╔═╡ 43564b0d-3a29-4f88-8d15-8120300660fa
 let seq = string(alnseqs[30])
@@ -191,34 +194,53 @@ end
 let fig = Makie.Figure()
 	bins = 0:0.1:1
 	for i = 1:8
-		ax = Makie.Axis(fig[fld1(i, 4), mod1(i, 4)]; width=200, height=200, xlabel="Base-pair prob. P1", ylabel="aptamers (freq.)", title="site = $i")
-		
-		Makie.hist!(ax, [bp[i, 109 - i] for bp = BPs_full]; normalization=:pdf, bins, label="full", color=:gray)
-		Makie.stephist!(ax, [bp[i, 109 - i] for bp = BPs_aptamer]; normalization=:pdf, bins, label="aptamer only", color=:blue, linewidth=2)
-
-		Makie.vlines!(ax, mean([bp[i, 109 - i] for bp = BPs_full]); color=:black, linestyle=:dash, linewidth=4)
-		Makie.vlines!(ax, mean([bp[i, 109 - i] for bp = BPs_aptamer]); color=:blue, linestyle=:dash, linewidth=4)
-
+		j = 109 - i
+		ax = Makie.Axis(fig[fld1(i, 4), mod1(i, 4)]; width=150, height=150, xlabel="Base-pair prob. P1", ylabel="aptamers (freq.)", title="pair = ($i, $j)")
+		Makie.hist!(ax, [bp[i,j] for bp = BPs_full]; normalization=:pdf, bins, label="full", color=:gray)
+		Makie.stephist!(ax, [bp[i,j] for bp = BPs_aptamer]; normalization=:pdf, bins, label="aptamer only", color=:blue, linewidth=2)
+		Makie.vlines!(ax, mean([bp[i,j] for bp = BPs_full]); color=:black, linestyle=:dash, linewidth=4)
+		Makie.vlines!(ax, mean([bp[i,j] for bp = BPs_aptamer]); color=:blue, linestyle=:dash, linewidth=4)
 		Makie.xlims!(ax, 0, 1)
 		Makie.ylims!(ax, 0, 10)
-		
-		if i == 8
-			Makie.axislegend(ax; position=:lt)
-		end
 	end
+
+	_xs = 0:8
+	bp_probs_aptamer = [pdf(PoissonBinomial([bp[i, 109 - i] for i=1:8]), n) for n = _xs, bp = BPs_aptamer]
+	bp_probs_riboswitch = [pdf(PoissonBinomial([bp[i, 109 - i] for i=1:8]), n) for n = _xs, bp = BPs_full]
+	
+	ax = Makie.Axis(fig[1,5], width=150, height=150, xlabel="Num. paired sites", ylabel="Average probability")
+	Makie.errorbars!(ax, _xs, vec(mean(bp_probs_aptamer; dims=2)), vec(std(bp_probs_aptamer; dims=2))/2; color=:blue, linewidth=1, whiskerwidth=5)
+	Makie.errorbars!(ax, _xs, vec(mean(bp_probs_riboswitch; dims=2)), vec(std(bp_probs_riboswitch; dims=2))/2; color=:black, linewidth=1, whiskerwidth=5)
+	Makie.scatterlines!(ax, _xs, vec(mean(bp_probs_aptamer; dims=2)); label="aptamer only", color=:blue, linewidth=2)
+	Makie.scatterlines!(ax, _xs, vec(mean(bp_probs_riboswitch; dims=2)); label="full riboswitch", color=:black, linewidth=2)
+	Makie.ylims!(ax, 0, 0.5)
+	
+	ax = Makie.Axis(fig[2,5], width=150, height=150, xlabel="Most likely no. of paired sites", ylabel="aptamers (freq.)")
+	Makie.stephist!(ax, [argmax(logpdf(PoissonBinomial([bp[i, 109 - i] for i=1:8]), n) for n = 0:10) - 1 for bp = BPs_aptamer]; normalization=:pdf, label="aptamer", color=:blue, linewidth=2, bins=-0.5:1:8.5)
+	Makie.stephist!(ax, [argmax(logpdf(PoissonBinomial([bp[i, 109 - i] for i=1:8]), n) for n = 0:10) - 1 for bp = BPs_full]; normalization=:pdf, label="riboswitch", color=:black, linewidth=2, bins=-0.5:1:8.5)
+	Makie.ylims!(ax, 0, 0.5)
+	Makie.axislegend(ax; position=:lt, framevisible=false)
+
+	# ax = Makie.Axis(fig[1:2, 5], width=350, height=350, xlabel="Prob. all unpaired (log10)", ylabel="aptamers (freq.)")
+	# Makie.hist!(ax, [log10(prod(1-bp[i, 109 - i] for i=1:8)) for bp = BPs_full]; normalization=:pdf, label="full", color=:gray, bins=-23:2:0)
+	# Makie.stephist!(ax, [log10(prod(1-bp[i, 109 - i] for i=1:8)) for bp = BPs_aptamer]; normalization=:pdf, label="aptamer only", color=:blue, linewidth=2, bins=-23:2:0)
+	# Makie.vlines!(ax, mean([sum(log10(1-bp[i, 109 - i]) for i=1:8) for bp = BPs_full]); color=:black, linestyle=:dash, linewidth=4)
+	# Makie.vlines!(ax, mean([sum(log10(1-bp[i, 109 - i]) for i=1:8) for bp = BPs_aptamer]); color=:blue, linestyle=:dash, linewidth=4)
+	# Makie.ylims!(ax, 0, 0.15)
+	
 	Makie.resize_to_layout!(fig)
 	fig
 end
-
-# ╔═╡ abfb5f30-5e6d-4c3f-8030-81b319787203
-prod(mean([bp[i, 109 - i] for bp = BPs_full]) for i=1:8) / 
-	prod(mean([bp[i, 109 - i] for bp = BPs_aptamer]) for i=1:8)
 
 # ╔═╡ 858cf27e-ea29-4d4f-9205-c6de4ba49f33
 let fig = Makie.Figure()
 	bins = 0:0.1:1
-	for (n, (i,j)) = enumerate(zip([13:17; 21:23], reverse([29:31; 38:42])))
-		ax = Makie.Axis(fig[fld1(n, 4), mod1(n, 4)]; width=200, height=200, xlabel="Base-pair prob. (P2)", ylabel="aptamers (freq.)", title="site = $n")
+
+	is = [13:17; 21:23]
+	js = reverse([29:31; 38:42])
+	
+	for (n, (i,j)) = enumerate(zip(is, js))
+		ax = Makie.Axis(fig[fld1(n, 4), mod1(n, 4)]; width=150, height=150, xlabel="Base-pair prob. (P2)", ylabel="aptamers (freq.)", title="pair = ($i, $j)")
 		
 		Makie.hist!(ax, [bp[i,j] for bp = BPs_full]; normalization=:pdf, bins, label="full", color=:gray)
 		Makie.stephist!(ax, [bp[i,j] for bp = BPs_aptamer]; normalization=:pdf, bins, label="aptamer only", color=:blue, linewidth=2)
@@ -227,27 +249,46 @@ let fig = Makie.Figure()
 		Makie.vlines!(ax, mean([bp[i,j] for bp = BPs_aptamer]); color=:blue, linestyle=:dash, linewidth=4)
 
 		Makie.xlims!(ax, 0, 1)
-		Makie.ylims!(ax, 0, 10)
-		
-		if n == 8
-			Makie.axislegend(ax; position=:lt)
-		end
+		Makie.ylims!(ax, 0, 7)
 	end
+
+	_xs = 0:8
+	bp_probs_aptamer = [pdf(PoissonBinomial([bp[i,j] for (i,j)=zip(is,js)]), n) for n = _xs, bp = BPs_aptamer]
+	bp_probs_full = [pdf(PoissonBinomial([bp[i,j] for (i,j)=zip(is,js)]), n) for n = _xs, bp = BPs_full]
+
+	ax = Makie.Axis(fig[1,5], width=150, height=150, xlabel="Num. paired sites", ylabel="Average probability")
+	Makie.errorbars!(ax, _xs, vec(mean(bp_probs_aptamer; dims=2)), vec(std(bp_probs_aptamer; dims=2))/2; color=:blue, linewidth=1, whiskerwidth=5)
+	Makie.errorbars!(ax, _xs, vec(mean(bp_probs_full; dims=2)), vec(std(bp_probs_full; dims=2))/2; color=:black, linewidth=1, whiskerwidth=5)
+	Makie.scatterlines!(ax, _xs, vec(mean(bp_probs_aptamer; dims=2)); label="aptamer only", color=:blue, linewidth=2)
+	Makie.scatterlines!(ax, _xs, vec(mean(bp_probs_full; dims=2)); label="full riboswitch", color=:black, linewidth=2)
+	Makie.ylims!(ax, 0, 0.5)
+	
+	ax = Makie.Axis(fig[2,5], width=150, height=150, xlabel="Most likely no. of paired sites", ylabel="aptamers (freq.)")
+	Makie.stephist!(ax, [argmax(pdf(PoissonBinomial([bp[i,j] for (i,j)=zip(is,js)]), n) for n = 0:10) - 1 for bp = BPs_aptamer]; normalization=:pdf, label="aptamer", color=:blue, linewidth=2, bins=-0.5:1:8.5)
+	Makie.stephist!(ax, [argmax(pdf(PoissonBinomial([bp[i,j] for (i,j)=zip(is,js)]), n) for n = 0:10) - 1 for bp = BPs_full]; normalization=:pdf, label="riboswitch", color=:black, linewidth=2, bins=-0.5:1:8.5)
+	Makie.ylims!(ax, 0, 0.5)
+	Makie.axislegend(ax; position=:lt, framevisible=false)
+	
+	# ax = Makie.Axis(fig[1:2, 5], width=350, height=350, xlabel="Prob. of any unpaired site (log10)", ylabel="aptamers (freq.)")
+	# Makie.hist!(ax, [log10(prod(1-bp[i,j] for (i,j)=zip(is,js))) for bp = BPs_full]; normalization=:pdf, label="full", color=:gray, bins=-23:2:0)
+	# Makie.stephist!(ax, [log10(prod(1-bp[i,j] for (i,j)=zip(is,js))) for bp = BPs_aptamer]; normalization=:pdf, label="aptamer only", color=:blue, linewidth=2, bins=-23:2:0)
+	# Makie.vlines!(ax, mean([sum(log10(1-bp[i,j]) for (i,j)=zip(is,js)) for bp = BPs_full]); color=:black, linestyle=:dash, linewidth=4)
+	# Makie.vlines!(ax, mean([sum(log10(1-bp[i,j]) for (i,j)=zip(is,js)) for bp = BPs_aptamer]); color=:blue, linestyle=:dash, linewidth=4)
+	# Makie.ylims!(ax, 0, 0.15)
+	# Makie.axislegend(ax; position=:lt)
+
 	Makie.resize_to_layout!(fig)
 	fig
 end
-
-# ╔═╡ c783cf11-f5c2-4ef5-8dc4-cf9dc0e4b479
-prod(mean([bp[i,j] for bp = BPs_full]) for (i,j) = zip([13:17; 21:23], reverse([29:31; 38:42]))) / 
-	prod(mean([bp[i,j] for bp = BPs_aptamer]) for (i,j) = zip([13:17; 21:23], reverse([29:31; 38:42])))
 
 # ╔═╡ df7fccd6-a5c4-47c4-afe4-a55a19ed57e3
 let fig = Makie.Figure()
 	bins = 0:0.1:1
-	for i = 81:86
-		j = 97 - i + 81
+	is = 81:86
+	js = 97 .- is .+ 81
+	for (i,j) = zip(is,js)
 		n = i - 80
-		ax = Makie.Axis(fig[fld1(n, 4), mod1(n,4)]; width=200, height=200, xlabel="Base-pair prob. (P4)", ylabel="aptamers (freq.)", title="sites = ($i,$j)")
+		ax = Makie.Axis(fig[fld1(n,3), mod1(n,3)]; width=150, height=150, xlabel="Base-pair prob. (P4)", ylabel="aptamers (freq.)", title="pair = ($i, $j)")
 		
 		Makie.hist!(ax, [bp[i,j] for bp = BPs_full]; normalization=:pdf, bins, label="full", color=:gray)
 		Makie.stephist!(ax, [bp[i,j] for bp = BPs_aptamer]; normalization=:pdf, bins, label="aptamer only", color=:blue, linewidth=2)
@@ -257,23 +298,36 @@ let fig = Makie.Figure()
 
 		Makie.xlims!(ax, 0, 1)
 		Makie.ylims!(ax, 0, 10)
-		
-		if n == 4
-			Makie.axislegend(ax; position=:lt)
-		end
 	end
+
+	_xs = 0:6
+	bp_probs_aptamer = [pdf(PoissonBinomial([bp[i,j] for (i,j)=zip(is,js)]), n) for n = _xs, bp = BPs_aptamer]
+	bp_probs_full = [pdf(PoissonBinomial([bp[i,j] for (i,j)=zip(is,js)]), n) for n = _xs, bp = BPs_full]
+
+	ax = Makie.Axis(fig[1,4], width=150, height=150, xlabel="Num. paired sites", ylabel="Average probability")
+	Makie.errorbars!(ax, _xs, vec(mean(bp_probs_aptamer; dims=2)), vec(std(bp_probs_aptamer; dims=2))/2; color=:blue, linewidth=1, whiskerwidth=5)
+	Makie.errorbars!(ax, _xs, vec(mean(bp_probs_full; dims=2)), vec(std(bp_probs_full; dims=2))/2; color=:black, linewidth=1, whiskerwidth=5)
+	Makie.scatterlines!(ax, _xs, vec(mean(bp_probs_aptamer; dims=2)); label="aptamer only", color=:blue, linewidth=2)
+	Makie.scatterlines!(ax, _xs, vec(mean(bp_probs_full; dims=2)); label="full riboswitch", color=:black, linewidth=2)
+	Makie.ylims!(ax, 0, 0.5)
+	
+	ax = Makie.Axis(fig[2,4], width=150, height=150, xlabel="Most likely no. of paired sites", ylabel="aptamers (freq.)")
+	Makie.stephist!(ax, [argmax(pdf(PoissonBinomial([bp[i,j] for (i,j)=zip(is,js)]), n) for n = 0:7) - 1 for bp = BPs_aptamer]; normalization=:pdf, label="aptamer", color=:blue, linewidth=2, bins=-0.5:1:6.5)
+	Makie.stephist!(ax, [argmax(pdf(PoissonBinomial([bp[i,j] for (i,j)=zip(is,js)]), n) for n = 0:7) - 1 for bp = BPs_full]; normalization=:pdf, label="riboswitch", color=:black, linewidth=2, bins=-0.5:1:6.5)
+	Makie.ylims!(ax, 0, 0.5)
+	Makie.axislegend(ax; position=:lt, framevisible=false)
+	
+	# ax = Makie.Axis(fig[1:2, 4], width=350, height=350, xlabel="Prob. of any unpaired site (log10)", ylabel="aptamers (freq.)")
+	# Makie.hist!(ax, [log10(prod(1-bp[i,97-i+81] for i=81:86)) for bp = BPs_full]; normalization=:pdf, label="full", color=:gray, bins=-23:2:0)
+	# Makie.stephist!(ax, [log10(prod(1-bp[i,97-i+81] for i=81:86)) for bp = BPs_aptamer]; normalization=:pdf, label="aptamer only", color=:blue, linewidth=2, bins=-23:2:0)
+	# Makie.vlines!(ax, mean([sum(log10(1-bp[i,97-i+81]) for i=81:86) for bp = BPs_full]); color=:black, linestyle=:dash, linewidth=4)
+	# Makie.vlines!(ax, mean([sum(log10(1-bp[i,97-i+81]) for i=81:86) for bp = BPs_aptamer]); color=:blue, linestyle=:dash, linewidth=4)
+	# Makie.ylims!(ax, 0, 0.15)
+	# Makie.axislegend(ax; position=:lt)
+
 	Makie.resize_to_layout!(fig)
 	fig
 end
-
-# ╔═╡ 64128cc4-44dc-4023-9600-1dcca76cfe31
-prod(mean([bp[i,97-i+81] for bp = BPs_full]) for i=81:86) / prod(mean([bp[i,97-i+81] for bp = BPs_aptamer]) for i=81:86)
-
-# ╔═╡ e4044118-c03d-4b20-ba8c-0284d7d250fb
-SamApp2024.RF00162_sites_annotated_secondary_structure().p4
-
-# ╔═╡ 21c629a1-5b4e-45ee-ae6b-18da275f3d0e
-length([13:16; 21:23])
 
 # ╔═╡ Cell order:
 # ╠═c89c23fe-3b38-415b-b11d-541e814d94fb
@@ -284,6 +338,7 @@ length([13:16; 21:23])
 # ╠═f3ec55d7-80e5-467d-8aa6-7f7804dd5f58
 # ╠═fef739cf-e49c-4a34-b987-85b90b356bc9
 # ╠═75226411-330d-4450-a6d2-0ca3d6774f65
+# ╠═89c7b400-aa05-4a38-8dbb-130eec789084
 # ╠═b97d20b6-70e2-4194-b49c-3166761d6403
 # ╠═73398a3e-1c08-4416-ac15-9bbe282834ce
 # ╠═48c28fd4-1b35-4632-9215-a24f3ecb1a80
@@ -317,13 +372,8 @@ length([13:16; 21:23])
 # ╠═ee17763e-7ab0-4234-b10f-cca58f12e814
 # ╠═b2b18a43-2a76-4f34-b041-0d123ea48e10
 # ╠═0fbc4fa8-5903-4afb-9759-2ac24a637003
-# ╠═7648e808-a0e0-485f-8bd8-5d898b5b3941
+# ╠═dd32923e-e86f-4165-8d38-5a7cdfb75bd6
 # ╠═43564b0d-3a29-4f88-8d15-8120300660fa
 # ╠═888345b7-8661-47d5-bedd-5d59612071b6
-# ╠═abfb5f30-5e6d-4c3f-8030-81b319787203
 # ╠═858cf27e-ea29-4d4f-9205-c6de4ba49f33
-# ╠═c783cf11-f5c2-4ef5-8dc4-cf9dc0e4b479
 # ╠═df7fccd6-a5c4-47c4-afe4-a55a19ed57e3
-# ╠═64128cc4-44dc-4023-9600-1dcca76cfe31
-# ╠═e4044118-c03d-4b20-ba8c-0284d7d250fb
-# ╠═21c629a1-5b4e-45ee-ae6b-18da275f3d0e
